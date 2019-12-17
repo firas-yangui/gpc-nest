@@ -1,0 +1,145 @@
+{
+  "name": "nestjs-whiteapp-api-producer",
+  "version": "1.0.4",
+  "description": "NestJS whiteApp API producer",
+  "author": "DEX",
+  "license": "Copyright Société Générale 2019 - All rights reserved",
+  "main": "dist/main.js",
+  "typings": "dist/main.d.ts",
+  "scripts": {
+    "prebuild": "rimraf dist",
+    "build": "tsc -p tsconfig.build.json",
+    "format": "prettier --write \"src/**/*.ts\"",
+    "start": "node dist/main.js",
+    "start:dev": "nodemon",
+    "start:debug": "nodemon --config nodemon-debug.json",
+    "lint": "eslint --ext .ts,.js src",
+    "test:unit": "jest",
+    "test": "npm run test:unit && npm run test:e2e",
+    "test:watch": "jest --watch",
+    "test:cov": "jest --coverage",
+    "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
+    "test:e2e": "jest --config ./test/jest-e2e.json"
+  },
+  "dependencies": {
+    "@godaddy/terminus": "4.3.0",
+    "@nestjs/common": "6.10.2",
+    "@nestjs/core": "6.10.2",
+    "@nestjs/platform-express": "6.10.2",
+    "@nestjs/swagger": "3.1.0",
+    "@nestjs/terminus": "6.5.3",
+    "@nestjs/typeorm": "^6.2.0",
+    "@societe-generale/nestjs-sg-connect": "0.0.18",
+    "@societe-generale/nestjs-swagger-ui": "0.0.18",
+    "class-transformer": "0.2.3",
+    "class-validator": "0.11.0",
+    "dotenv": "8.2.0",
+    "express": "4.17.1",
+    "pg": "^7.14.0",
+    "reflect-metadata": "0.1.13",
+    "rxjs": "6.5.3",
+    "typeorm": "^0.2.21"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "8.2.0",
+    "@commitlint/config-angular": "8.2.0",
+    "@commitlint/config-conventional": "8.2.0",
+    "@nestjs/testing": "6.10.2",
+    "@semantic-release/changelog": "3.0.6",
+    "@semantic-release/commit-analyzer": "6.3.3",
+    "@semantic-release/git": "7.0.18",
+    "@semantic-release/gitlab": "^4.0.4",
+    "@semantic-release/npm": "5.3.4",
+    "@semantic-release/release-notes-generator": "7.3.5",
+    "@types/express": "4.17.2",
+    "@types/jest": "24.0.23",
+    "@types/lowdb": "1.0.9",
+    "@types/node": "12.12.14",
+    "@types/supertest": "2.0.8",
+    "@typescript-eslint/eslint-plugin": "2.9.0",
+    "@typescript-eslint/parser": "2.9.0",
+    "concurrently": "5.0.0",
+    "eslint": "6.7.1",
+    "eslint-config-prettier": "6.7.0",
+    "eslint-plugin-prettier": "3.1.1",
+    "husky": "3.1.0",
+    "jest": "24.9.0",
+    "lint-staged": "9.5.0",
+    "lowdb": "1.0.0",
+    "nock": "11.7.0",
+    "nodemon": "2.0.1",
+    "prettier": "1.19.1",
+    "semantic-release": "15.13.31",
+    "supertest": "4.0.2",
+    "ts-jest": "24.2.0",
+    "ts-node": "8.5.3",
+    "tsconfig-paths": "3.9.0",
+    "typescript": "3.7.2"
+  },
+  "jest": {
+    "moduleFileExtensions": [
+      "js",
+      "json",
+      "ts"
+    ],
+    "rootDir": "src",
+    "testRegex": ".spec.ts$",
+    "transform": {
+      "^.+\\.(t|j)s$": "ts-jest"
+    },
+    "coverageDirectory": "../coverage",
+    "testEnvironment": "node"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "tsc && lint-staged",
+      "pre-push": "npm run test:cov && npm run test:e2e",
+      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
+    }
+  },
+  "lint-staged": {
+    "src/**/*.{json,md}": [
+      "prettier --write"
+    ],
+    "src/**/*.{ts,js}": [
+      "eslint --fix",
+      "git add"
+    ]
+  },
+  "commitlint": {
+    "extends": [
+      "@commitlint/config-conventional"
+    ]
+  },
+  "release": {
+    "branch": "master",
+    "tagFormat": "${version}",
+    "plugins": [
+      "@semantic-release/commit-analyzer",
+      "@semantic-release/release-notes-generator",
+      [
+        "@semantic-release/changelog",
+        {
+          "changelogFile": "CHANGELOG.md"
+        }
+      ],
+      [
+        "@semantic-release/git",
+        {
+          "assets": [
+            "CHANGELOG.md",
+            "package.json",
+            "package-lock.json"
+          ],
+          "message": "chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
+        }
+      ],
+      [
+        "@semantic-release/gitlab",
+        {
+          "gitlabUrl": "https://apps.bsc.aws.societegenerale.com/gitlab"
+        }
+      ]
+    ]
+  }
+}

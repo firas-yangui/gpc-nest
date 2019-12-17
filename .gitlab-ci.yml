@@ -1,0 +1,54 @@
+stages:
+  - build
+  - test
+  - release
+
+build:
+  stage: build
+  image: node:10.16.3
+  # Cache modules in between jobs
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}
+    paths:
+      - node_modules/
+    policy: push
+  script:
+    - echo "//${NPM_REGISTRY_BSC}:_authToken=${NEXUS_TOKEN}" > .npmrc
+    - echo "strict-ssl=false" >> .npmrc
+    - echo "@bsc:registry=https://${NPM_REGISTRY_BSC}" >> .npmrc
+    - echo "@societe-generale:registry=https://${NPM_REGISTRY_BSC}" >> .npmrc
+    - npm install
+    - npm run build
+
+test:
+  stage: test
+  image: node:10.16.3
+  # Cache modules in between jobs
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}
+    paths:
+      - node_modules/
+    policy: pull
+  script:
+    - npm run lint
+    - npm run test # Trigger unit and e2e tests
+  # Get code coverage metrics for showing it on GitLab UI
+  coverage: /All files[^|]*\|[^|]*\s+([\d\.]+)/
+
+release:
+  stage: release
+  variables:
+    GITLAB_TOKEN: $GITLAB_AUTH_TOKEN
+  only:
+    - master
+  image: node:10.16.3
+  # Cache modules in between jobs
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}
+    paths:
+      - node_modules/
+    policy: pull
+  before_script: 
+    - apt install --assume-yes git # Install git 
+  script:
+    - npx semantic-release

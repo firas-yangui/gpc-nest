@@ -1,0 +1,15 @@
+version: '3'
+
+services:
+  gpc_novo_backend:
+    container_name: gpc_novo_backend
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - '.:/app'
+      - '/app/node_modules'
+    ports:
+      - '999:9999'
+    environment:
+      - NODE_ENV=development
