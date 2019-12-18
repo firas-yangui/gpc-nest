@@ -1,27 +1,28 @@
-import {BaseEntity,Column,Entity,Index,JoinColumn,JoinTable,ManyToMany,ManyToOne,OneToMany,OneToOne,PrimaryColumn,PrimaryGeneratedColumn,RelationId} from "typeorm";
-import {program} from "./program";
-import {gpcappsettings} from "./gpcappsettings";
+import { Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { program } from './program';
+import { GpcAppSettings } from './gpcappsettings';
 
+@Entity('programappsettings', { schema: 'public' })
+export class ProgramAppSettings {
+  @PrimaryGeneratedColumn({
+    type: 'integer',
+    name: 'id',
+  })
+  id: number;
 
-@Entity("programappsettings" ,{schema:"public" } )
-export class programappsettings {
+  @ManyToOne(
+    () => program,
+    (program: program) => program.programappsettingss,
+    {},
+  )
+  @JoinColumn({ name: 'modelid' })
+  model: program | null;
 
-    @PrimaryGeneratedColumn({
-        type:"integer", 
-        name:"id"
-        })
-    id:number;
-        
-
-   
-    @ManyToOne(()=>program, (program: program)=>program.programappsettingss,{  })
-    @JoinColumn({ name:'modelid'})
-    model:program | null;
-
-
-   
-    @ManyToOne(()=>gpcappsettings, (gpcappsettings: gpcappsettings)=>gpcappsettings.programappsettingss,{  })
-    @JoinColumn({ name:'gpcappsettingsid'})
-    gpcappsettings:gpcappsettings | null;
-
+  @ManyToOne(
+    () => GpcAppSettings,
+    (gpcappsettings: GpcAppSettings) => gpcappsettings.programappsettingss,
+    {},
+  )
+  @JoinColumn({ name: 'gpcappsettingsid' })
+  gpcappsettings: GpcAppSettings | null;
 }

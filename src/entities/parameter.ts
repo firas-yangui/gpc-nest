@@ -1,59 +1,56 @@
-import {BaseEntity,Column,Entity,Index,JoinColumn,JoinTable,ManyToMany,ManyToOne,OneToMany,OneToOne,PrimaryColumn,PrimaryGeneratedColumn,RelationId} from "typeorm";
-import {stake} from "./stake";
-import {phase} from "./phase";
+import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Stake } from './stake';
+import { Phase } from './phase';
 
+@Entity('parameter', { schema: 'public' })
+export class Parameter {
+  @PrimaryGeneratedColumn({
+    type: 'integer',
+    name: 'id',
+  })
+  id: number;
 
-@Entity("parameter" ,{schema:"public" } )
-export class parameter {
+  @Column('character varying', {
+    nullable: true,
+    length: 255,
+    name: 'stakename',
+  })
+  stakename: string | null;
 
-    @PrimaryGeneratedColumn({
-        type:"integer", 
-        name:"id"
-        })
-    id:number;
-        
+  @ManyToOne(
+    () => Stake,
+    (stake: Stake) => stake.parameters,
+    { onDelete: 'SET NULL' },
+  )
+  @JoinColumn({ name: 'stakeid' })
+  stake: Stake | null;
 
-    @Column("character varying",{ 
-        nullable:true,
-        length:255,
-        name:"stakename"
-        })
-    stakename:string | null;
-        
+  @Column('character varying', {
+    nullable: true,
+    length: 255,
+    name: 'phasename',
+  })
+  phasename: string | null;
 
-   
-    @ManyToOne(()=>stake, (stake: stake)=>stake.parameters,{ onDelete: 'SET NULL', })
-    @JoinColumn({ name:'stakeid'})
-    stake:stake | null;
+  @ManyToOne(
+    () => Phase,
+    (phase: Phase) => phase.parameters,
+    {},
+  )
+  @JoinColumn({ name: 'phaseid' })
+  phase: Phase | null;
 
+  @Column('character varying', {
+    nullable: true,
+    length: 255,
+    name: 'axisname',
+  })
+  axisname: string | null;
 
-    @Column("character varying",{ 
-        nullable:true,
-        length:255,
-        name:"phasename"
-        })
-    phasename:string | null;
-        
-
-   
-    @ManyToOne(()=>phase, (phase: phase)=>phase.parameters,{  })
-    @JoinColumn({ name:'phaseid'})
-    phase:phase | null;
-
-
-    @Column("character varying",{ 
-        nullable:true,
-        length:255,
-        name:"axisname"
-        })
-    axisname:string | null;
-        
-
-    @Column("character varying",{ 
-        nullable:true,
-        length:255,
-        name:"targetaxis"
-        })
-    targetaxis:string | null;
-        
+  @Column('character varying', {
+    nullable: true,
+    length: 255,
+    name: 'targetaxis',
+  })
+  targetaxis: string | null;
 }

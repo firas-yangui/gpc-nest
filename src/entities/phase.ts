@@ -1,51 +1,50 @@
-import {BaseEntity,Column,Entity,Index,JoinColumn,JoinTable,ManyToMany,ManyToOne,OneToMany,OneToOne,PrimaryColumn,PrimaryGeneratedColumn,RelationId} from "typeorm";
-import {projectreporting} from "./projectreporting";
-import {parameter} from "./parameter";
-import {subservice} from "./subservice";
-import {phaseappsettings} from "./phaseappsettings";
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { ProjectReporting } from './projectreporting';
+import { Parameter } from './parameter';
+import { SubService } from './subservice';
+import { PhaseAppSettings } from './phaseappsettings';
 
+@Entity('phase', { schema: 'public' })
+export class Phase {
+  @PrimaryGeneratedColumn({
+    type: 'integer',
+    name: 'id',
+  })
+  id: number;
 
-@Entity("phase" ,{schema:"public" } )
-export class phase {
+  @Column('text', {
+    nullable: true,
+    name: 'englishname',
+  })
+  englishname: string | null;
 
-    @PrimaryGeneratedColumn({
-        type:"integer", 
-        name:"id"
-        })
-    id:number;
-        
+  @Column('text', {
+    nullable: true,
+    name: 'frenchname',
+  })
+  frenchname: string | null;
 
-    @Column("text",{ 
-        nullable:true,
-        name:"englishname"
-        })
-    englishname:string | null;
-        
+  @OneToMany(
+    () => ProjectReporting,
+    (projectreporting: ProjectReporting) => projectreporting.phase,
+  )
+  projectreportings: ProjectReporting[];
 
-    @Column("text",{ 
-        nullable:true,
-        name:"frenchname"
-        })
-    frenchname:string | null;
-        
+  @OneToMany(
+    () => Parameter,
+    (parameter: Parameter) => parameter.phase,
+  )
+  parameters: Parameter[];
 
-   
-    @OneToMany(()=>projectreporting, (projectreporting: projectreporting)=>projectreporting.phase)
-    projectreportings:projectreporting[];
-    
+  @OneToMany(
+    () => SubService,
+    (subservice: SubService) => subservice.phase,
+  )
+  subservices: SubService[];
 
-   
-    @OneToMany(()=>parameter, (parameter: parameter)=>parameter.phase)
-    parameters:parameter[];
-    
-
-   
-    @OneToMany(()=>subservice, (subservice: subservice)=>subservice.phase)
-    subservices:subservice[];
-    
-
-   
-    @OneToMany(()=>phaseappsettings, (phaseappsettings: phaseappsettings)=>phaseappsettings.model)
-    phaseappsettingss:phaseappsettings[];
-    
+  @OneToMany(
+    () => PhaseAppSettings,
+    (phaseappsettings: PhaseAppSettings) => phaseappsettings.model,
+  )
+  phaseappsettingss: PhaseAppSettings[];
 }

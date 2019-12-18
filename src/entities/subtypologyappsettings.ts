@@ -1,24 +1,10 @@
-import {
-  BaseEntity,
-  Column,
-  Entity,
-  Index,
-  JoinColumn,
-  JoinTable,
-  ManyToMany,
-  ManyToOne,
-  OneToMany,
-  OneToOne,
-  PrimaryColumn,
-  PrimaryGeneratedColumn,
-  RelationId,
-} from 'typeorm';
-import { subtypology } from './subtypology';
-import { gpcappsettings } from './gpcappsettings';
+import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { SubTypology } from './subtypology';
+import { GpcAppSettings } from './gpcappsettings';
 
 @Entity('subtypologyappsettings', { schema: 'public' })
 @Index('unique_subtypology_gpcappsettings_couple', ['gpcappsettings', 'model'], { unique: true })
-export class subtypologyappsettings {
+export class SubTypologyAppSettings {
   @PrimaryGeneratedColumn({
     type: 'integer',
     name: 'id',
@@ -26,20 +12,20 @@ export class subtypologyappsettings {
   id: number;
 
   @ManyToOne(
-    () => subtypology,
-    (subtypology: subtypology) => subtypology.subtypologyappsettingss,
+    () => SubTypology,
+    (subtypology: SubTypology) => subtypology.subtypologyappsettingss,
     {},
   )
   @JoinColumn({ name: 'modelid' })
-  model: subtypology | null;
+  model: SubTypology | null;
 
   @ManyToOne(
-    () => gpcappsettings,
-    (gpcappsettings: gpcappsettings) => gpcappsettings.subtypologyappsettingss,
+    () => GpcAppSettings,
+    (gpcappsettings: GpcAppSettings) => gpcappsettings.subtypologyappsettingss,
     {},
   )
   @JoinColumn({ name: 'gpcappsettingsid' })
-  gpcappsettings: gpcappsettings | null;
+  gpcappsettings: GpcAppSettings | null;
 
   @Column('character varying', {
     nullable: true,

@@ -1,10 +1,10 @@
 import { Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
-import { Activitydomain } from './activitydomain';
-import { gpcappsettings } from './gpcappsettings';
+import { ActivityDomain } from './activitydomain';
+import { GpcAppSettings } from './gpcappsettings';
 
 @Entity('activitydomainappsettings', { schema: 'public' })
 @Index('unique_activitydomain_gpcappsettings_couple', ['gpcappsettings', 'model'], { unique: true })
-export class Activitydomainappsettings {
+export class ActivityDomainAppSettings {
   @PrimaryGeneratedColumn({
     type: 'integer',
     name: 'id',
@@ -12,16 +12,16 @@ export class Activitydomainappsettings {
   id: number;
 
   @ManyToOne(
-    () => Activitydomain,
-    (activitydomain: Activitydomain) => activitydomain.activitydomainappsettingss,
+    () => ActivityDomain,
+    (activitydomain: ActivityDomain) => activitydomain.activitydomainappsettingss,
     {},
   )
   @JoinColumn({ name: 'modelid' })
-  model: Activitydomain | null;
+  model: ActivityDomain | null;
 
   @ManyToOne(
-    () => gpcappsettings,
-    (gpcappsettings: gpcappsettings) => gpcappsettings.activitydomainappsettingss,
+    () => GpcAppSettings,
+    (gpcappsettings: GpcAppSettings) => gpcappsettings.activitydomainappsettingss,
     {},
   )
   @JoinColumn({ name: 'gpcappsettingsid' })

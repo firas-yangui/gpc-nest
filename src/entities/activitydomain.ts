@@ -1,6 +1,6 @@
 import { Column, Entity, Index, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
-import { activitydomainappsettings } from './activitydomainappsettings';
-import { serviceappsettings } from './serviceappsettings';
+import { ActivityDomainAppSettings } from './activitydomainappsettings';
+import { ServiceAppSettings } from './serviceappsettings';
 
 @Entity('activitydomain', { schema: 'public' })
 @Index('activitydomain_code_unique_idx', ['code'], { unique: true })
@@ -45,14 +45,14 @@ export class ActivityDomain {
   funcdomain: string | null;
 
   @OneToMany(
-    () => activitydomainappsettings,
-    (activitydomainappsettings: activitydomainappsettings) => activitydomainappsettings.model,
+    () => ActivityDomainAppSettings,
+    (activitydomainappsettings: ActivityDomainAppSettings) => activitydomainappsettings.model,
   )
-  activitydomainappsettingss: activitydomainappsettings[];
+  activitydomainappsettingss: ActivityDomainAppSettings[];
 
   @OneToMany(
-    () => serviceappsettings,
-    (serviceappsettings: serviceappsettings) => serviceappsettings.activitydomain,
+    () => ServiceAppSettings,
+    (serviceappsettings: ServiceAppSettings) => serviceappsettings.activitydomain,
   )
-  serviceappsettingss: serviceappsettings[];
+  serviceappsettingss: ServiceAppSettings[];
 }

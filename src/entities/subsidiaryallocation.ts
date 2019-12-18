@@ -30,18 +30,18 @@ export class SubsidiaryAllocation {
   weight: number | null;
 
   @ManyToOne(
-    () => workload,
-    (workload: workload) => workload.subsidiaryallocations,
+    () => Workload,
+    (workload: Workload) => workload.subsidiaryallocations,
     { nullable: false, onUpdate: 'CASCADE' },
   )
   @JoinColumn({ name: 'workloadid' })
-  workload: workload | null;
+  workload: Workload | null;
 
   @ManyToOne(
-    () => period,
-    (period: period) => period.subsidiaryallocations,
+    () => Period,
+    (period: Period) => period.subsidiaryallocations,
     { nullable: false, onUpdate: 'CASCADE' },
   )
   @JoinColumn({ name: 'periodid' })
-  period: period | null;
+  period: Period | null;
 }

@@ -2,7 +2,7 @@ import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 't
 import { Gpcappsettings } from './gpcappsettings';
 
 @Entity('homemessage', { schema: 'public' })
-export class Homemessage {
+export class HomeMessage {
   @PrimaryGeneratedColumn({
     type: 'integer',
     name: 'id',

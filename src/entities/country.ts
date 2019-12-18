@@ -1,6 +1,6 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
-import { currencyrate } from './currencyrate';
-import { thirdparty } from './thirdparty';
+import { CurrencyRate } from './currencyrate';
+import { Thirdparty } from './thirdparty';
 
 @Entity('country', { schema: 'public' })
 export class Country {
@@ -24,14 +24,14 @@ export class Country {
   defaultcountry: boolean | null;
 
   @OneToMany(
-    () => currencyrate,
-    (currencyrate: currencyrate) => currencyrate.country,
+    () => CurrencyRate,
+    (currencyrate: CurrencyRate) => currencyrate.country,
   )
-  currencyrates: currencyrate[];
+  currencyrates: CurrencyRate[];
 
   @OneToMany(
-    () => thirdparty,
-    (thirdparty: thirdparty) => thirdparty.country,
+    () => Thirdparty,
+    (thirdparty: Thirdparty) => thirdparty.country,
   )
-  thirdpartys: thirdparty[];
+  thirdpartys: Thirdparty[];
 }

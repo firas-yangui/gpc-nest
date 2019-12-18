@@ -1,35 +1,35 @@
-import {BaseEntity,Column,Entity,Index,JoinColumn,JoinTable,ManyToMany,ManyToOne,OneToMany,OneToOne,PrimaryColumn,PrimaryGeneratedColumn,RelationId} from "typeorm";
-import {phase} from "./phase";
-import {gpcappsettings} from "./gpcappsettings";
+import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Phase } from './phase';
+import { GpcAppSettings } from './gpcappsettings';
 
+@Entity('phaseappsettings', { schema: 'public' })
+@Index('unique_phase_gpcappsettings_couple', ['gpcappsettings', 'model'], { unique: true })
+export class PhaseAppSettings {
+  @PrimaryGeneratedColumn({
+    type: 'integer',
+    name: 'id',
+  })
+  id: number;
 
-@Entity("phaseappsettings" ,{schema:"public" } )
-@Index("unique_phase_gpcappsettings_couple",["gpcappsettings","model",],{unique:true})
-export class phaseappsettings {
+  @ManyToOne(
+    () => Phase,
+    (phase: Phase) => phase.phaseappsettingss,
+    {},
+  )
+  @JoinColumn({ name: 'modelid' })
+  model: Phase | null;
 
-    @PrimaryGeneratedColumn({
-        type:"integer", 
-        name:"id"
-        })
-    id:number;
-        
+  @ManyToOne(
+    () => GpcAppSettings,
+    (gpcappsettings: GpcAppSettings) => gpcappsettings.phaseappsettingss,
+    {},
+  )
+  @JoinColumn({ name: 'gpcappsettingsid' })
+  gpcappsettings: GpcAppSettings | null;
 
-   
-    @ManyToOne(()=>phase, (phase: phase)=>phase.phaseappsettingss,{  })
-    @JoinColumn({ name:'modelid'})
-    model:phase | null;
-
-
-   
-    @ManyToOne(()=>gpcappsettings, (gpcappsettings: gpcappsettings)=>gpcappsettings.phaseappsettingss,{  })
-    @JoinColumn({ name:'gpcappsettingsid'})
-    gpcappsettings:gpcappsettings | null;
-
-
-    @Column("integer",{ 
-        nullable:true,
-        name:"phaseorder"
-        })
-    phaseorder:number | null;
-        
+  @Column('integer', {
+    nullable: true,
+    name: 'phaseorder',
+  })
+  phaseorder: number | null;
 }

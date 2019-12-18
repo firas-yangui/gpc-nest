@@ -1,9 +1,9 @@
 import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
-import { Bipexceptionrule } from './bipexceptionrule';
+import { BipExceptionRule } from './bipexceptionrule';
 
 @Entity('bipexceptionvalue', { schema: 'public' })
 @Index('bipexceptionvalue_idx', ['bipexceptionrule', 'fileoccurence'], { unique: true })
-export class Bipexceptionvalue {
+export class BipExceptionValue {
   @PrimaryGeneratedColumn({
     type: 'integer',
     name: 'id',
@@ -11,12 +11,12 @@ export class Bipexceptionvalue {
   id: number;
 
   @ManyToOne(
-    () => Bipexceptionrule,
-    (bipexceptionrule: Bipexceptionrule) => bipexceptionrule.bipexceptionvalues,
+    () => BipExceptionRule,
+    (bipexceptionrule: BipExceptionRule) => bipexceptionrule.bipexceptionvalues,
     {},
   )
   @JoinColumn({ name: 'bipexceptionruleid' })
-  bipexceptionrule: Bipexceptionrule | null;
+  bipexceptionrule: BipExceptionRule | null;
 
   @Column('character varying', {
     nullable: false,

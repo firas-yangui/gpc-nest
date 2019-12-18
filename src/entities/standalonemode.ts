@@ -1,20 +1,16 @@
-import {BaseEntity,Column,Entity,Index,JoinColumn,JoinTable,ManyToMany,ManyToOne,OneToMany,OneToOne,PrimaryColumn,PrimaryGeneratedColumn,RelationId} from "typeorm";
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
+@Entity('standalonemode', { schema: 'public' })
+export class StandaloneMode {
+  @PrimaryGeneratedColumn({
+    type: 'integer',
+    name: 'id',
+  })
+  id: number;
 
-@Entity("standalonemode" ,{schema:"public" } )
-export class standalonemode {
-
-    @PrimaryGeneratedColumn({
-        type:"integer", 
-        name:"id"
-        })
-    id:number;
-        
-
-    @Column("boolean",{ 
-        nullable:true,
-        name:"ison"
-        })
-    ison:boolean | null;
-        
+  @Column('boolean', {
+    nullable: true,
+    name: 'ison',
+  })
+  ison: boolean | null;
 }

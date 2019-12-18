@@ -2,7 +2,7 @@ import { Column, Entity, Index, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity('import_raw_bipline_data', { schema: 'public' })
 @Index('import_raw_bipline_data_code_id_file_key', ['code', 'id_file'], { unique: true })
-export class importRawBiplineData {
+export class ImportRawBiplineData {
   @PrimaryGeneratedColumn({
     type: 'integer',
     name: 'id',

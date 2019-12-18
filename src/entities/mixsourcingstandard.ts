@@ -1,35 +1,35 @@
-import {BaseEntity,Column,Entity,Index,JoinColumn,JoinTable,ManyToMany,ManyToOne,OneToMany,OneToOne,PrimaryColumn,PrimaryGeneratedColumn,RelationId} from "typeorm";
-import {thirdparty} from "./thirdparty";
-import {subnature} from "./subnature";
+import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Thirdparty } from './thirdparty';
+import { SubNature } from './subnature';
 
+@Entity('mixsourcingstandard', { schema: 'public' })
+export class MixSourcingStandard {
+  @PrimaryGeneratedColumn({
+    type: 'integer',
+    name: 'id',
+  })
+  id: number;
 
-@Entity("mixsourcingstandard" ,{schema:"public" } )
-export class mixsourcingstandard {
+  @ManyToOne(
+    () => Thirdparty,
+    (thirdparty: Thirdparty) => thirdparty.mixsourcingstandards,
+    {},
+  )
+  @JoinColumn({ name: 'thirdpartyid' })
+  thirdparty: Thirdparty | null;
 
-    @PrimaryGeneratedColumn({
-        type:"integer", 
-        name:"id"
-        })
-    id:number;
-        
+  @ManyToOne(
+    () => SubNature,
+    (subnature: SubNature) => subnature.mixsourcingstandards,
+    {},
+  )
+  @JoinColumn({ name: 'subnatureid' })
+  subnature: SubNature | null;
 
-   
-    @ManyToOne(()=>thirdparty, (thirdparty: thirdparty)=>thirdparty.mixsourcingstandards,{  })
-    @JoinColumn({ name:'thirdpartyid'})
-    thirdparty:thirdparty | null;
-
-
-   
-    @ManyToOne(()=>subnature, (subnature: subnature)=>subnature.mixsourcingstandards,{  })
-    @JoinColumn({ name:'subnatureid'})
-    subnature:subnature | null;
-
-
-    @Column("real",{ 
-        nullable:true,
-        precision:24,
-        name:"percent"
-        })
-    percent:number | null;
-        
+  @Column('real', {
+    nullable: true,
+    precision: 24,
+    name: 'percent',
+  })
+  percent: number | null;
 }

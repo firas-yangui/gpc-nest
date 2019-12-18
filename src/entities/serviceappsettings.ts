@@ -1,7 +1,7 @@
 import { Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { service } from './service';
-import { gpcappsettings } from './gpcappsettings';
-import { thirdparty } from './thirdparty';
+import { GpcAppSettings } from './gpcappsettings';
+import { Thirdparty } from './thirdparty';
 import { ActivityDomain } from './activitydomain';
 
 @Entity('serviceappsettings', { schema: 'public' })
@@ -22,20 +22,20 @@ export class ServiceAppSettings {
   model: service | null;
 
   @ManyToOne(
-    () => gpcappsettings,
-    (gpcappsettings: gpcappsettings) => gpcappsettings.serviceappsettingss,
+    () => GpcAppSettings,
+    (gpcappsettings: GpcAppSettings) => gpcappsettings.serviceappsettingss,
     { nullable: false },
   )
   @JoinColumn({ name: 'gpcappsettingsid' })
-  gpcappsettings: gpcappsettings | null;
+  gpcappsettings: GpcAppSettings | null;
 
   @ManyToOne(
-    () => thirdparty,
-    (thirdparty: thirdparty) => thirdparty.serviceappsettingss,
+    () => Thirdparty,
+    (thirdparty: Thirdparty) => thirdparty.serviceappsettingss,
     { nullable: false },
   )
   @JoinColumn({ name: 'thirdpartyid' })
-  thirdparty: thirdparty | null;
+  thirdparty: Thirdparty | null;
 
   @ManyToOne(
     () => ActivityDomain,
