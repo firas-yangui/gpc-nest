@@ -1,66 +1,62 @@
-import {BaseEntity,Column,Entity,Index,JoinColumn,JoinTable,ManyToMany,ManyToOne,OneToMany,OneToOne,PrimaryColumn,PrimaryGeneratedColumn,RelationId} from "typeorm";
-import {thirdparty} from "./thirdparty";
-import {subnature} from "./subnature";
+import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Thirdparty } from './thirdparty';
+import { SubNature } from './subnature';
 
+@Entity('pre_validation_price', { schema: 'public' })
+export class PreValidationPrice {
+  @PrimaryGeneratedColumn({
+    type: 'integer',
+    name: 'id',
+  })
+  id: number;
 
-@Entity("pre_validation_price" ,{schema:"public" } )
-export class pre_validation_price {
+  @Column('double precision', {
+    nullable: true,
+    precision: 53,
+    name: 'price',
+  })
+  price: number | null;
 
-    @PrimaryGeneratedColumn({
-        type:"integer", 
-        name:"id"
-        })
-    id:number;
-        
+  @ManyToOne(
+    () => Thirdparty,
+    (thirdparty: Thirdparty) => thirdparty.preValidationPrices,
+    { nullable: false },
+  )
+  @JoinColumn({ name: 'thirdpartyid' })
+  thirdparty: Thirdparty | null;
 
-    @Column("double precision",{ 
-        nullable:true,
-        precision:53,
-        name:"price"
-        })
-    price:number | null;
-        
+  @ManyToOne(
+    () => SubNature,
+    (subnature: SubNature) => subnature.preValidationPrices,
+    { nullable: false },
+  )
+  @JoinColumn({ name: 'subnatureid' })
+  subnature: SubNature | null;
 
-   
-    @ManyToOne(()=>thirdparty, (thirdparty: thirdparty)=>thirdparty.preValidationPrices,{  nullable:false, })
-    @JoinColumn({ name:'thirdpartyid'})
-    thirdparty:thirdparty | null;
+  @Column('double precision', {
+    nullable: true,
+    precision: 53,
+    name: 'saleprice',
+  })
+  saleprice: number | null;
 
+  @Column('enum', {
+    nullable: false,
+    default: () => "'budget'",
+    enum: ['notified', 'actual', 'sum', 'committed', 'budget', 'forecast'],
+    name: 'periodtype',
+  })
+  periodtype: string;
 
-   
-    @ManyToOne(()=>subnature, (subnature: subnature)=>subnature.preValidationPrices,{  nullable:false, })
-    @JoinColumn({ name:'subnatureid'})
-    subnature:subnature | null;
+  @Column('date', {
+    nullable: true,
+    name: 'updatedate',
+  })
+  updatedate: string | null;
 
-
-    @Column("double precision",{ 
-        nullable:true,
-        precision:53,
-        name:"saleprice"
-        })
-    saleprice:number | null;
-        
-
-    @Column("enum",{ 
-        nullable:false,
-        default: () => "'budget'",
-        enum:["notified","actual","sum","committed","budget","forecast"],
-        name:"periodtype"
-        })
-    periodtype:string;
-        
-
-    @Column("date",{ 
-        nullable:true,
-        name:"updatedate"
-        })
-    updatedate:string | null;
-        
-
-    @Column("text",{ 
-        nullable:false,
-        name:"user_id"
-        })
-    user_id:string;
-        
+  @Column('text', {
+    nullable: false,
+    name: 'user_id',
+  })
+  user_id: string;
 }

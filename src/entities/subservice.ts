@@ -1,24 +1,10 @@
-import {
-  BaseEntity,
-  Column,
-  Entity,
-  Index,
-  JoinColumn,
-  JoinTable,
-  ManyToMany,
-  ManyToOne,
-  OneToMany,
-  OneToOne,
-  PrimaryColumn,
-  PrimaryGeneratedColumn,
-  RelationId,
-} from 'typeorm';
-import { thirdparty } from './thirdparty';
-import { service } from './service';
-import { subtypology } from './subtypology';
-import { stake } from './stake';
-import { irtapplication } from './irtapplication';
-import { portfolio } from './portfolio';
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Thirdparty } from './thirdparty';
+import { Service } from './service';
+import { SubTypology } from './subtypology';
+import { Stake } from './stake';
+import { IrtApplication } from './irtapplication';
+import { Portfolio } from './portfolio';
 import { phase } from './phase';
 import { program } from './program';
 import { workload } from './workload';
@@ -27,7 +13,7 @@ import { transaction } from './transaction';
 import { projectreporting } from './projectreporting';
 
 @Entity('subservice', { schema: 'public' })
-export class subservice {
+export class SubService {
   @PrimaryGeneratedColumn({
     type: 'integer',
     name: 'id',
@@ -47,28 +33,28 @@ export class subservice {
   name: string;
 
   @ManyToOne(
-    () => thirdparty,
-    (thirdparty: thirdparty) => thirdparty.subservices,
+    () => Thirdparty,
+    (thirdparty: Thirdparty) => thirdparty.subservices,
     { nullable: false, onUpdate: 'CASCADE' },
   )
   @JoinColumn({ name: 'thirdpartyid' })
-  thirdparty: thirdparty | null;
+  thirdparty: Thirdparty | null;
 
   @ManyToOne(
-    () => service,
-    (service: service) => service.subservices,
+    () => Service,
+    (service: Service) => service.subservices,
     { nullable: false, onUpdate: 'CASCADE' },
   )
   @JoinColumn({ name: 'serviceid' })
-  service: service | null;
+  service: Service | null;
 
   @ManyToOne(
-    () => subtypology,
-    (subtypology: subtypology) => subtypology.subservices,
+    () => SubTypology,
+    (subtypology: SubTypology) => subtypology.subservices,
     { nullable: false, onUpdate: 'CASCADE' },
   )
   @JoinColumn({ name: 'subtypologyid' })
-  subtypology: subtypology | null;
+  subtypology: SubTypology | null;
 
   @Column('text', {
     nullable: true,
@@ -77,20 +63,20 @@ export class subservice {
   description: string | null;
 
   @ManyToOne(
-    () => stake,
-    (stake: stake) => stake.subservices,
+    () => Stake,
+    (stake: Stake) => stake.subservices,
     { onDelete: 'SET NULL' },
   )
   @JoinColumn({ name: 'stakeid' })
-  stake: stake | null;
+  stake: Stake | null;
 
   @ManyToOne(
-    () => irtapplication,
-    (irtapplication: irtapplication) => irtapplication.subservices,
+    () => IrtApplication,
+    (irtapplication: IrtApplication) => irtapplication.subservices,
     { onUpdate: 'CASCADE' },
   )
   @JoinColumn({ name: 'irtapplicationid' })
-  irtapplication: irtapplication | null;
+  irtapplication: IrtApplication | null;
 
   @ManyToOne(
     () => portfolio,

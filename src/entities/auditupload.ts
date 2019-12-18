@@ -1,7 +1,7 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity('auditupload', { schema: 'public' })
-export class Auditupload {
+export class AuditUpload {
   @PrimaryGeneratedColumn({
     type: 'integer',
     name: 'id',

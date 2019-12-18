@@ -1,6 +1,6 @@
 import { Column, Entity, Index, PrimaryGeneratedColumn } from 'typeorm';
-import { sourcingplan } from './sourcingplan';
-import { periodappsettings } from './periodappsettings';
+import { SourcingPlan } from './sourcingplan';
+import { PeriodAppSettings } from './periodappsettings';
 import { CurrencyRate } from './currencyrate';
 import { TransactionAmount } from './transaction_amount';
 import { SubsidiaryAllocation } from './subsidiaryallocation';
@@ -66,52 +66,52 @@ export class Period {
   allowtransfer: boolean;
 
   @OneToMany(
-    () => sourcingplan,
-    (sourcingplan: sourcingplan) => sourcingplan.period,
+    () => SourcingPlan,
+    (sourcingplan: SourcingPlan) => sourcingplan.period,
   )
-  sourcingplans: sourcingplan[];
+  sourcingplans: SourcingPlan[];
 
   @OneToMany(
-    () => periodappsettings,
-    (periodappsettings: periodappsettings) => periodappsettings.model,
+    () => PeriodAppSettings,
+    (periodappsettings: PeriodAppSettings) => periodappsettings.model,
   )
-  periodappsettingss: periodappsettings[];
+  periodappsettingss: PeriodAppSettings[];
 
   @OneToMany(
-    () => currencyrate,
-    (currencyrate: currencyrate) => currencyrate.period,
+    () => CurrencyRate,
+    (currencyrate: CurrencyRate) => currencyrate.period,
   )
-  currencyrates: currencyrate[];
+  currencyrates: CurrencyRate[];
 
   @OneToMany(
-    () => transaction_amount,
-    (transaction_amount: transaction_amount) => transaction_amount.period,
+    () => TransactionAmount,
+    (transaction_amount: TransactionAmount) => transaction_amount.period,
   )
-  transactionAmounts: transaction_amount[];
+  transactionAmounts: TransactionAmount[];
 
   @OneToMany(
-    () => subsidiaryallocation,
-    (subsidiaryallocation: subsidiaryallocation) => subsidiaryallocation.period,
+    () => SubsidiaryAllocation,
+    (subsidiaryallocation: SubsidiaryAllocation) => subsidiaryallocation.period,
     { onUpdate: 'CASCADE' },
   )
-  subsidiaryallocations: subsidiaryallocation[];
+  subsidiaryallocations: SubsidiaryAllocation[];
 
   @OneToMany(
-    () => amount,
-    (amount: amount) => amount.period,
+    () => Amount,
+    (amount: Amount) => amount.period,
     { onUpdate: 'CASCADE' },
   )
-  amounts: amount[];
+  amounts: Amount[];
 
   @OneToMany(
-    () => subserviceperiod,
-    (subserviceperiod: subserviceperiod) => subserviceperiod.period,
+    () => SubServicePeriod,
+    (subserviceperiod: SubServicePeriod) => subserviceperiod.period,
   )
-  subserviceperiods: subserviceperiod[];
+  subserviceperiods: SubServicePeriod[];
 
   @OneToMany(
-    () => projectreporting,
-    (projectreporting: projectreporting) => projectreporting.period,
+    () => ProjectReporting,
+    (projectreporting: ProjectReporting) => projectreporting.period,
   )
-  projectreportings: projectreporting[];
+  projectreportings: ProjectReporting[];
 }

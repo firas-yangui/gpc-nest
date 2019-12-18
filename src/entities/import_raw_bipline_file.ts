@@ -2,7 +2,7 @@ import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { BiplineErrors } from './bipline_errors';
 
 @Entity('import_raw_bipline_file', { schema: 'public' })
-export class importRawBiplineFile {
+export class ImportRawBiplineFile {
   @PrimaryGeneratedColumn({
     type: 'integer',
     name: 'id',

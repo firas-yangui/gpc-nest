@@ -1,10 +1,10 @@
 import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { Country } from './country';
-import { period } from './period';
+import { Period } from './period';
 
 @Entity('currencyrate', { schema: 'public' })
 @Index('unique_country_period_couple', ['country', 'period'], { unique: true })
-export class Currencyrate {
+export class CurrencyRate {
   @PrimaryGeneratedColumn({
     type: 'integer',
     name: 'id',
@@ -20,12 +20,12 @@ export class Currencyrate {
   country: Country | null;
 
   @ManyToOne(
-    () => period,
-    (period: period) => period.currencyrates,
+    () => Period,
+    (period: Period) => period.currencyrates,
     {},
   )
   @JoinColumn({ name: 'periodid' })
-  period: period | null;
+  period: Period | null;
 
   @Column('real', {
     nullable: false,

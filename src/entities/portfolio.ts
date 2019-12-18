@@ -1,58 +1,55 @@
-import {BaseEntity,Column,Entity,Index,JoinColumn,JoinTable,ManyToMany,ManyToOne,OneToMany,OneToOne,PrimaryColumn,PrimaryGeneratedColumn,RelationId} from "typeorm";
-import {portfolioappsettings} from "./portfolioappsettings";
-import {subservice} from "./subservice";
+import { Column, Entity, Index, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { PortfolioAppSettings } from './portfolioappsettings';
+import { SubService } from './subservice';
 
+@Entity('portfolio', { schema: 'public' })
+@Index('uniq_english_name', ['englishname'], { unique: true })
+@Index('uniq_french_name', ['frenchname'], { unique: true })
+export class Portfolio {
+  @PrimaryGeneratedColumn({
+    type: 'integer',
+    name: 'id',
+  })
+  id: number;
 
-@Entity("portfolio" ,{schema:"public" } )
-@Index("uniq_english_name",["englishname",],{unique:true})
-@Index("uniq_french_name",["frenchname",],{unique:true})
-export class portfolio {
+  @Column('text', {
+    nullable: true,
+    unique: true,
+    name: 'englishname',
+  })
+  englishname: string | null;
 
-    @PrimaryGeneratedColumn({
-        type:"integer", 
-        name:"id"
-        })
-    id:number;
-        
+  @Column('text', {
+    nullable: true,
+    unique: true,
+    name: 'frenchname',
+  })
+  frenchname: string | null;
 
-    @Column("text",{ 
-        nullable:true,
-        unique: true,
-        name:"englishname"
-        })
-    englishname:string | null;
-        
+  @Column('text', {
+    nullable: true,
+    name: 'currency',
+  })
+  currency: string | null;
 
-    @Column("text",{ 
-        nullable:true,
-        unique: true,
-        name:"frenchname"
-        })
-    frenchname:string | null;
-        
+  @Column('real', {
+    nullable: true,
+    precision: 24,
+    name: 'rate',
+  })
+  rate: number | null;
 
-    @Column("text",{ 
-        nullable:true,
-        name:"currency"
-        })
-    currency:string | null;
-        
+  @OneToMany(
+    () => PortfolioAppSettings,
+    (portfolioappsettings: PortfolioAppSettings) => portfolioappsettings.model,
+    { onDelete: 'CASCADE' },
+  )
+  portfolioappsettingss: PortfolioAppSettings[];
 
-    @Column("real",{ 
-        nullable:true,
-        precision:24,
-        name:"rate"
-        })
-    rate:number | null;
-        
-
-   
-    @OneToMany(()=>portfolioappsettings, (portfolioappsettings: portfolioappsettings)=>portfolioappsettings.model,{ onDelete: 'CASCADE' , })
-    portfolioappsettingss:portfolioappsettings[];
-    
-
-   
-    @OneToMany(()=>subservice, (subservice: subservice)=>subservice.portfolio,{ onDelete: 'SET NULL' , })
-    subservices:subservice[];
-    
+  @OneToMany(
+    () => SubService,
+    (subservice: SubService) => subservice.portfolio,
+    { onDelete: 'SET NULL' },
+  )
+  subservices: SubService[];
 }

@@ -1,7 +1,7 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity('initialisationtemporaryentity', { schema: 'public' })
-export class initialisationTemporaryEntity {
+export class InitialisationTemporaryEntity {
   @PrimaryGeneratedColumn({
     type: 'integer',
     name: 'id',

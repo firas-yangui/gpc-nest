@@ -1,7 +1,7 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity('audithiddenfieldname', { schema: 'public' })
-export class Audithiddenfieldname {
+export class AuditHiddenFieldName {
   @PrimaryGeneratedColumn({
     type: 'integer',
     name: 'id',

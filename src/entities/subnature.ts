@@ -1,96 +1,96 @@
-import {BaseEntity,Column,Entity,Index,JoinColumn,JoinTable,ManyToMany,ManyToOne,OneToMany,OneToOne,PrimaryColumn,PrimaryGeneratedColumn,RelationId} from "typeorm";
-import {price} from "./price";
-import {mixsourcingstandard} from "./mixsourcingstandard";
-import {pre_validation_price} from "./pre_validation_price";
-import {workload} from "./workload";
-import {subnatureappsettings} from "./subnatureappsettings";
-import {bipexceptionrule} from "./bipexceptionrule";
-import {sourcingplan} from "./sourcingplan";
+import { Column, Entity, Index, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { price } from './price';
+import { mixsourcingstandard } from './mixsourcingstandard';
+import { PreValidationPrice } from './pre_validation_price';
+import { Workload } from './workload';
+import { SubNatureAppSettings } from './subnatureappsettings';
+import { BipExceptionRule } from './bipexceptionrule';
+import { SourcingPlan } from './sourcingplan';
 
+@Entity('subnature', { schema: 'public' })
+@Index('subnature_code_unique_idx', ['code'], { unique: true })
+export class SubNature {
+  @PrimaryGeneratedColumn({
+    type: 'integer',
+    name: 'id',
+  })
+  id: number;
 
-@Entity("subnature" ,{schema:"public" } )
-@Index("subnature_code_unique_idx",["code",],{unique:true})
-export class subnature {
+  @Column('character varying', {
+    nullable: false,
+    length: 16,
+    name: 'code',
+  })
+  code: string;
 
-    @PrimaryGeneratedColumn({
-        type:"integer", 
-        name:"id"
-        })
-    id:number;
-        
+  @Column('character varying', {
+    nullable: false,
+    length: 32,
+    name: 'name',
+  })
+  name: string;
 
-    @Column("character varying",{ 
-        nullable:false,
-        length:16,
-        name:"code"
-        })
-    code:string;
-        
+  @Column('text', {
+    nullable: false,
+    default: () => "'KEURO'",
+    name: 'amountunit',
+  })
+  amountunit: string;
 
-    @Column("character varying",{ 
-        nullable:false,
-        length:32,
-        name:"name"
-        })
-    name:string;
-        
+  @Column('boolean', {
+    nullable: true,
+    default: () => 'true',
+    name: 'iscashout',
+  })
+  iscashout: boolean | null;
 
-    @Column("text",{ 
-        nullable:false,
-        default: () => "'KEURO'",
-        name:"amountunit"
-        })
-    amountunit:string;
-        
+  @Column('boolean', {
+    nullable: false,
+    default: () => 'false',
+    name: 'isworkforce',
+  })
+  isworkforce: boolean;
 
-    @Column("boolean",{ 
-        nullable:true,
-        default: () => "true",
-        name:"iscashout"
-        })
-    iscashout:boolean | null;
-        
+  @OneToMany(
+    () => price,
+    (price: price) => price.subnature,
+  )
+  prices: price[];
 
-    @Column("boolean",{ 
-        nullable:false,
-        default: () => "false",
-        name:"isworkforce"
-        })
-    isworkforce:boolean;
-        
+  @OneToMany(
+    () => mixsourcingstandard,
+    (mixsourcingstandard: mixsourcingstandard) => mixsourcingstandard.subnature,
+  )
+  mixsourcingstandards: mixsourcingstandard[];
 
-   
-    @OneToMany(()=>price, (price: price)=>price.subnature)
-    prices:price[];
-    
+  @OneToMany(
+    () => PreValidationPrice,
+    (pre_validation_price: PreValidationPrice) => pre_validation_price.subnature,
+  )
+  preValidationPrices: PreValidationPrice[];
 
-   
-    @OneToMany(()=>mixsourcingstandard, (mixsourcingstandard: mixsourcingstandard)=>mixsourcingstandard.subnature)
-    mixsourcingstandards:mixsourcingstandard[];
-    
+  @OneToMany(
+    () => Workload,
+    (workload: Workload) => workload.subnature,
+    { onUpdate: 'CASCADE' },
+  )
+  workloads: Workload[];
 
-   
-    @OneToMany(()=>pre_validation_price, (pre_validation_price: pre_validation_price)=>pre_validation_price.subnature)
-    preValidationPrices:pre_validation_price[];
-    
+  @OneToMany(
+    () => SubNatureAppSettings,
+    (subnatureappsettings: SubNatureAppSettings) => subnatureappsettings.model,
+  )
+  subnatureappsettingss: SubNatureAppSettings[];
 
-   
-    @OneToMany(()=>workload, (workload: workload)=>workload.subnature,{ onUpdate: 'CASCADE' })
-    workloads:workload[];
-    
+  @OneToMany(
+    () => BipExceptionRule,
+    (bipexceptionrule: BipExceptionRule) => bipexceptionrule.subnature,
+  )
+  bipexceptionrules: BipExceptionRule[];
 
-   
-    @OneToMany(()=>subnatureappsettings, (subnatureappsettings: subnatureappsettings)=>subnatureappsettings.model)
-    subnatureappsettingss:subnatureappsettings[];
-    
-
-   
-    @OneToMany(()=>bipexceptionrule, (bipexceptionrule: bipexceptionrule)=>bipexceptionrule.subnature)
-    bipexceptionrules:bipexceptionrule[];
-    
-
-   
-    @OneToMany(()=>sourcingplan, (sourcingplan: sourcingplan)=>sourcingplan.subnature)
-    sourcingplans:sourcingplan[];
-    
+  @OneToMany(
+    () => SourcingPlan,
+    (sourcingplan: SourcingPlan) => sourcingplan.subnature,
+  )
+  sourcingplans: SourcingPlan[];
 }

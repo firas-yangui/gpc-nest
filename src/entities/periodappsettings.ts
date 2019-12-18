@@ -1,45 +1,44 @@
-import {BaseEntity,Column,Entity,Index,JoinColumn,JoinTable,ManyToMany,ManyToOne,OneToMany,OneToOne,PrimaryColumn,PrimaryGeneratedColumn,RelationId} from "typeorm";
-import {period} from "./period";
-import {gpcappsettings} from "./gpcappsettings";
+import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Period } from './period';
+import { GpcAppSettings } from './gpcappsettings';
 
+@Entity('periodappsettings', { schema: 'public' })
+@Index('unique_period_gpcappsettings_couple', ['gpcappsettings', 'model'], { unique: true })
+export class PeriodAppSettings {
+  @PrimaryGeneratedColumn({
+    type: 'integer',
+    name: 'id',
+  })
+  id: number;
 
-@Entity("periodappsettings" ,{schema:"public" } )
-@Index("unique_period_gpcappsettings_couple",["gpcappsettings","model",],{unique:true})
-export class periodappsettings {
+  @ManyToOne(
+    () => Period,
+    (period: Period) => period.periodappsettingss,
+    {},
+  )
+  @JoinColumn({ name: 'modelid' })
+  model: Period | null;
 
-    @PrimaryGeneratedColumn({
-        type:"integer", 
-        name:"id"
-        })
-    id:number;
-        
+  @ManyToOne(
+    () => GpcAppSettings,
+    (gpcappsettings: GpcAppSettings) => gpcappsettings.periodappsettingss,
+    {},
+  )
+  @JoinColumn({ name: 'gpcappsettingsid' })
+  gpcappsettings: GpcAppSettings | null;
 
-   
-    @ManyToOne(()=>period, (period: period)=>period.periodappsettingss,{  })
-    @JoinColumn({ name:'modelid'})
-    model:period | null;
+  @Column('boolean', {
+    nullable: false,
+    default: () => 'false',
+    name: 'iscampaignperiod',
+  })
+  iscampaignperiod: boolean;
 
-
-   
-    @ManyToOne(()=>gpcappsettings, (gpcappsettings: gpcappsettings)=>gpcappsettings.periodappsettingss,{  })
-    @JoinColumn({ name:'gpcappsettingsid'})
-    gpcappsettings:gpcappsettings | null;
-
-
-    @Column("boolean",{ 
-        nullable:false,
-        default: () => "false",
-        name:"iscampaignperiod"
-        })
-    iscampaignperiod:boolean;
-        
-
-    @Column("character varying",{ 
-        nullable:true,
-        length:128,
-        default: () => "'administratorOnly'",
-        name:"status"
-        })
-    status:string | null;
-        
+  @Column('character varying', {
+    nullable: true,
+    length: 128,
+    default: () => "'administratorOnly'",
+    name: 'status',
+  })
+  status: string | null;
 }

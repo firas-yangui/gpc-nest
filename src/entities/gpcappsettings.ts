@@ -1,34 +1,20 @@
-import {
-  BaseEntity,
-  Column,
-  Entity,
-  Index,
-  JoinColumn,
-  JoinTable,
-  ManyToMany,
-  ManyToOne,
-  OneToMany,
-  OneToOne,
-  PrimaryColumn,
-  PrimaryGeneratedColumn,
-  RelationId,
-} from 'typeorm';
-import { gpcuser } from './gpcuser';
-import { irtapplicationappsettings } from './irtapplicationappsettings';
-import { portfolioappsettings } from './portfolioappsettings';
-import { subtypologyappsettings } from './subtypologyappsettings';
-import { homemessage } from './homemessage';
-import { activitydomainappsettings } from './activitydomainappsettings';
-import { thirdpartyappsettings } from './thirdpartyappsettings';
-import { phaseappsettings } from './phaseappsettings';
-import { programappsettings } from './programappsettings';
-import { subnatureappsettings } from './subnatureappsettings';
-import { serviceappsettings } from './serviceappsettings';
-import { periodappsettings } from './periodappsettings';
+import { Column, Entity, Index, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { GpcUser } from './gpcuser';
+import { IrtApplicationAppSettings } from './irtapplicationappsettings';
+import { PortfolioAppSettings } from './portfolioappsettings';
+import { SubTypologyAppSettings } from './subtypologyappsettings';
+import { HomeMessage } from './homemessage';
+import { ActivityDomainAppSettings } from './activitydomainappsettings';
+import { ThirdPartyAppSettings } from './thirdpartyappsettings';
+import { PhaseAppSettings } from './phaseappsettings';
+import { ProgramAppSettings } from './programappsettings';
+import { SubNatureAppSettings } from './subnatureappsettings';
+import { ServiceAppSettings } from './serviceappsettings';
+import { PeriodAppSettings } from './periodappsettings';
 
 @Entity('Gpcappsettings', { schema: 'public' })
 @Index('gpcappsettings_name_key', ['name'], { unique: true })
-export class Gpcappsettings {
+export class GpcAppSettings {
   @PrimaryGeneratedColumn({
     type: 'integer',
     name: 'id',
@@ -43,74 +29,74 @@ export class Gpcappsettings {
   name: string;
 
   @OneToMany(
-    () => gpcuser,
-    (gpcuser: gpcuser) => gpcuser.gpcappsettings,
+    () => GpcUser,
+    (gpcuser: GpcUser) => gpcuser.gpcappsettings,
   )
-  gpcusers: gpcuser[];
+  gpcusers: GpcUser[];
 
   @OneToMany(
-    () => irtapplicationappsettings,
-    (irtapplicationappsettings: irtapplicationappsettings) => irtapplicationappsettings.gpcappsettings,
+    () => IrtApplicationAppSettings,
+    (irtapplicationappsettings: IrtApplicationAppSettings) => irtapplicationappsettings.gpcappsettings,
   )
-  irtapplicationappsettingss: irtapplicationappsettings[];
+  irtapplicationappsettingss: IrtApplicationAppSettings[];
 
   @OneToMany(
-    () => portfolioappsettings,
-    (portfolioappsettings: portfolioappsettings) => portfolioappsettings.gpcappsettings,
+    () => PortfolioAppSettings,
+    (portfolioappsettings: PortfolioAppSettings) => portfolioappsettings.gpcappsettings,
   )
-  portfolioappsettingss: portfolioappsettings[];
+  portfolioappsettingss: PortfolioAppSettings[];
 
   @OneToMany(
-    () => subtypologyappsettings,
-    (subtypologyappsettings: subtypologyappsettings) => subtypologyappsettings.gpcappsettings,
+    () => SubTypologyAppSettings,
+    (subtypologyappsettings: SubTypologyAppSettings) => subtypologyappsettings.gpcappsettings,
   )
-  subtypologyappsettingss: subtypologyappsettings[];
+  subtypologyappsettingss: SubTypologyAppSettings[];
 
   @OneToMany(
-    () => homemessage,
-    (homemessage: homemessage) => homemessage.gpcappsettings,
+    () => HomeMessage,
+    (homemessage: HomeMessage) => homemessage.gpcappsettings,
   )
-  homemessages: homemessage[];
+  homemessages: HomeMessage[];
 
   @OneToMany(
-    () => activitydomainappsettings,
-    (activitydomainappsettings: activitydomainappsettings) => activitydomainappsettings.gpcappsettings,
+    () => ActivityDomainAppSettings,
+    (activitydomainappsettings: ActivityDomainAppSettings) => activitydomainappsettings.gpcappsettings,
   )
-  activitydomainappsettingss: activitydomainappsettings[];
+  activitydomainappsettingss: ActivityDomainAppSettings[];
 
   @OneToMany(
-    () => thirdpartyappsettings,
-    (thirdpartyappsettings: thirdpartyappsettings) => thirdpartyappsettings.gpcappsettings,
+    () => ThirdPartyAppSettings,
+    (thirdpartyappsettings: ThirdPartyAppSettings) => thirdpartyappsettings.gpcappsettings,
   )
-  thirdpartyappsettingss: thirdpartyappsettings[];
+  thirdpartyappsettingss: ThirdPartyAppSettings[];
 
   @OneToMany(
-    () => phaseappsettings,
-    (phaseappsettings: phaseappsettings) => phaseappsettings.gpcappsettings,
+    () => PhaseAppSettings,
+    (phaseappsettings: PhaseAppSettings) => phaseappsettings.gpcappsettings,
   )
-  phaseappsettingss: phaseappsettings[];
+  phaseappsettingss: PhaseAppSettings[];
 
   @OneToMany(
-    () => programappsettings,
-    (programappsettings: programappsettings) => programappsettings.gpcappsettings,
+    () => ProgramAppSettings,
+    (programappsettings: ProgramAppSettings) => programappsettings.gpcappsettings,
   )
-  programappsettingss: programappsettings[];
+  programappsettingss: ProgramAppSettings[];
 
   @OneToMany(
-    () => subnatureappsettings,
-    (subnatureappsettings: subnatureappsettings) => subnatureappsettings.gpcappsettings,
+    () => SubNatureAppSettings,
+    (subnatureappsettings: SubNatureAppSettings) => subnatureappsettings.gpcappsettings,
   )
-  subnatureappsettingss: subnatureappsettings[];
+  subnatureappsettingss: SubNatureAppSettings[];
 
   @OneToMany(
-    () => serviceappsettings,
-    (serviceappsettings: serviceappsettings) => serviceappsettings.gpcappsettings,
+    () => ServiceAppSettings,
+    (serviceappsettings: ServiceAppSettings) => serviceappsettings.gpcappsettings,
   )
-  serviceappsettingss: serviceappsettings[];
+  serviceappsettingss: ServiceAppSettings[];
 
   @OneToMany(
-    () => periodappsettings,
-    (periodappsettings: periodappsettings) => periodappsettings.gpcappsettings,
+    () => PeriodAppSettings,
+    (periodappsettings: PeriodAppSettings) => periodappsettings.gpcappsettings,
   )
-  periodappsettingss: periodappsettings[];
+  periodappsettingss: PeriodAppSettings[];
 }

@@ -1,9 +1,9 @@
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
-import { subnature } from './subnature';
-import { Bipexceptionvalue } from './bipexceptionvalue';
+import { SubNature } from './subnature';
+import { BipExceptionValue } from './bipexceptionvalue';
 
 @Entity('bipexceptionrule', { schema: 'public' })
-export class Bipexceptionrule {
+export class BipExceptionRule {
   @PrimaryGeneratedColumn({
     type: 'integer',
     name: 'id',
@@ -11,12 +11,12 @@ export class Bipexceptionrule {
   id: number;
 
   @ManyToOne(
-    () => subnature,
-    (subnature: subnature) => subnature.bipexceptionrules,
+    () => SubNature,
+    (subnature: SubNature) => subnature.bipexceptionrules,
     {},
   )
   @JoinColumn({ name: 'subnatureid' })
-  subnature: subnature | null;
+  subnature: SubNature | null;
 
   @Column('character varying', {
     nullable: false,
@@ -45,8 +45,8 @@ export class Bipexceptionrule {
   matchbegin: number | null;
 
   @OneToMany(
-    () => Bipexceptionvalue,
-    (bipexceptionvalue: Bipexceptionvalue) => bipexceptionvalue.bipexceptionrule,
+    () => BipExceptionValue,
+    (bipexceptionvalue: BipExceptionValue) => bipexceptionvalue.bipexceptionrule,
   )
-  bipexceptionvalues: Bipexceptionvalue[];
+  bipexceptionvalues: BipExceptionValue[];
 }

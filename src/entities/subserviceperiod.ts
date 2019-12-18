@@ -1,36 +1,36 @@
-import {BaseEntity,Column,Entity,Index,JoinColumn,JoinTable,ManyToMany,ManyToOne,OneToMany,OneToOne,PrimaryColumn,PrimaryGeneratedColumn,RelationId} from "typeorm";
-import {period} from "./period";
-import {subservice} from "./subservice";
+import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Period } from './period';
+import { SubService } from './subservice';
 
+@Entity('subserviceperiod', { schema: 'public' })
+@Index('sub_service_period_unicity', ['period', 'subservice'], { unique: true })
+export class Subserviceperiod {
+  @PrimaryGeneratedColumn({
+    type: 'integer',
+    name: 'id',
+  })
+  id: number;
 
-@Entity("subserviceperiod" ,{schema:"public" } )
-@Index("sub_service_period_unicity",["period","subservice",],{unique:true})
-export class subserviceperiod {
+  @Column('boolean', {
+    nullable: true,
+    default: () => 'false',
+    name: 'isinvested',
+  })
+  isinvested: boolean | null;
 
-    @PrimaryGeneratedColumn({
-        type:"integer", 
-        name:"id"
-        })
-    id:number;
-        
+  @ManyToOne(
+    () => Period,
+    (period: Period) => period.subserviceperiods,
+    { nullable: false },
+  )
+  @JoinColumn({ name: 'periodid' })
+  period: period | null;
 
-    @Column("boolean",{ 
-        nullable:true,
-        default: () => "false",
-        name:"isinvested"
-        })
-    isinvested:boolean | null;
-        
-
-   
-    @ManyToOne(()=>period, (period: period)=>period.subserviceperiods,{  nullable:false, })
-    @JoinColumn({ name:'periodid'})
-    period:period | null;
-
-
-   
-    @ManyToOne(()=>subservice, (subservice: subservice)=>subservice.subserviceperiods,{  nullable:false, })
-    @JoinColumn({ name:'subserviceid'})
-    subservice:subservice | null;
-
+  @ManyToOne(
+    () => SubService,
+    (subservice: SubService) => subservice.subserviceperiods,
+    { nullable: false },
+  )
+  @JoinColumn({ name: 'subserviceid' })
+  subservice: SubService | null;
 }

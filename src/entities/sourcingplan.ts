@@ -1,56 +1,59 @@
-import {BaseEntity,Column,Entity,Index,JoinColumn,JoinTable,ManyToMany,ManyToOne,OneToMany,OneToOne,PrimaryColumn,PrimaryGeneratedColumn,RelationId} from "typeorm";
-import {thirdparty} from "./thirdparty";
-import {subnature} from "./subnature";
-import {period} from "./period";
+import { Column, Entity, JoinColumn, PrimaryGeneratedColumn } from 'typeorm';
+import { Thirdparty } from './thirdparty';
+import { SubNature } from './subnature';
+import { Period } from './period';
 
+@Entity('sourcingplan', { schema: 'public' })
+export class SourcingPlan {
+  @PrimaryGeneratedColumn({
+    type: 'integer',
+    name: 'id',
+  })
+  id: number;
 
-@Entity("sourcingplan" ,{schema:"public" } )
-export class sourcingplan {
+  @Column('character varying', {
+    nullable: false,
+    length: 3,
+    name: 'type',
+  })
+  type: string;
 
-    @PrimaryGeneratedColumn({
-        type:"integer", 
-        name:"id"
-        })
-    id:number;
-        
+  @Column('real', {
+    nullable: true,
+    precision: 24,
+    name: 'value',
+  })
+  value: number | null;
 
-    @Column("character varying",{ 
-        nullable:false,
-        length:3,
-        name:"type"
-        })
-    type:string;
-        
+  @ManyToOne(
+    () => thirdparty,
+    (thirdparty: thirdparty) => thirdparty.sourcingplans,
+    {},
+  )
+  @JoinColumn({ name: 'childthirdpartyid' })
+  childthirdparty: thirdparty | null;
 
-    @Column("real",{ 
-        nullable:true,
-        precision:24,
-        name:"value"
-        })
-    value:number | null;
-        
+  @ManyToOne(
+    () => Thirdparty,
+    (thirdparty: Thirdparty) => thirdparty.sourcingplans2,
+    {},
+  )
+  @JoinColumn({ name: 'parentthirdpartyid' })
+  parentthirdparty: Thirdparty | null;
 
-   
-    @ManyToOne(()=>thirdparty, (thirdparty: thirdparty)=>thirdparty.sourcingplans,{  })
-    @JoinColumn({ name:'childthirdpartyid'})
-    childthirdparty:thirdparty | null;
+  @ManyToOne(
+    () => SubNature,
+    (subnature: SubNature) => subnature.sourcingplans,
+    {},
+  )
+  @JoinColumn({ name: 'subnatureid' })
+  subnature: SubNature | null;
 
-
-   
-    @ManyToOne(()=>thirdparty, (thirdparty: thirdparty)=>thirdparty.sourcingplans2,{  })
-    @JoinColumn({ name:'parentthirdpartyid'})
-    parentthirdparty:thirdparty | null;
-
-
-   
-    @ManyToOne(()=>subnature, (subnature: subnature)=>subnature.sourcingplans,{  })
-    @JoinColumn({ name:'subnatureid'})
-    subnature:subnature | null;
-
-
-   
-    @ManyToOne(()=>period, (period: period)=>period.sourcingplans,{  })
-    @JoinColumn({ name:'periodid'})
-    period:period | null;
-
+  @ManyToOne(
+    () => Period,
+    (period: Period) => period.sourcingplans,
+    {},
+  )
+  @JoinColumn({ name: 'periodid' })
+  period: Period | null;
 }

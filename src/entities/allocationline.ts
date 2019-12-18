@@ -2,7 +2,7 @@ import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 't
 import { gpcuser } from './gpcuser';
 
 @Entity('allocationline', { schema: 'public' })
-export class Allocationline {
+export class AllocationLine {
   @PrimaryGeneratedColumn({
     type: 'integer',
     name: 'id',

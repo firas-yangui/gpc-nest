@@ -1,7 +1,7 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity('archivedsourcingplan', { schema: 'public' })
-export class Archivedsourcingplan {
+export class ArchivedSourcingPlan {
   @PrimaryGeneratedColumn({
     type: 'integer',
     name: 'id',

@@ -1,21 +1,7 @@
-import {
-  BaseEntity,
-  Column,
-  Entity,
-  Index,
-  JoinColumn,
-  JoinTable,
-  ManyToMany,
-  ManyToOne,
-  OneToMany,
-  OneToOne,
-  PrimaryColumn,
-  PrimaryGeneratedColumn,
-  RelationId,
-} from 'typeorm';
-import { irtapplication } from './irtapplication';
-import { gpcappsettings } from './gpcappsettings';
-import { thirdparty } from './thirdparty';
+import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { IrtApplication } from './irtapplication';
+import { GpcAppSettings } from './gpcappsettings';
+import { Thirdparty } from './thirdparty';
 
 @Entity('irtapplicationappsettings', { schema: 'public' })
 @Index('unique_irtapplication_gpcappsettings_couple', ['gpcappsettings', 'model'], { unique: true })
@@ -27,28 +13,28 @@ export class IrtApplicationAppSettings {
   id: number;
 
   @ManyToOne(
-    () => irtapplication,
-    (irtapplication: irtapplication) => irtapplication.irtapplicationappsettingss,
+    () => IrtApplication,
+    (irtapplication: IrtApplication) => irtapplication.irtapplicationappsettingss,
     { nullable: false },
   )
   @JoinColumn({ name: 'modelid' })
-  model: irtapplication | null;
+  model: IrtApplication | null;
 
   @ManyToOne(
-    () => gpcappsettings,
-    (gpcappsettings: gpcappsettings) => gpcappsettings.irtapplicationappsettingss,
+    () => GpcAppSettings,
+    (gpcappsettings: GpcAppSettings) => gpcappsettings.irtapplicationappsettingss,
     { nullable: false },
   )
   @JoinColumn({ name: 'gpcappsettingsid' })
-  gpcappsettings: gpcappsettings | null;
+  gpcappsettings: GpcAppSettings | null;
 
   @ManyToOne(
-    () => thirdparty,
-    (thirdparty: thirdparty) => thirdparty.irtapplicationappsettingss,
+    () => Thirdparty,
+    (thirdparty: Thirdparty) => thirdparty.irtapplicationappsettingss,
     { nullable: false },
   )
   @JoinColumn({ name: 'thirdpartyid' })
-  thirdparty: thirdparty | null;
+  thirdparty: Thirdparty | null;
 
   @Column('text', {
     nullable: false,

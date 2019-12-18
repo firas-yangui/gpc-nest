@@ -1,5 +1,5 @@
 import { Column, Entity, JoinColumn, PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
-import { Import_raw_bipline_file } from './import_raw_bipline_file';
+import { ImportRawBiplineFile } from './import_raw_bipline_file';
 
 @Entity('bipline_errors', { schema: 'public' })
 export class BiplineErrors {
@@ -10,12 +10,12 @@ export class BiplineErrors {
   id: number;
 
   @ManyToOne(
-    () => import_raw_bipline_file,
-    (import_raw_bipline_file: import_raw_bipline_file) => import_raw_bipline_file.biplineErrorss,
+    () => ImportRawBiplineFile,
+    (import_raw_bipline_file: ImportRawBiplineFile) => import_raw_bipline_file.biplineErrorss,
     { nullable: false },
   )
   @JoinColumn({ name: 'id_file' })
-  idFile: import_raw_bipline_file | null;
+  idFile: ImportRawBiplineFile | null;
 
   @Column('bigint', {
     nullable: true,

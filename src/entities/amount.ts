@@ -1,6 +1,6 @@
 import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
-import { workload } from './workload';
-import { period } from './period';
+import { Workload } from './workload';
+import { Period } from './period';
 
 @Entity('amount', { schema: 'public' })
 @Index('workload_period_idx', ['period', 'workload'], { unique: true })
@@ -12,20 +12,20 @@ export class Amount {
   id: number;
 
   @ManyToOne(
-    () => workload,
-    (workload: workload) => workload.amounts,
+    () => Workload,
+    (workload: Workload) => workload.amounts,
     { nullable: false, onUpdate: 'CASCADE' },
   )
   @JoinColumn({ name: 'workloadid' })
-  workload: workload | null;
+  workload: Workload | null;
 
   @ManyToOne(
-    () => period,
-    (period: period) => period.amounts,
+    () => Period,
+    (period: Period) => period.amounts,
     { nullable: false, onUpdate: 'CASCADE' },
   )
   @JoinColumn({ name: 'periodid' })
-  period: period | null;
+  period: Period | null;
 
   @Column('real', {
     nullable: true,
