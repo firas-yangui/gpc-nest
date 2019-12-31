@@ -1,7 +1,7 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity('user', { schema: 'public' })
-export class user {
+export class User {
   @Column('character varying', {
     nullable: true,
     length: 1024,
