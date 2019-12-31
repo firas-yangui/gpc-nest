@@ -6,6 +6,8 @@ import { SgConnectModule, SgConnectOptions } from '@societe-generale/nestjs-sg-c
 import { ConfigurationModule } from './modules/configuration/configuration.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { typeOrmConfig } from './config/typeorm.config';
+import { UserModule } from './modules/user/user.module';
+import { NotificationsModule } from './modules/notifications/notifications.module';
 
 const options: SgConnectOptions = {
   sgConnectUrl: process.env.SG_CONNECT_ENDPOINT,
@@ -24,6 +26,8 @@ const options: SgConnectOptions = {
       useClass: TerminusOptionsService,
     }),
     EmployeesModule,
+    UserModule,
+    NotificationsModule,
   ],
 })
 export class AppModule {}
