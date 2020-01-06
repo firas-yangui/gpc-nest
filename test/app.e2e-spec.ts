@@ -8,7 +8,7 @@ import { SgConnectTokenVerificationService, SgConnectCache } from '@societe-gene
 import { TOKEN, TOKEN_INFO, USER_INFO, SG_CONNECT_OPTIONS, SG_CONNECT_URL } from './test-constants';
 import { EmployeesService } from '../src/modules/employees/employees.service';
 
-describe('AppModule (e2e)', () => {
+describe.skip('AppModule (e2e)', () => {
   let app: INestApplication;
   const empService = { getHello: () => 'Hello world !' };
   let sgService: SgConnectTokenVerificationService;

@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { TerminusModule } from '@nestjs/terminus';
 import { TerminusOptionsService } from './modules/healthcheck/terminus-options.service';
 import { EmployeesModule } from './modules/employees/employees.module';
+import { TransactionModule } from './modules/transactions/transaction.module';
 import { SgConnectModule, SgConnectOptions } from '@societe-generale/nestjs-sg-connect';
 import { ConfigurationModule } from './modules/configuration/configuration.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -28,6 +29,7 @@ const options: SgConnectOptions = {
     EmployeesModule,
     UserModule,
     NotificationsModule,
+    TransactionModule,
   ],
 })
 export class AppModule {}
