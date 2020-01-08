@@ -1,4 +1,5 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
+import { Workload } from './../workloads/workload.entity';
 
 @Entity('gpcuser', { schema: 'public' })
 export class User {
@@ -73,4 +74,11 @@ export class User {
     name: 'ismanager',
   })
   ismanager: boolean | null;
+
+  @OneToMany(
+    () => Workload,
+    (workload: Workload) => workload.personincharge,
+    { onDelete: 'SET NULL' },
+  )
+  workloads: Workload[];
 }

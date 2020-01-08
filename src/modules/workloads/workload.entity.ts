@@ -1,12 +1,9 @@
 import { Column, Entity, Index, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
-import { Thirdparty } from './thirdparty';
-import { SubNature } from './subnature';
-import { SubService } from './subservice';
-import { GpcUser } from './gpcuser';
-import { Amount } from './amount';
-import { SubsidiaryAllocation } from './subsidiaryallocation';
-import { AutoImportedBipline } from './auto_imported_bipline';
-import { TransactionWorkload } from './transaction_workload';
+import { Thirdparty } from './../thirdparties/thirdParty.entity';
+import { SubNature } from './../subnature/subnature.entity';
+import { SubService } from './../subservices/subservice.entity';
+import { User as gpcUser } from './../user/user.entity';
+import { Amount } from './../amounts/amount.entity';
 
 @Entity('Workload', { schema: 'public' })
 @Index('workload_code_idx', ['code'], { unique: true })
@@ -39,28 +36,28 @@ export class Workload {
   status: string;
 
   @ManyToOne(
-    () => thirdparty,
-    (thirdparty: thirdparty) => thirdparty.workloads,
+    () => Thirdparty,
+    (thirdparty: Thirdparty) => thirdparty.workloads,
     { nullable: false, onUpdate: 'CASCADE' },
   )
   @JoinColumn({ name: 'thirdpartyid' })
-  thirdparty: thirdparty | null;
+  thirdparty: Thirdparty | null;
 
   @ManyToOne(
-    () => subnature,
-    (subnature: subnature) => subnature.workloads,
+    () => SubNature,
+    (subnature: SubNature) => subnature.workloads,
     { nullable: false, onUpdate: 'CASCADE' },
   )
   @JoinColumn({ name: 'subnatureid' })
-  subnature: subnature | null;
+  subnature: SubNature | null;
 
   @ManyToOne(
-    () => subservice,
-    (subservice: subservice) => subservice.workloads,
+    () => SubService,
+    (subservice: SubService) => subservice.workloads,
     { nullable: false, onUpdate: 'CASCADE' },
   )
   @JoinColumn({ name: 'subserviceid' })
-  subservice: subservice | null;
+  subservice: SubService | null;
 
   @Column('text', {
     nullable: true,
@@ -82,12 +79,12 @@ export class Workload {
   isinvested: boolean | null;
 
   @ManyToOne(
-    () => gpcuser,
-    (gpcuser: gpcuser) => gpcuser.workloads,
+    () => gpcUser,
+    (gpcuser: gpcUser) => gpcuser.workloads,
     { onDelete: 'SET NULL' },
   )
   @JoinColumn({ name: 'personinchargeid' })
-  personincharge: gpcuser | null;
+  personincharge: gpcUser | null;
 
   @Column('timestamp with time zone', {
     nullable: true,
@@ -101,23 +98,4 @@ export class Workload {
     { onUpdate: 'CASCADE' },
   )
   amounts: Amount[];
-
-  @OneToMany(
-    () => subsidiaryallocation,
-    (subsidiaryallocation: subsidiaryallocation) => subsidiaryallocation.workload,
-    { onUpdate: 'CASCADE' },
-  )
-  subsidiaryallocations: subsidiaryallocation[];
-
-  @OneToMany(
-    () => AutoImportedBipline,
-    (auto_imported_bipline: AutoImportedBipline) => auto_imported_bipline.workload,
-  )
-  autoImportedBiplines: AutoImportedBipline[];
-
-  @OneToMany(
-    () => transaction_workload,
-    (transaction_workload: TransactionWorkload) => transaction_workload.workload,
-  )
-  transactionWorkloads: TransactionWorkload[];
 }

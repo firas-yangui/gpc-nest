@@ -1,6 +1,6 @@
 import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
-import { Workload } from './workload';
-import { Period } from './period';
+import { Workload } from './../workloads/workload.entity';
+import { Period } from './../periods/period.entity';
 
 @Entity('amount', { schema: 'public' })
 @Index('workload_period_idx', ['period', 'workload'], { unique: true })
@@ -10,22 +10,6 @@ export class Amount {
     name: 'id',
   })
   id: number;
-
-  @ManyToOne(
-    () => Workload,
-    (workload: Workload) => workload.amounts,
-    { nullable: false, onUpdate: 'CASCADE' },
-  )
-  @JoinColumn({ name: 'workloadid' })
-  workload: Workload | null;
-
-  @ManyToOne(
-    () => Period,
-    (period: Period) => period.amounts,
-    { nullable: false, onUpdate: 'CASCADE' },
-  )
-  @JoinColumn({ name: 'periodid' })
-  period: Period | null;
 
   @Column('real', {
     nullable: true,
@@ -61,4 +45,20 @@ export class Amount {
     name: 'keurossales',
   })
   keurossales: number | null;
+
+  @ManyToOne(
+    () => Workload,
+    (workload: Workload) => workload.amounts,
+    { nullable: false, onUpdate: 'CASCADE' },
+  )
+  @JoinColumn({ name: 'workloadid' })
+  workload: Workload | null;
+
+  @ManyToOne(
+    () => Period,
+    (period: Period) => period.amounts,
+    { nullable: false, onUpdate: 'CASCADE' },
+  )
+  @JoinColumn({ name: 'periodid' })
+  period: Period | null;
 }

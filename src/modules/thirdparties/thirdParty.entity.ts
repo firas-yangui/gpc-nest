@@ -1,8 +1,10 @@
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { TransactionEntity } from '../transactions/transaction.entity';
 
+import { Workload } from './../workloads/workload.entity';
+
 @Entity('thirdparty', { schema: 'public' })
-export class ThirdPartyEntity {
+export class Thirdparty {
   @PrimaryGeneratedColumn({
     type: 'integer',
     name: 'id',
@@ -46,4 +48,10 @@ export class ThirdPartyEntity {
     (transaction: TransactionEntity) => transaction.targetThirdParty,
   )
   transactions: TransactionEntity[];
+
+  @OneToMany(
+    () => Workload,
+    (workload: Workload) => workload.thirdparty,
+  )
+  workloads: Workload[];
 }
