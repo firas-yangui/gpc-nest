@@ -9,6 +9,10 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { typeOrmConfig } from './config/typeorm.config';
 import { UserModule } from './modules/user/user.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
+import { PeriodsModule } from './modules/periods/periods.module';
+import { AmountsModule } from './modules/amounts/amounts.module';
+import { WorkloadsModule } from './modules/workloads/workloads.module';
+import { SubnatureModule } from './modules/subnature/subnature.module';
 
 const options: SgConnectOptions = {
   sgConnectUrl: process.env.SG_CONNECT_ENDPOINT,
@@ -30,6 +34,10 @@ const options: SgConnectOptions = {
     UserModule,
     NotificationsModule,
     TransactionModule,
+    PeriodsModule,
+    AmountsModule,
+    WorkloadsModule,
+    SubnatureModule,
   ],
 })
 export class AppModule {}

@@ -1,6 +1,6 @@
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
-import { SubServiceEntity } from '../subservices/subservice.entity';
-import { ThirdPartyEntity } from '../thirdparties/thirdParty.entity';
+import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { SubService } from '../subservices/subservice.entity';
+import { Thirdparty } from '../thirdparties/thirdParty.entity';
 import { UserEntity } from '../users/user.entity';
 
 @Entity('transaction', { schema: 'public' })
@@ -12,20 +12,20 @@ export class TransactionEntity {
   id: number;
 
   @ManyToOne(
-    () => SubServiceEntity,
-    (subService: SubServiceEntity) => subService.transactions,
+    () => SubService,
+    (subService: SubService) => subService.transactions,
     { nullable: false, onUpdate: 'CASCADE' },
   )
   @JoinColumn({ name: 'subservice_id' })
-  subService: SubServiceEntity;
+  subService: SubService;
 
   @ManyToOne(
-    () => ThirdPartyEntity,
-    (targetThirdParty: ThirdPartyEntity) => targetThirdParty.transactions,
+    () => Thirdparty,
+    (targetThirdParty: Thirdparty) => targetThirdParty.transactions,
     { nullable: false, onUpdate: 'CASCADE' },
   )
   @JoinColumn({ name: 'target_thirdparty_id' })
-  targetThirdParty: ThirdPartyEntity;
+  targetThirdParty: Thirdparty;
 
   @ManyToOne(
     () => UserEntity,

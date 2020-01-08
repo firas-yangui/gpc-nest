@@ -1,8 +1,9 @@
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { TransactionEntity } from '../transactions/transaction.entity';
+import { Workload } from './../workloads/workload.entity';
 
 @Entity('subservice', { schema: 'public' })
-export class SubServiceEntity {
+export class SubService {
   @PrimaryGeneratedColumn({
     type: 'integer',
     name: 'id',
@@ -263,4 +264,10 @@ export class SubServiceEntity {
     (transaction: TransactionEntity) => transaction.subService,
   )
   transactions: TransactionEntity[];
+
+  @OneToMany(
+    () => Workload,
+    (workload: Workload) => workload.subservice,
+  )
+  workloads: Workload[];
 }
