@@ -1,5 +1,5 @@
 import { Column, Entity, Index, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
-import { Thirdparty } from './../thirdparties/thirdParty.entity';
+import { Thirdparty } from '../thirdparties/thirdparty.entity';
 import { SubNature } from './../subnature/subnature.entity';
 import { SubService } from './../subservices/subservice.entity';
 import { User as gpcUser } from './../user/user.entity';

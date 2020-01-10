@@ -13,6 +13,7 @@ import { PeriodsModule } from './modules/periods/periods.module';
 import { AmountsModule } from './modules/amounts/amounts.module';
 import { WorkloadsModule } from './modules/workloads/workloads.module';
 import { SubnatureModule } from './modules/subnature/subnature.module';
+import { ThirdpartiesModule } from './modules/thirdparties/thirdparties.module';
 
 const options: SgConnectOptions = {
   sgConnectUrl: process.env.SG_CONNECT_ENDPOINT,
@@ -38,6 +39,7 @@ const options: SgConnectOptions = {
     AmountsModule,
     WorkloadsModule,
     SubnatureModule,
+    ThirdpartiesModule,
   ],
 })
 export class AppModule {}
