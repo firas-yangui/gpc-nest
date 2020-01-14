@@ -1,5 +1,6 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { TransactionEntity } from '../transactions/transaction.entity';
+import { User } from '../user/user.entity';
 
 import { Workload } from './../workloads/workload.entity';
 
@@ -54,4 +55,22 @@ export class Thirdparty {
     (workload: Workload) => workload.thirdparty,
   )
   workloads: Workload[];
+
+  @OneToMany(
+    () => User,
+    (user: User) => user.thirdParty,
+  )
+  users: User[];
+
+  @OneToMany(
+    () => User,
+    (user: User) => user.maxReadThirdParty,
+  )
+  readers: User[];
+
+  @OneToMany(
+    () => User,
+    (user: User) => user.maxEditThirdParty,
+  )
+  editors: User[];
 }

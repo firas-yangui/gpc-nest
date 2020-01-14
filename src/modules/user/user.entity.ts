@@ -1,6 +1,6 @@
-import { Column, Entity, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
 import { Workload } from './../workloads/workload.entity';
-
+import { Thirdparty } from '../thirdparties/thirdParty.entity';
 @Entity('gpcuser', { schema: 'public' })
 export class User {
   @Column({ length: 1024 })
@@ -54,17 +54,32 @@ export class User {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
-  thirdpartyid: number | null;
+  @ManyToOne(
+    () => Thirdparty,
+    (thirdparty: Thirdparty) => thirdparty.users,
+    { nullable: false, onUpdate: 'CASCADE' },
+  )
+  @JoinColumn({ name: 'thirdpartyid' })
+  thirdParty: Thirdparty;
 
   @Column()
   bipcode: string | null;
 
-  @Column({ type: 'int' })
-  maxreadthirdpartyid: number | null;
+  @ManyToOne(
+    () => Thirdparty,
+    (maxReadThirdParty: Thirdparty) => maxReadThirdParty.readers,
+    { nullable: false, onUpdate: 'CASCADE' },
+  )
+  @JoinColumn({ name: 'maxreadthirdpartyid' })
+  maxReadThirdParty: Thirdparty;
 
-  @Column({ type: 'int' })
-  maxeditthirdpartyid: number | null;
+  @ManyToOne(
+    () => Thirdparty,
+    (maxEditThirdParty: Thirdparty) => maxEditThirdParty.editors,
+    { nullable: false, onUpdate: 'CASCADE' },
+  )
+  @JoinColumn({ name: 'maxeditthirdpartyid' })
+  maxEditThirdParty: Thirdparty;
 
   @Column({ type: 'int' })
   gpcappsettingsid: number | null;
