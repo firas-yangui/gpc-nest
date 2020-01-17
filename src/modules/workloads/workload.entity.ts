@@ -5,7 +5,7 @@ import { SubService } from './../subservices/subservice.entity';
 import { User as gpcUser } from './../user/user.entity';
 import { Amount } from './../amounts/amount.entity';
 
-@Entity('Workload', { schema: 'public' })
+@Entity('workload', { schema: 'public' })
 @Index('workload_code_idx', ['code'], { unique: true })
 export class Workload {
   @PrimaryGeneratedColumn({
