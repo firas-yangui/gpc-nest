@@ -58,11 +58,6 @@ export interface PeriodData {
   forecast: any;
 }
 
-export interface TotalAmountForThirdpartyRootData {
-  //TODO
-  typo: PeriodType;
-}
-
 export interface SumAmountByPeriodTypeAndBusinessPlan extends UnitsAmount {
   type: PeriodType;
 }
@@ -78,4 +73,9 @@ export interface PeriodTypeAmount {
 export interface BusinessPlanAmount {
   RTB: PeriodTypeAmount;
   CTB: PeriodTypeAmount;
+}
+
+export interface MonthlyBusinessPlanAmount {
+  month: string;
+  plans: BusinessPlanAmount;
 }
