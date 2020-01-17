@@ -10,5 +10,6 @@ import { PeriodsModule } from './../periods/periods.module';
   imports: [TypeOrmModule.forFeature([WorkloadRepository]), ThirdpartiesModule, PeriodsModule],
   controllers: [WorkloadsController],
   providers: [WorkloadsService],
+  exports: [WorkloadsService],
 })
 export class WorkloadsModule {}
