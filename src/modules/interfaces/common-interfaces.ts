@@ -32,14 +32,14 @@ export interface Period {
   allowtransfer: boolean;
 }
 
-export interface Units {
+export interface UnitsAmount {
   klocalcurrency: number;
   keuros: number;
   mandays: number;
   keurossales: number;
 }
 
-export interface Amount extends Units {
+export interface Amount extends UnitsAmount {
   id: number;
   workloadis: number;
   periodid: number;
@@ -61,4 +61,21 @@ export interface PeriodData {
 export interface TotalAmountForThirdpartyRootData {
   //TODO
   typo: PeriodType;
+}
+
+export interface SumAmountByPeriodTypeAndBusinessPlan extends UnitsAmount {
+  type: PeriodType;
+}
+
+export interface PeriodTypeAmount {
+  notified?: UnitsAmount;
+  actual?: UnitsAmount;
+  sum?: UnitsAmount;
+  committed?: UnitsAmount;
+  budget?: UnitsAmount;
+  forecast?: UnitsAmount;
+}
+export interface BusinessPlanAmount {
+  RTB: PeriodTypeAmount;
+  CTB: PeriodTypeAmount;
 }

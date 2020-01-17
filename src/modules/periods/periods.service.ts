@@ -1,8 +1,10 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, Logger } from '@nestjs/common';
 import { PeriodRepository } from './period.repository';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PeriodType } from './../interfaces/common-interfaces';
 import { Period } from './period.entity';
+import { Like } from 'typeorm';
+import * as moment from 'moment';
 
 @Injectable()
 export class PeriodsService {
@@ -26,5 +28,21 @@ export class PeriodsService {
     }
 
     return period;
+  }
+
+  async getPeriodsByYearAndMonth(year: string = null, month: string = null): Promise<Period[]> {
+    if (!year) {
+      year = moment().format('YY');
+    }
+    if (!month) {
+      month = moment().format('MM');
+    }
+    const periodName = [year, month].join('');
+    // @Todo: filter periods by connected user appsettings to query
+    const periods = await this.periodRepository.find({ where: { code: Like(`%${periodName}%`), isarchived: false } });
+    if (!periods.length) {
+      throw new NotFoundException(`No Period found for month ${month} and yaer ${year}`);
+    }
+    return periods;
   }
 }

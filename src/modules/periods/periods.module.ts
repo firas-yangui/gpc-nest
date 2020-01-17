@@ -8,5 +8,6 @@ import { PeriodRepository } from './period.repository';
   imports: [TypeOrmModule.forFeature([PeriodRepository])],
   controllers: [PeriodsController],
   providers: [PeriodsService],
+  exports: [PeriodsService],
 })
 export class PeriodsModule {}
