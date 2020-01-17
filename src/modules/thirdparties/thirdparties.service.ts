@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, Logger } from '@nestjs/common';
 import { ThirdpartyRepository } from './thirdparties.repository';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Thirdparty as ThirdpartyInterface } from './../interfaces/common-interfaces';
@@ -6,13 +6,15 @@ import * as _ from 'lodash';
 
 @Injectable()
 export class ThirdpartiesService {
+  public thirdpartyChilds: number[];
   constructor(
     @InjectRepository(ThirdpartyRepository)
     private thirdpartyRepository: ThirdpartyRepository,
-    private thirdpartyChilds: Array<number>,
-  ) {}
+  ) {
+    this.thirdpartyChilds = [];
+  }
 
-  async getThirdPartyById(id: number): Promise<ThirdpartyInterface> {
+  public async getThirdPartyById(id: number) {
     const thirdparty = await this.thirdpartyRepository.findOne({ id });
     if (!thirdparty) {
       throw new NotFoundException(`User with id ${id} not found`);
