@@ -14,6 +14,7 @@ module.exports = {
     ecmaVersion: 2018,
     sourceType: 'module',
   },
+  globals: {Promise: true},
   settings: {
   },
   env: {

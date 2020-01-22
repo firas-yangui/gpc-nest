@@ -2,23 +2,8 @@ import { Controller, Get, Param, Header } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiImplicitHeader } from '@nestjs/swagger';
 import { UserService } from './user.service';
 import { User } from './user.entity';
-import { Request } from 'express';
 import { ErrorModel } from './../exceptions-handler/error-model';
 import { FindAndCountInterface } from './../interfaces/common-interfaces';
-
-interface SgUser {
-  email: string;
-}
-
-interface GPCRequest {
-  Request: Request;
-  sgUser: SgUser;
-}
-
-// interface FindAndCountInterface<E> {
-//   Entities: E[];
-//   count: number;
-// }
 
 @Controller('users')
 export class UserController {

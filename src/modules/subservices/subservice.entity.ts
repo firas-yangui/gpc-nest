@@ -1,6 +1,7 @@
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, ManyToOne, OneToMany, JoinColumn, PrimaryGeneratedColumn } from 'typeorm';
 import { TransactionEntity } from '../transactions/transaction.entity';
 import { Workload } from './../workloads/workload.entity';
+import { Subtypology } from './../subtypologies/subtypology.entity';
 
 @Entity('subservice', { schema: 'public' })
 export class SubService {
@@ -34,11 +35,13 @@ export class SubService {
   })
   serviceId: number;
 
-  @Column('integer', {
-    nullable: false,
-    name: 'subtypologyid',
-  })
-  subTypologyId: number;
+  @ManyToOne(
+    () => Subtypology,
+    (subtypology: Subtypology) => subtypology.subservices,
+    { nullable: false, onUpdate: 'CASCADE' },
+  )
+  @JoinColumn({ name: 'subtypologyid' })
+  subtypology: Subtypology;
 
   @Column('text', {
     nullable: true,

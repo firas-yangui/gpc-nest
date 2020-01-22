@@ -1,6 +1,6 @@
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { SubService } from '../subservices/subservice.entity';
-import { Thirdparty } from '../thirdparties/thirdParty.entity';
+import { Thirdparty } from '../thirdparties/thirdparty.entity';
 import { UserEntity } from '../users/user.entity';
 
 @Entity('transaction', { schema: 'public' })

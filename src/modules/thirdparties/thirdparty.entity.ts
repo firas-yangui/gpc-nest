@@ -2,7 +2,7 @@ import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { TransactionEntity } from '../transactions/transaction.entity';
 import { User } from '../user/user.entity';
 
-import { Workload } from './../workloads/workload.entity';
+import { Workload } from '../workloads/workload.entity';
 
 @Entity('thirdparty', { schema: 'public' })
 export class Thirdparty {

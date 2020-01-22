@@ -1,6 +1,6 @@
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
 import { Workload } from './../workloads/workload.entity';
-import { Thirdparty } from '../thirdparties/thirdParty.entity';
+import { Thirdparty } from '../thirdparties/thirdparty.entity';
 @Entity('gpcuser', { schema: 'public' })
 export class User {
   @Column({ length: 1024 })
