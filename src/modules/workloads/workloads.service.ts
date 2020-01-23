@@ -14,7 +14,7 @@ import {
 } from './../interfaces/common-interfaces';
 import { getConnection } from 'typeorm';
 import { Workload } from './workload.entity';
-import moment = require('moment');
+import * as moment from 'moment';
 
 @Injectable()
 export class WorkloadsService {
@@ -30,6 +30,7 @@ export class WorkloadsService {
     const thirdparties: ThirdpartyInterface[] = await this.thirdpartiesService.find();
     this.thirdpartiesService.buildTree(thirdparties, myThirdpartyRoot);
     const thirdpartyChilds = this.thirdpartiesService.getMyThirdPartiesChilds();
+
     return await this.getTotalAmountsByMonth(thirdpartyChilds);
   }
 
@@ -38,6 +39,7 @@ export class WorkloadsService {
       const shortMonth = moment(month, 'MMMM').format('MM');
       return { month: shortMonth, plans: await this.getBusinessPlanMonthlyTotalAmounts(shortMonth, thirdparties) };
     });
+
     return await Promise.all(promises);
   }
 
@@ -55,8 +57,10 @@ export class WorkloadsService {
       const { type, ...units } = total;
       periodTypeAmount[type] = units;
     });
+
     return periodTypeAmount;
   }
+
   async getRawMonthlyTotalAmountGroupedByPeriodType(
     month: string | null = null,
     thirdparties: number[],
@@ -68,8 +72,7 @@ export class WorkloadsService {
       /**
        * @todo add relation with appSettings for connected user
        */
-      Logger.debug('The periods ...');
-      Logger.debug(periodIds);
+
       return await getConnection()
         .createQueryBuilder()
         .from(Workload, 'workload')
@@ -90,6 +93,7 @@ export class WorkloadsService {
         .execute();
     } catch (error) {
       Logger.error(error);
+
       return [];
     }
   }
