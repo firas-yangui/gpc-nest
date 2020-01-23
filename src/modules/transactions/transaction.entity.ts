@@ -1,7 +1,8 @@
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { SubService } from '../subservices/subservice.entity';
 import { Thirdparty } from '../thirdparties/thirdparty.entity';
 import { UserEntity } from '../users/user.entity';
+import TransactionWorkload from './transaction-workloads/transaction-workload.entity';
 
 @Entity('transaction', { schema: 'public' })
 export class TransactionEntity {
@@ -57,4 +58,10 @@ export class TransactionEntity {
 
   @Column('timestamp', { nullable: false, name: 'rejected_date' })
   rejectedDate: Date;
+
+  @OneToMany(
+    () => TransactionWorkload,
+    (transactionWorkload: TransactionWorkload) => transactionWorkload.transaction,
+  )
+  transactionWorkloads: TransactionWorkload[];
 }

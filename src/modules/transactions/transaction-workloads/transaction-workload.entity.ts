@@ -1,9 +1,9 @@
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
-import { Transaction } from './transaction';
-import { Workload } from './workload';
+import { TransactionEntity } from '../transaction.entity';
+import { Workload } from '../../workloads/workload.entity';
 
 @Entity('transaction_workload', { schema: 'public' })
-export class TransactionWorkload {
+export default class TransactionWorkload {
   @PrimaryGeneratedColumn({
     type: 'integer',
     name: 'id',
@@ -11,12 +11,12 @@ export class TransactionWorkload {
   id: number;
 
   @ManyToOne(
-    () => Transaction,
-    (transaction: Transaction) => transaction.transactionWorkloads,
+    () => TransactionEntity,
+    (transaction: TransactionEntity) => transaction.transactionWorkloads,
     {},
   )
   @JoinColumn({ name: 'transaction_id' })
-  transaction: Transaction | null;
+  transaction: TransactionEntity | null;
 
   @ManyToOne(
     () => Workload,

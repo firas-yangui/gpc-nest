@@ -4,7 +4,7 @@ import { SubNature } from './../subnature/subnature.entity';
 import { SubService } from './../subservices/subservice.entity';
 import { User as gpcUser } from './../user/user.entity';
 import { Amount } from './../amounts/amount.entity';
-
+import TransactionWorkload from './../transactions/transaction-workloads/transaction-workload.entity';
 @Entity('workload', { schema: 'public' })
 @Index('workload_code_idx', ['code'], { unique: true })
 export class Workload {
@@ -98,4 +98,10 @@ export class Workload {
     { onUpdate: 'CASCADE' },
   )
   amounts: Amount[];
+
+  @OneToMany(
+    () => TransactionWorkload,
+    (transactionWorkload: TransactionWorkload) => transactionWorkload.workload,
+  )
+  transactionWorkloads: TransactionWorkload[];
 }
