@@ -79,3 +79,7 @@ export interface MonthlyBusinessPlanAmount {
   month: string;
   plans: BusinessPlanAmount;
 }
+
+export default interface EnvConfigInterface {
+  [key: string]: string;
+}
