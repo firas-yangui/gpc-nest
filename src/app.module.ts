@@ -15,6 +15,7 @@ import { WorkloadsModule } from './modules/workloads/workloads.module';
 import { SubnatureModule } from './modules/subnature/subnature.module';
 import { ThirdpartiesModule } from './modules/thirdparties/thirdparties.module';
 import { SubtypologiesModule } from './modules/subtypologies/subtypologies.module';
+import DbLoader from './loader';
 
 const options: SgConnectOptions = {
   sgConnectUrl: process.env.SG_CONNECT_ENDPOINT,
@@ -26,7 +27,7 @@ const options: SgConnectOptions = {
  */
 @Module({
   imports: [
-    TypeOrmModule.forRoot(typeOrmConfig),
+    TypeOrmModule.forRoot(DbLoader),
     ConfigurationModule,
     SgConnectModule.register(options),
     TerminusModule.forRootAsync({
