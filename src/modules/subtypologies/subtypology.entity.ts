@@ -1,7 +1,7 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { SubService } from './../subservices/subservice.entity';
 
-@Entity('subtypology', { schema: 'public' })
+@Entity('subtypology')
 export class Subtypology {
   @PrimaryGeneratedColumn({
     type: 'integer',

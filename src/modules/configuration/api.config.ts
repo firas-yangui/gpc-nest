@@ -5,8 +5,11 @@ import { toSchemes } from './configuration.utils';
 // Configuration that depends on the environment (dev, uat, prod...) must be taken
 // from environment variables (process.env.XXX)
 
+let globalPrefix = null;
+process.env.NODE_ENV == 'development' ? (globalPrefix = 'api/v1') : (globalPrefix = 'gpc/v2/api/v1');
+
 const configuration: ApiConfiguration = {
-  globalPrefix: 'gpc/v2/api/v1',
+  globalPrefix: globalPrefix,
   port: process.env.SERVER_PORT ? parseInt(process.env.SERVER_PORT, 10) : 9999,
   // ----------------------------------
   // NestJS swagger configuration

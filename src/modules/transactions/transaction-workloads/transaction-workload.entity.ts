@@ -2,7 +2,7 @@ import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 't
 import { TransactionEntity } from '../transaction.entity';
 import { Workload } from '../../workloads/workload.entity';
 
-@Entity('transaction_workload', { schema: 'public' })
+@Entity('transaction_workload')
 export default class TransactionWorkload {
   @PrimaryGeneratedColumn({
     type: 'integer',

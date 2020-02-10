@@ -1,7 +1,7 @@
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
 import { Workload } from './../workloads/workload.entity';
 import { Thirdparty } from '../thirdparties/thirdparty.entity';
-@Entity('gpcuser', { schema: 'public' })
+@Entity('gpcuser')
 export class User {
   @Column({ length: 1024 })
   firstname: string | null;

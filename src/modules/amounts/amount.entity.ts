@@ -2,7 +2,7 @@ import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn } 
 import { Workload } from './../workloads/workload.entity';
 import { Period } from './../periods/period.entity';
 
-@Entity('amount', { schema: 'public' })
+@Entity('amount')
 @Index('workload_period_idx', ['period', 'workload'], { unique: true })
 export class Amount {
   @PrimaryGeneratedColumn({
