@@ -7,6 +7,7 @@
   "main": "dist/main.js",
   "typings": "dist/main.d.ts",
   "scripts": {
+    "package-push": "docker-compose exec nest-package-push ./opt/app-packager/package-and-push-tar.sh --tar-name=gpc --use-yarn --version=$npm_package_version --repository=$(git remote get-url origin) -nr='fastit-maven' -ng='fastitdco'",
     "prebuild": "rimraf dist",
     "build": "tsc -p tsconfig.build.json",
     "format": "prettier --write \"src/**/*.ts\"",
