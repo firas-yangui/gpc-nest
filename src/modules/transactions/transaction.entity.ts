@@ -4,7 +4,7 @@ import { Thirdparty } from '../thirdparties/thirdparty.entity';
 import { UserEntity } from '../users/user.entity';
 import TransactionWorkload from './transaction-workloads/transaction-workload.entity';
 
-@Entity('transaction', { schema: 'public' })
+@Entity('transaction')
 export class TransactionEntity {
   @PrimaryGeneratedColumn({
     type: 'integer',

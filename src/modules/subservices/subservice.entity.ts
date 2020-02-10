@@ -3,7 +3,7 @@ import { TransactionEntity } from '../transactions/transaction.entity';
 import { Workload } from './../workloads/workload.entity';
 import { Subtypology } from './../subtypologies/subtypology.entity';
 
-@Entity('subservice', { schema: 'public' })
+@Entity('subservice')
 export class SubService {
   @PrimaryGeneratedColumn({
     type: 'integer',

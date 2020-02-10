@@ -1,7 +1,7 @@
 import { Column, Entity, Index, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
 import { Amount } from './../amounts/amount.entity';
 
-@Entity('period', { schema: 'public' })
+@Entity('period')
 @Index('period_code_uniqueness', ['code'], { unique: true })
 @Index('period_name_unique_idx', ['name'], { unique: true })
 export class Period {

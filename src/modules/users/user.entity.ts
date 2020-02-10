@@ -1,7 +1,7 @@
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { TransactionEntity } from '../transactions/transaction.entity';
 
-@Entity('gpcuser', { schema: 'public' })
+@Entity('gpcuser')
 export class UserEntity {
   @PrimaryGeneratedColumn({
     type: 'integer',

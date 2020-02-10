@@ -4,7 +4,7 @@ import { User } from '../user/user.entity';
 
 import { Workload } from '../workloads/workload.entity';
 
-@Entity('thirdparty', { schema: 'public' })
+@Entity('thirdparty')
 export class Thirdparty {
   @PrimaryGeneratedColumn({
     type: 'integer',
