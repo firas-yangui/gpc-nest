@@ -6,7 +6,7 @@ import { toSchemes } from './configuration.utils';
 // from environment variables (process.env.XXX)
 
 const configuration: ApiConfiguration = {
-  globalPrefix: 'api/v1',
+  globalPrefix: 'gpc/v2/api/v1',
   port: process.env.SERVER_PORT ? parseInt(process.env.SERVER_PORT, 10) : 9999,
   // ----------------------------------
   // NestJS swagger configuration

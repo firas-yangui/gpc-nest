@@ -1,8 +1,9 @@
-import { Controller, Get, Param, Header } from '@nestjs/common';
+import { Controller, Get, Param, Header, UseFilters } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiImplicitHeader } from '@nestjs/swagger';
 import { UserService } from './user.service';
 import { User } from './user.entity';
 import { ErrorModel } from './../exceptions-handler/error-model';
+import { AllExceptionsFilter } from './../exceptions-handler/all-exceptions.filter';
 import { FindAndCountInterface } from './../interfaces/common-interfaces';
 
 @Controller('users')
@@ -66,6 +67,7 @@ export class UserController {
     type: ErrorModel,
     isArray: false,
   })
+  @UseFilters(new AllExceptionsFilter())
   async getAllUsers(): Promise<FindAndCountInterface<User, number>> {
     return await this.userService.findAndCount();
   }
