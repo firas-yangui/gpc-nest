@@ -3,7 +3,9 @@ import { ApiUseTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiForbiddenRespo
 import { TransactionService } from './transaction.service';
 import { TransactionEntity } from './transaction.entity';
 import { ErrorModel } from '../exceptions-handler/error-model';
+
 @Controller('transactions')
+@ApiUseTags('Transactions')
 export class TransactionController {
   constructor(private transactionService: TransactionService) {}
 

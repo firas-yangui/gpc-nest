@@ -1,11 +1,12 @@
 import { Controller, Get, Param, Header, UseFilters } from '@nestjs/common';
-import { ApiOperation, ApiResponse, ApiImplicitHeader } from '@nestjs/swagger';
+import { ApiOperation, ApiResponse, ApiImplicitHeader, ApiUseTags } from '@nestjs/swagger';
 import { UserService } from './user.service';
 import { User } from './user.entity';
 import { ErrorModel } from './../exceptions-handler/error-model';
 import { AllExceptionsFilter } from './../exceptions-handler/all-exceptions.filter';
 import { FindAndCountInterface } from './../interfaces/common-interfaces';
 
+@ApiUseTags('Users')
 @Controller('users')
 export class UserController {
   constructor(private readonly userService: UserService) {}
