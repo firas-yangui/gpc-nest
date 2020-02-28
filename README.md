@@ -58,21 +58,21 @@ This is a basic API back-end based on [NestJS](https://nestjs.com/) framework.
 
 1. Clone this Sample and change backend_name
 
-    ```bash
-    git clone https://apps.bsc.aws.societegenerale.com/gitlab/dex/backend/nestjs-api-whiteapp <backend_name>
-    ```
+   ```bash
+   git clone https://apps.bsc.aws.societegenerale.com/gitlab/dex/backend/nestjs-api-whiteapp <backend_name>
+   ```
 
 2. Bind this project to your target repository on [SGithub](https://sgithub.fr.world.socgen/) or [gitlab](https://apps.bsc.aws.societegenerale.com/gitlab/)
 
-    ```bash
-    cd <backend_name>
-    rm -rf .git
-    git init
-    git remote add origin https://<sgithub_or_gitlab_url>/<groupe>/<target_repo_name>.git
-    git add .
-    git commit -m "chore: initial commit"
-    git push -u origin master
-    ```
+   ```bash
+   cd <backend_name>
+   rm -rf .git
+   git init
+   git remote add origin https://<sgithub_or_gitlab_url>/<groupe>/<target_repo_name>.git
+   git add .
+   git commit -m "chore: initial commit"
+   git push -u origin master
+   ```
 
 - :warning: For developers who develops on **unmanaged desktop** (outside SG internal network). You must first log in on _exposed nexus_ to be able to get module.
 
@@ -113,9 +113,9 @@ This is a basic API back-end based on [NestJS](https://nestjs.com/) framework.
 
 You must declare the swagger-ui as client application of your API in order to make it works.
 For the development environment:
-- Register a client application as described in the following [documentation](https://apps.bsc.aws.societegenerale.com/gitlab/dex/welcome/blob/master/doc/register-your-application-sgconnect.md)
-- 
 
+- Register a client application as described in the following [documentation](https://apps.bsc.aws.societegenerale.com/gitlab/dex/welcome/blob/master/doc/register-your-application-sgconnect.md)
+-
 
 ## Usage
 
@@ -135,7 +135,7 @@ npm run start:prod
 
 #### Developpment environment
 
-- :link: [Swagger URL](http://localhost:9999/swagger/#/)
+- :link: [Swagger URL](http://localhost:9999/docs/#/)
 - :link: [End-point](http://localhost:9999/api/v1/employees)
 
 ## Test

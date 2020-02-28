@@ -10,6 +10,7 @@
       "name": "Debug Nest Framework",
       "args": ["${workspaceFolder}/src/main.ts"],
       "runtimeArgs": ["--nolazy", "-r", "ts-node/register"],
+      "envFile": "${workspaceFolder}/.env.development",
       "autoAttachChildProcesses": true
     },
     {
