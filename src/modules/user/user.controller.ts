@@ -6,8 +6,8 @@ import { ErrorModel } from './../exceptions-handler/error-model';
 import { AllExceptionsFilter } from './../exceptions-handler/all-exceptions.filter';
 import { FindAndCountInterface } from './../interfaces/common-interfaces';
 
-@ApiUseTags('Users')
 @Controller('users')
+@ApiUseTags('Users')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
