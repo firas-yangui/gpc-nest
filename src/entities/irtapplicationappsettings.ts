@@ -1,6 +1,6 @@
 import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { IrtApplication } from './irtapplication';
-import { GpcAppSettings } from './gpcappsettings';
+// import { GpcAppSettings } from './gpcappsettings';
 import { Thirdparty } from './thirdparty';
 
 @Entity('irtapplicationappsettings', { schema: 'public' })
@@ -20,13 +20,13 @@ export class IrtApplicationAppSettings {
   @JoinColumn({ name: 'modelid' })
   model: IrtApplication | null;
 
-  @ManyToOne(
-    () => GpcAppSettings,
-    (gpcappsettings: GpcAppSettings) => gpcappsettings.irtapplicationappsettingss,
-    { nullable: false },
-  )
-  @JoinColumn({ name: 'gpcappsettingsid' })
-  gpcappsettings: GpcAppSettings | null;
+  // @ManyToOne(
+  //   () => GpcAppSettings,
+  //   (gpcappsettings: GpcAppSettings) => gpcappsettings.irtapplicationappsettingss,
+  //   { nullable: false },
+  // )
+  // @JoinColumn({ name: 'gpcappsettingsid' })
+  // gpcappsettings: GpcAppSettings | null;
 
   @ManyToOne(
     () => Thirdparty,

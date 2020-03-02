@@ -1,6 +1,8 @@
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
 import { Workload } from './../workloads/workload.entity';
 import { Thirdparty } from '../thirdparties/thirdparty.entity';
+import { GpcAppSettings } from './../gpcappsettings/gpcappsettings.entity';
+
 @Entity('gpcuser')
 export class User {
   @Column({ length: 1024 })
@@ -61,6 +63,14 @@ export class User {
   )
   @JoinColumn({ name: 'thirdpartyid' })
   thirdParty: Thirdparty;
+
+  @ManyToOne(
+    () => GpcAppSettings,
+    (gpcAppSettings: GpcAppSettings) => gpcAppSettings.gpcusers,
+    { nullable: false, onUpdate: 'CASCADE' },
+  )
+  @JoinColumn({ name: 'gpcappsettingsid' })
+  gpcAppSettings: GpcAppSettings;
 
   @Column()
   bipcode: string | null;

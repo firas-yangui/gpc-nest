@@ -1,8 +1,11 @@
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn, ManyToOne, JoinColumn } from 'typeorm';
 import { TransactionEntity } from '../transactions/transaction.entity';
 import { User } from '../user/user.entity';
+import { Thirdpartyappsettings } from './thirdpartyappsettings/thirdpartyappsettings.entity';
+import { Country } from './../country/country.entity';
 
 import { Workload } from '../workloads/workload.entity';
+import { Type } from 'class-transformer';
 
 @Entity('thirdparty')
 export class Thirdparty {
@@ -44,6 +47,24 @@ export class Thirdparty {
   })
   countryid: number;
 
+  @Column('character varying', {
+    nullable: true,
+    name: 'hierarchical_code',
+  })
+  hierarchicalCode: string;
+
+  @Column('character varying', {
+    nullable: true,
+    name: 'activity_code',
+  })
+  activityCode: string;
+
+  @Column('integer', {
+    nullable: true,
+    name: 'level',
+  })
+  level: number;
+
   @OneToMany(
     () => TransactionEntity,
     (transaction: TransactionEntity) => transaction.targetThirdParty,
@@ -73,4 +94,18 @@ export class Thirdparty {
     (user: User) => user.maxEditThirdParty,
   )
   editors: User[];
+
+  @OneToMany(
+    () => Thirdpartyappsettings,
+    (thirdpartyappsettings: Thirdpartyappsettings) => thirdpartyappsettings.model,
+  )
+  thirdpartyappsettings: Thirdpartyappsettings[];
+
+  @ManyToOne(
+    () => Country,
+    (country: Country) => country.thirdparties,
+    { nullable: false, onUpdate: 'CASCADE' },
+  )
+  @JoinColumn({ name: 'countryid' })
+  country: Country;
 }

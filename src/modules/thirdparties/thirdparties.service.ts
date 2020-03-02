@@ -27,8 +27,8 @@ export class ThirdpartiesService {
     return await this.thirdpartyRepository.findAndCount();
   }
 
-  async find(): Promise<ThirdpartyInterface[]> {
-    return await this.thirdpartyRepository.find();
+  async find(options: object = {}): Promise<ThirdpartyInterface[]> {
+    return await this.thirdpartyRepository.find(options);
   }
 
   populateChildren(itemList: ThirdpartyInterface[], parent: ThirdpartyInterface): ThirdpartyInterface {
