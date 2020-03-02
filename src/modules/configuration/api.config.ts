@@ -11,15 +11,16 @@ process.env.NODE_ENV == 'development' ? (globalPrefix = 'api/v1') : (globalPrefi
 const configuration: ApiConfiguration = {
   globalPrefix: globalPrefix,
   port: process.env.SERVER_PORT ? parseInt(process.env.SERVER_PORT, 10) : 9999,
+
   // ----------------------------------
   // NestJS swagger configuration
   // https://docs.nestjs.com/recipes/swagger
   // ----------------------------------
   swagger: {
-    host: process.env.SWAGGER_HOST,
+    host: `${process.env.SWAGGER_HOST}/${globalPrefix}`,
     schemes: toSchemes(process.env.SWAGGER_SCHEMES),
-    title: 'NestJS whiteApp',
-    description: 'NestJS whiteApp API producer',
+    title: 'GPC',
+    description: 'Apis pour la gestion du plan de charge',
     version: '1.0',
     contactEmail: 'example@socgen.com',
     externalDocumenttion: '',
