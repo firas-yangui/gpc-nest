@@ -1,6 +1,6 @@
 import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { Portfolio } from './portfolio';
-import { GpcAppSettings } from './gpcappsettings';
+// import { GpcAppSettings } from './gpcappsettings';
 import { Thirdparty } from './thirdparty';
 
 @Entity('portfolioappsettings', { schema: 'public' })
@@ -12,21 +12,21 @@ export class PortfolioAppSettings {
   })
   id: number;
 
-  @ManyToOne(
-    () => portfolio,
-    (portfolio: portfolio) => portfolio.portfolioappsettingss,
-    { nullable: false, onDelete: 'CASCADE' },
-  )
-  @JoinColumn({ name: 'modelid' })
-  model: portfolio | null;
+  // @ManyToOne(
+  //   () => portfolio,
+  //   (portfolio: portfolio) => portfolio.portfolioappsettingss,
+  //   { nullable: false, onDelete: 'CASCADE' },
+  // )
+  // @JoinColumn({ name: 'modelid' })
+  // model: portfolio | null;
 
-  @ManyToOne(
-    () => GpcAppSettings,
-    (gpcappsettings: GpcAppSettings) => gpcappsettings.portfolioappsettingss,
-    { nullable: false },
-  )
-  @JoinColumn({ name: 'gpcappsettingsid' })
-  gpcappsettings: GpcAppSettings | null;
+  // @ManyToOne(
+  //   () => GpcAppSettings,
+  //   (gpcappsettings: GpcAppSettings) => gpcappsettings.portfolioappsettingss,
+  //   { nullable: false },
+  // )
+  // @JoinColumn({ name: 'gpcappsettingsid' })
+  // gpcappsettings: GpcAppSettings | null;
 
   @Column('text', {
     nullable: true,

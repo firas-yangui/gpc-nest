@@ -1,6 +1,6 @@
 import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { Phase } from './phase';
-import { GpcAppSettings } from './gpcappsettings';
+import { GpcAppSettings } from '../modules/gpcappsettings/gpcappsettings.entity';
 
 @Entity('phaseappsettings', { schema: 'public' })
 @Index('unique_phase_gpcappsettings_couple', ['gpcappsettings', 'model'], { unique: true })
