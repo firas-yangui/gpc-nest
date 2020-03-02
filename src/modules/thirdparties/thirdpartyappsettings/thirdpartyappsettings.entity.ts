@@ -1,10 +1,10 @@
 import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
-import { thirdparty } from './thirdparty';
-import { GpcAppSettings } from './gpcappsettings';
+import { Thirdparty } from './../thirdparty.entity';
+import { GpcAppSettings } from '../../gpcappsettings/gpcappsettings.entity';
 
-@Entity('thirdpartyappsettings', { schema: 'public' })
+@Entity('thirdpartyappsettings')
 @Index('unique_thirdparty_gpcappsettings_couple', ['gpcappsettings', 'model'], { unique: true })
-export class ThirdpartyAppSettings {
+export class Thirdpartyappsettings {
   @PrimaryGeneratedColumn({
     type: 'integer',
     name: 'id',
@@ -12,16 +12,16 @@ export class ThirdpartyAppSettings {
   id: number;
 
   @ManyToOne(
-    () => thirdparty,
-    (thirdparty: thirdparty) => thirdparty.thirdpartyappsettingss,
+    () => Thirdparty,
+    (thirdparty: Thirdparty) => thirdparty.thirdpartyappsettings,
     {},
   )
   @JoinColumn({ name: 'modelid' })
-  model: thirdparty | null;
+  model: Thirdparty;
 
   @ManyToOne(
     () => GpcAppSettings,
-    (gpcappsettings: GpcAppSettings) => gpcappsettings.thirdpartyappsettingss,
+    (gpcappsettings: GpcAppSettings) => gpcappsettings.thirdpartyappsettings,
     {},
   )
   @JoinColumn({ name: 'gpcappsettingsid' })
