@@ -47,6 +47,24 @@ export class Thirdparty {
   })
   countryid: number;
 
+  @Column('character varying', {
+    nullable: true,
+    name: 'hierarchical_code',
+  })
+  hierarchicalCode: string;
+
+  @Column('character varying', {
+    nullable: true,
+    name: 'activity_code',
+  })
+  activityCode: string;
+
+  @Column('integer', {
+    nullable: true,
+    name: 'level',
+  })
+  level: number;
+
   @OneToMany(
     () => TransactionEntity,
     (transaction: TransactionEntity) => transaction.targetThirdParty,
