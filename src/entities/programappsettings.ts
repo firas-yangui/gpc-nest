@@ -1,6 +1,6 @@
 import { Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { program } from './program';
-import { GpcAppSettings } from './gpcappsettings';
+import { GpcAppSettings } from '../modules/gpcappsettings/gpcappsettings';
 
 @Entity('programappsettings', { schema: 'public' })
 export class ProgramAppSettings {

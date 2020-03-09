@@ -1,8 +1,7 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
-import { CurrencyRate } from './currencyrate';
-import { Thirdparty } from './thirdparty';
+import { Thirdparty } from '../../modules/thirdparties/thirdparty.entity';
 
-@Entity('country', { schema: 'public' })
+@Entity('country')
 export class Country {
   @PrimaryGeneratedColumn({
     type: 'integer',
@@ -24,14 +23,8 @@ export class Country {
   defaultcountry: boolean | null;
 
   @OneToMany(
-    () => CurrencyRate,
-    (currencyrate: CurrencyRate) => currencyrate.country,
-  )
-  currencyrates: CurrencyRate[];
-
-  @OneToMany(
     () => Thirdparty,
     (thirdparty: Thirdparty) => thirdparty.country,
   )
-  thirdpartys: Thirdparty[];
+  thirdparties: Thirdparty[];
 }
