@@ -1,6 +1,7 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn, ManyToOne, JoinColumn } from 'typeorm';
 import { TransactionEntity } from '../transactions/transaction.entity';
 import { User } from '../user/user.entity';
+import { UserThirdpartiesAuthorizations } from '../user/user-thirdparties-authorizations.entity';
 import { Thirdpartyappsettings } from './thirdpartyappsettings/thirdpartyappsettings.entity';
 import { Country } from './../country/country.entity';
 
@@ -84,16 +85,10 @@ export class Thirdparty {
   users: User[];
 
   @OneToMany(
-    () => User,
-    (user: User) => user.maxReadThirdParty,
+    () => UserThirdpartiesAuthorizations,
+    (scope: UserThirdpartiesAuthorizations) => scope.thirdparty,
   )
-  readers: User[];
-
-  @OneToMany(
-    () => User,
-    (user: User) => user.maxEditThirdParty,
-  )
-  editors: User[];
+  scopes: UserThirdpartiesAuthorizations[];
 
   @OneToMany(
     () => Thirdpartyappsettings,
