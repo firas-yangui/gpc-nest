@@ -1,6 +1,7 @@
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
 import { Workload } from './../workloads/workload.entity';
 import { Thirdparty } from '../thirdparties/thirdparty.entity';
+import { UserThirdpartiesAuthorizations } from './user-thirdparties-authorizations.entity';
 import { GpcAppSettings } from './../gpcappsettings/gpcappsettings.entity';
 
 @Entity('gpcuser')
@@ -75,24 +76,11 @@ export class User {
   @Column()
   bipcode: string | null;
 
-  @ManyToOne(
-    () => Thirdparty,
-    (maxReadThirdParty: Thirdparty) => maxReadThirdParty.readers,
-    { nullable: false, onUpdate: 'CASCADE' },
+  @OneToMany(
+    () => UserThirdpartiesAuthorizations,
+    (authorization: UserThirdpartiesAuthorizations) => authorization.user,
   )
-  @JoinColumn({ name: 'maxreadthirdpartyid' })
-  maxReadThirdParty: Thirdparty;
-
-  @ManyToOne(
-    () => Thirdparty,
-    (maxEditThirdParty: Thirdparty) => maxEditThirdParty.editors,
-    { nullable: false, onUpdate: 'CASCADE' },
-  )
-  @JoinColumn({ name: 'maxeditthirdpartyid' })
-  maxEditThirdParty: Thirdparty;
-
-  @Column({ type: 'int' })
-  gpcappsettingsid: number | null;
+  maxAuthorizations: UserThirdpartiesAuthorizations[];
 
   @Column('boolean', {
     nullable: true,
