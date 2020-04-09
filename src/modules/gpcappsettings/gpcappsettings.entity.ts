@@ -33,7 +33,7 @@ export class GpcAppSettings {
 
   @OneToMany(
     () => SubNatureAppSettings,
-    (subNatureAppSettings: SubNatureAppSettings) => subNatureAppSettings.model,
+    (subNatureAppSettings: SubNatureAppSettings) => subNatureAppSettings.subnature,
   )
   subnatureappsettings: SubNatureAppSettings[];
 }

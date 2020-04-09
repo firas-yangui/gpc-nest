@@ -3,7 +3,7 @@ import { SubNature } from './../subnature/subnature.entity';
 import { GpcAppSettings } from './../gpcappsettings/gpcappsettings.entity';
 
 @Entity('subnatureappsettings')
-@Index('unique_subnature_gpcappsettings_couple', ['gpcappsettings', 'model'], { unique: true })
+@Index('unique_subnature_gpcappsettings_couple', ['gpcappsettings', 'subnature'], { unique: true })
 export class SubNatureAppSettings {
   @PrimaryGeneratedColumn({
     type: 'integer',
@@ -17,7 +17,7 @@ export class SubNatureAppSettings {
     {},
   )
   @JoinColumn({ name: 'modelid' })
-  model: SubNature | null;
+  subnature: SubNature | null;
 
   @ManyToOne(
     () => GpcAppSettings,

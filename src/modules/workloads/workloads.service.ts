@@ -64,9 +64,18 @@ export class WorkloadsService {
       Logger.error(`subService not found by subServiceName: ${subserviceName}`);
       return;
     }
-    return await this.find({ code: Like('%NOS_TRANS%'), subservice: subService.id });
+    return await this.find({
+      relations: ['subservice', 'subnature', 'thirdparty'],
+      where: {
+        description: Like('%NOS_TRANS%'),
+        subService: {
+          id: subService.id,
+        },
+      },
+    });
   }
 
+  // , subservice: subService.id
   async update(criteria: any, partialEntity: any): Promise<UpdateResult> {
     return await this.workloadRepository.update(criteria, partialEntity);
   }

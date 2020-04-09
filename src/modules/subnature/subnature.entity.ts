@@ -54,7 +54,7 @@ export class SubNature {
 
   @OneToMany(
     () => SubNatureAppSettings,
-    (subNatureAppSettings: SubNatureAppSettings) => subNatureAppSettings.model,
+    (subNatureAppSettings: SubNatureAppSettings) => subNatureAppSettings.subnature,
     { onUpdate: 'CASCADE' },
   )
   subnatureappsettings: SubNatureAppSettings[];
