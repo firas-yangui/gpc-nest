@@ -4,7 +4,10 @@ import { WorkloadRepository } from './workload.repository';
 import { ThirdpartiesService } from './../thirdparties/thirdparties.service';
 import { PeriodsService } from './../periods/periods.service';
 import { Request } from 'express';
+import { UpdateResult } from 'typeorm/query-builder/result/UpdateResult';
 import * as _ from 'lodash';
+import * as moment from 'moment';
+
 import {
   PeriodTypeAmount,
   BusinessPlanAmount,
@@ -12,9 +15,9 @@ import {
   Thirdparty as ThirdpartyInterface,
   SumAmountByPeriodTypeAndBusinessPlan,
 } from './../interfaces/common-interfaces';
-import { getConnection } from 'typeorm';
+import { getConnection, Like } from 'typeorm';
 import { Workload } from './workload.entity';
-import * as moment from 'moment';
+import { SubservicesService } from './../subservices/subservices.service';
 
 @Injectable()
 export class WorkloadsService {
@@ -22,6 +25,7 @@ export class WorkloadsService {
     @InjectRepository(WorkloadRepository)
     private workloadRepository: WorkloadRepository,
     private readonly thirdpartiesService: ThirdpartiesService,
+    private readonly subservicesService: SubservicesService,
     private readonly periodsService: PeriodsService,
   ) {}
 
@@ -48,6 +52,23 @@ export class WorkloadsService {
       RTB: await this.getPeriodTypeMonthlyAmount(month, thirdparties, 'RTB'),
       CTB: await this.getPeriodTypeMonthlyAmount(month, thirdparties, 'CTB'),
     };
+  }
+
+  async find(options: object = {}): Promise<Workload[]> {
+    return await this.workloadRepository.find(options);
+  }
+
+  async getNosicaWorkloadInSubserviceName(subserviceName: string) {
+    const subService = await this.subservicesService.findOne(null, { name: Like(subserviceName) });
+    if (!subService) {
+      Logger.error(`subService not found by subServiceName: ${subserviceName}`);
+      return;
+    }
+    return await this.find({ code: Like('%NOS_TRANS%'), subservice: subService.id });
+  }
+
+  async update(criteria: any, partialEntity: any): Promise<UpdateResult> {
+    return await this.workloadRepository.update(criteria, partialEntity);
   }
 
   async getPeriodTypeMonthlyAmount(month: string | null = null, thirdparties: number[], businessPlan: string): Promise<PeriodTypeAmount> {

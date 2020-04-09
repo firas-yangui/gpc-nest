@@ -1,16 +1,14 @@
 import { Injectable, NotFoundException, Logger } from '@nestjs/common';
 import { ThirdpartyRepository } from './thirdparties.repository';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Thirdparty as ThirdpartyInterface } from './../interfaces/common-interfaces';
 import * as _ from 'lodash';
+import { Thirdparty } from './thirdparty.entity';
+import { Thirdparty as ThirdpartyInterface } from './../interfaces/common-interfaces';
 
 @Injectable()
 export class ThirdpartiesService {
   public thirdpartyChilds: number[];
-  constructor(
-    @InjectRepository(ThirdpartyRepository)
-    private thirdpartyRepository: ThirdpartyRepository,
-  ) {
+  constructor(@InjectRepository(ThirdpartyRepository) private readonly thirdpartyRepository: ThirdpartyRepository) {
     this.thirdpartyChilds = [];
   }
 
@@ -23,12 +21,20 @@ export class ThirdpartiesService {
     return thirdparty;
   }
 
-  async findAndCount(): Promise<[ThirdpartyInterface[], number]> {
+  async findAndCount(): Promise<[Thirdparty[], number]> {
     return await this.thirdpartyRepository.findAndCount();
   }
 
-  async find(options: object = {}): Promise<ThirdpartyInterface[]> {
+  async find(options: object = {}): Promise<Thirdparty[]> {
     return await this.thirdpartyRepository.find(options);
+  }
+
+  async findOne(options: object = {}): Promise<Thirdparty> {
+    return await this.thirdpartyRepository.findOne(options);
+  }
+
+  async findNosicaWorkloadsWithSubServiceCode() {
+    return await this.thirdpartyRepository.find({});
   }
 
   populateChildren(itemList: ThirdpartyInterface[], parent: ThirdpartyInterface): ThirdpartyInterface {
@@ -49,6 +55,7 @@ export class ThirdpartiesService {
       id: myThirdpartyRoot.id,
       name: myThirdpartyRoot.trigram,
       trigram: myThirdpartyRoot.trigram,
+      radical: myThirdpartyRoot.radical,
       children: [],
     };
     this.thirdpartyChilds.push(myThirdpartyRoot.id);

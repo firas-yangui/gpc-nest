@@ -6,10 +6,33 @@ export interface FindAndCountInterface<E, N> extends Array<E[] | N> {
 export interface Thirdparty {
   id: number;
   trigram: string;
+  radical: string;
   name: string;
   thirdpartyparent?: string;
   countryid?: number;
   children?: Thirdparty[];
+}
+
+export interface Subnatureappsetting {
+  id: number;
+  dfincode: string;
+  nrgcode: string;
+  model?: number;
+}
+
+export interface Service {
+  id: number;
+  code: string;
+  name: string;
+  lastupdatedate: string;
+  description: string;
+}
+
+export interface SubService {
+  id: number;
+  code: string;
+  name: string;
+  description: string;
 }
 
 export enum PeriodType {
@@ -32,6 +55,8 @@ export interface Period {
   allowtransfer: boolean;
 }
 
+export type Unit = 'mandays' | 'keuros' | 'keurossales' | 'klocalcurrency';
+
 export interface UnitsAmount {
   klocalcurrency: number;
   keuros: number;
@@ -40,8 +65,8 @@ export interface UnitsAmount {
 }
 
 export interface Amount extends UnitsAmount {
-  id: number;
-  workloadis: number;
+  id?: number;
+  workloadid: number;
   periodid: number;
 }
 

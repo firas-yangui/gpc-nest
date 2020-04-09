@@ -12,7 +12,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
 
     let errorResponse = {
       code: status,
-      message: exception.message.error,
+      message: exception.message,
       errors: [] || undefined,
     };
 
