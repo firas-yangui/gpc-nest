@@ -75,6 +75,7 @@ export class CsvParser {
       })
       .on('end', () => {
         Logger.log(`end, receiving data`);
+        this.callbackNosicaParser.endNosicaCallback();
       });
   };
 

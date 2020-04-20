@@ -1,3 +1,4 @@
+import { createWriteStream } from 'fs';
 import { Injectable, Logger } from '@nestjs/common';
 import { Like } from 'typeorm';
 
@@ -17,7 +18,9 @@ const nosicaField = {
 };
 
 const serviceName = '%activité transverses BSC%';
-
+const separator = '|@|';
+const rejectedFileName = `nosica-rejected-lines-${Date.now()}.csv`;
+const writeStream = createWriteStream(`/tmp/${rejectedFileName}`);
 @Injectable()
 export class CallbackNosicaParser {
   constructor(
@@ -34,41 +37,58 @@ export class CallbackNosicaParser {
     });
   };
 
+  private writeInRejectedFile = (line: string, error: string) => {
+    writeStream.write(line.concat(separator, error));
+  };
+
   nosicaCallback = async (line: any[]) => {
     const receivedSakarahCode = line[nosicaField.sakarahCode].trim();
     const receivedYear = line[nosicaField.year].trim();
     const receivedNRGCode = line[nosicaField.NRG].trim();
     const receivedMonth = line[nosicaField.period].trim();
     const amount = line[nosicaField.amount].trim();
+    let error = '';
+
+    const nosicaWorkloads = await this.workloadsService.getNosicaWorkloadInSubserviceName(serviceName);
+    if (!nosicaWorkloads) {
+      error = 'No Nosica workload found in database, exit the script.';
+      Logger.error(error);
+      this.writeInRejectedFile('Global rejection', error);
+      writeStream.end();
+      process.exit(1);
+    }
 
     const thirdparty: Thirdparty = await this.thirdpartiesService.findOne({ radical: Like(receivedSakarahCode) });
 
     if (!thirdparty) {
+      error = `No Thirdparty found for Sakarah Code : ${receivedSakarahCode}`;
+      Logger.error(error);
+      this.writeInRejectedFile(line.join(separator), error);
       return;
     }
 
     const subnatureappsetting = await this.subnatureappsettingsService.findOne({ nrgcode: Like(receivedNRGCode), relations: ['subnature'] });
 
     if (!subnatureappsetting) {
-      Logger.error('code NRG inexistant');
-      return;
-    }
-
-    const nosicaWorkloads = await this.workloadsService.getNosicaWorkloadInSubserviceName(serviceName);
-    if (!nosicaWorkloads) {
-      Logger.error('nosicaWorkloads not found');
+      error = `No Subnature found with NRG Code : ${receivedNRGCode}`;
+      Logger.error(error);
+      this.writeInRejectedFile(line.join(separator), error);
       return;
     }
 
     const actualPeriod = await this.periodsService.findOne(null, { year: receivedYear, month: receivedMonth, type: Like(PeriodType.actual) });
     if (!actualPeriod) {
-      Logger.error('actualPeriod not found');
+      error = `No Period found with year  ${receivedYear} and month ${receivedMonth} and type ${PeriodType.actual}`;
+      Logger.error(error);
+      this.writeInRejectedFile(line.join(separator), error);
       return;
     }
 
     const workload = this.getWorkloadByNrgAndSakarah(nosicaWorkloads, subnatureappsetting.subnature.id, thirdparty.id);
     if (!workload) {
-      Logger.error('not workload match with NGR and Sakarah code');
+      error = `No workload match with subnature ID   ${subnatureappsetting.subnature.id} and thirdparty ID ${thirdparty.id}`;
+      Logger.error(error);
+      this.writeInRejectedFile(line.join(separator), error);
       return;
     }
     const amountObject: Amount = {
@@ -81,5 +101,9 @@ export class CallbackNosicaParser {
     };
 
     return this.amountsService.save([amountObject], { reloead: false });
+  };
+
+  endNosicaCallback = () => {
+    writeStream.end();
   };
 }
