@@ -1,4 +1,7 @@
 import { Global, Module } from '@nestjs/common';
+import { SubservicesModule } from './subservices/subservices/subservices.module';
+import { SubnatureappsettingsModule } from './subnatureappsettings/subnatureappsettings.module';
+import { ServicesModule } from './services/services.module';
 import ConfigService from './../services/config.service';
 
 @Global()
@@ -10,5 +13,6 @@ import ConfigService from './../services/config.service';
     },
   ],
   exports: [ConfigService],
+  imports: [SubservicesModule, SubnatureappsettingsModule, ServicesModule],
 })
 export default class ConfigModule {}

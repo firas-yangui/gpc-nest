@@ -1,4 +1,5 @@
 #!/bin/sh
+#./gpc-module-generator.sh modulesName /ModulesPath
 if [ "$#" -gt 2 ]; then
   shift
   shift

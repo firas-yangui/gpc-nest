@@ -17,8 +17,12 @@ export class PeriodsService {
     return await this.periodRepository.findAndCount();
   }
 
-  async find(): Promise<Period[]> {
-    return await this.periodRepository.find();
+  async find(options: object): Promise<Period[]> {
+    return await this.periodRepository.find(options);
+  }
+
+  async findOne(id: string | number, options: object): Promise<Period> {
+    return await this.periodRepository.findOne(id, options);
   }
 
   async getPeriodsByType(type: PeriodType): Promise<Period[]> {

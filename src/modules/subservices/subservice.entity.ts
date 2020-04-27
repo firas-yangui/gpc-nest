@@ -2,6 +2,7 @@ import { Column, Entity, ManyToOne, OneToMany, JoinColumn, PrimaryGeneratedColum
 import { TransactionEntity } from '../transactions/transaction.entity';
 import { Workload } from './../workloads/workload.entity';
 import { Subtypology } from './../subtypologies/subtypology.entity';
+import { Service } from './../services/services.entity';
 
 @Entity('subservice')
 export class SubService {
@@ -34,14 +35,6 @@ export class SubService {
     name: 'serviceid',
   })
   serviceId: number;
-
-  @ManyToOne(
-    () => Subtypology,
-    (subtypology: Subtypology) => subtypology.subservices,
-    { nullable: false, onUpdate: 'CASCADE' },
-  )
-  @JoinColumn({ name: 'subtypologyid' })
-  subtypology: Subtypology;
 
   @Column('text', {
     nullable: true,
@@ -273,4 +266,20 @@ export class SubService {
     (workload: Workload) => workload.subservice,
   )
   workloads: Workload[];
+
+  @ManyToOne(
+    () => Subtypology,
+    (subtypology: Subtypology) => subtypology.subservices,
+    { nullable: false, onUpdate: 'CASCADE' },
+  )
+  @JoinColumn({ name: 'subtypologyid' })
+  subtypology: Subtypology;
+
+  @ManyToOne(
+    () => Service,
+    (service: Service) => service.subservices,
+    { nullable: false, onUpdate: 'CASCADE' },
+  )
+  @JoinColumn({ name: 'serviceid' })
+  service: Service | null;
 }

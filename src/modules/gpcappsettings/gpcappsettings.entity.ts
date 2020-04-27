@@ -1,6 +1,7 @@
 import { Column, Entity, Index, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { User as GpcUser } from './../user/user.entity';
 import { Thirdpartyappsettings } from './../thirdparties/thirdpartyappsettings/thirdpartyappsettings.entity';
+import { SubNatureAppSettings } from './../subnatureappsettings/subnatureappsettings.entity';
 
 @Entity('gpcappsettings')
 @Index('gpcappsettings_name_key', ['name'], { unique: true })
@@ -29,4 +30,10 @@ export class GpcAppSettings {
     (thirdpartyappsettings: Thirdpartyappsettings) => thirdpartyappsettings.gpcappsettings,
   )
   thirdpartyappsettings: Thirdpartyappsettings[];
+
+  @OneToMany(
+    () => SubNatureAppSettings,
+    (subNatureAppSettings: SubNatureAppSettings) => subNatureAppSettings.subnature,
+  )
+  subnatureappsettings: SubNatureAppSettings[];
 }
