@@ -1,18 +1,49 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AmountsService } from './amounts.service';
+import { AmountRepository } from './amounts.repository';
+import { async } from 'rxjs/internal/scheduler/async';
+
+const saveMock = jest.fn();
+const amountRepositoryMock = () => ({
+  save: saveMock,
+});
 
 describe('AmountsService', () => {
-  let service: AmountsService;
+  let amountsService: AmountsService;
+  let amountRepository: AmountRepository;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [AmountsService],
+      providers: [
+        AmountsService,
+        {
+          provide: AmountRepository,
+          useFactory: amountRepositoryMock,
+        },
+      ],
     }).compile();
 
-    service = module.get<AmountsService>(AmountsService);
+    amountsService = module.get<AmountsService>(AmountsService);
+    amountRepository = module.get<AmountRepository>(AmountRepository);
   });
 
-  it.skip('should be defined', () => {
-    expect(service).toBeDefined();
+  it('should be defined', () => {
+    expect(amountsService).toBeDefined();
+  });
+
+  describe('the save function', () => {
+    it('should call find from the repository', () => {
+      expect(amountRepository.save).not.toHaveBeenCalled;
+      amountsService.save([]);
+      expect(amountRepository.save).toHaveBeenCalled;
+    });
+
+    it('should return value from the repository', async () => {
+      expect(amountRepository.save).not.toHaveBeenCalled;
+      saveMock.mockResolvedValue([]);
+      const savedAmount = await amountsService.save([]);
+      expect(amountRepository.save).toHaveBeenCalled;
+      expect(savedAmount).toEqual([]);
+    });
   });
 });

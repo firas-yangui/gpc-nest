@@ -24,6 +24,7 @@ const mockPeriodsService = () => ({});
 const mockLogger = () => ({
   error: errorMock,
 });
+
 describe('WorkloadsService', () => {
   let workloadsService: WorkloadsService;
   let workloadRepository: Repository<Workload>;
