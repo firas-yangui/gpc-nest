@@ -1,6 +1,6 @@
 import { createReadStream, statSync, readdirSync } from 'fs';
 import csvParser = require('csv-parser');
-import { Injectable, Logger, Header } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { map, sortBy } from 'lodash';
 
 import { CallbackNosicaParser } from './callback.nosica.parser';
@@ -19,7 +19,7 @@ import { AmountRepository } from './../../amounts/amounts.repository';
 import { SubServiceRepository } from './../../subservices/subservices.repository';
 
 @Injectable()
-export class CsvParser {
+export class NosicaParser {
   constructor(
     private readonly callbackNosicaParser: CallbackNosicaParser,
     private readonly thirdpartiesService: ThirdpartiesService,

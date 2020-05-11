@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 
-import { CallbackNosicaParser } from './../../../modules/tasks/nosica/callback.nosica.parser';
-import { CsvParser } from './../../../modules/tasks/nosica/csv.parser';
+import { CallbackNosicaParser } from './callback.nosica.parser';
+import { NosicaParser } from './nosica.parser';
 
 import { ServicesModule } from './../../../modules/services/services.module';
 import { SubservicesModule } from './../../../modules/subservices/subservices.module';
@@ -13,7 +13,7 @@ import { ThirdpartiesModule } from './../../../modules/thirdparties/thirdparties
 
 @Module({
   imports: [AmountsModule, PeriodsModule, ThirdpartiesModule, ServicesModule, SubservicesModule, SubnatureappsettingsModule, WorkloadsModule],
-  providers: [CsvParser, CallbackNosicaParser],
-  exports: [CsvParser, CallbackNosicaParser],
+  providers: [NosicaParser, CallbackNosicaParser],
+  exports: [NosicaParser, CallbackNosicaParser],
 })
 export class NosicaModule {}
