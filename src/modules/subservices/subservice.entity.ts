@@ -3,6 +3,7 @@ import { TransactionEntity } from '../transactions/transaction.entity';
 import { Workload } from './../workloads/workload.entity';
 import { Subtypology } from './../subtypologies/subtypology.entity';
 import { Service } from './../services/services.entity';
+import { Portfolio } from './../portfolio/portfolio.entity';
 
 @Entity('subservice')
 export class SubService {
@@ -282,4 +283,12 @@ export class SubService {
   )
   @JoinColumn({ name: 'serviceid' })
   service: Service | null;
+
+  @ManyToOne(
+    () => Portfolio,
+    (portfolio: Portfolio) => portfolio.subservices,
+    { nullable: false, onUpdate: 'CASCADE' },
+  )
+  @JoinColumn({ name: 'portfolioid' })
+  portfolio: Service | null;
 }

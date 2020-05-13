@@ -2,6 +2,8 @@ import { Column, Entity, Index, OneToMany, PrimaryGeneratedColumn } from 'typeor
 import { User as GpcUser } from './../user/user.entity';
 import { Thirdpartyappsettings } from './../thirdparties/thirdpartyappsettings/thirdpartyappsettings.entity';
 import { SubNatureAppSettings } from './../subnatureappsettings/subnatureappsettings.entity';
+import { PortfolioAppSettings } from './../portfolioAppSettings/portfolioappsettings.entity';
+import { SubTypologyAppSettings } from './../subTypologyAppSettings/subtypologyappsettings.entity';
 
 @Entity('gpcappsettings')
 @Index('gpcappsettings_name_key', ['name'], { unique: true })
@@ -36,4 +38,16 @@ export class GpcAppSettings {
     (subNatureAppSettings: SubNatureAppSettings) => subNatureAppSettings.subnature,
   )
   subnatureappsettings: SubNatureAppSettings[];
+
+  @OneToMany(
+    () => PortfolioAppSettings,
+    (portfolioAppSettings: PortfolioAppSettings) => portfolioAppSettings.gpcappsettings,
+  )
+  portfolioAppSettings: PortfolioAppSettings[];
+
+  @OneToMany(
+    () => SubTypologyAppSettings,
+    (subTypologyAppSettings: SubTypologyAppSettings) => subTypologyAppSettings.gpcappsettings,
+  )
+  subTypologyAppSettings: SubTypologyAppSettings[];
 }

@@ -4,7 +4,7 @@ import { User } from '../user/user.entity';
 import { UserThirdpartiesAuthorizations } from '../user/user-thirdparties-authorizations.entity';
 import { Thirdpartyappsettings } from './thirdpartyappsettings/thirdpartyappsettings.entity';
 import { Country } from './../country/country.entity';
-
+import { PortfolioAppSettings } from './../portfolioAppSettings/portfolioappsettings.entity';
 import { Workload } from '../workloads/workload.entity';
 import { Type } from 'class-transformer';
 
@@ -95,6 +95,12 @@ export class Thirdparty {
     (thirdpartyappsettings: Thirdpartyappsettings) => thirdpartyappsettings.model,
   )
   thirdpartyappsettings: Thirdpartyappsettings[];
+
+  @OneToMany(
+    () => PortfolioAppSettings,
+    (portfolioAppSettings: PortfolioAppSettings) => portfolioAppSettings.thirdparty,
+  )
+  portfolioappsettings: PortfolioAppSettings[];
 
   @ManyToOne(
     () => Country,
