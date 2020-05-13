@@ -1,5 +1,6 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { SubService } from './../subservices/subservice.entity';
+import { SubTypologyAppSettings } from './../subTypologyAppSettings/subtypologyappsettings.entity';
 
 @Entity('subtypology')
 export class Subtypology {
@@ -39,4 +40,10 @@ export class Subtypology {
     (subservice: SubService) => subservice.subtypology,
   )
   subservices: SubService[];
+
+  @OneToMany(
+    () => SubTypologyAppSettings,
+    (subTypologyAppSettings: SubTypologyAppSettings) => subTypologyAppSettings.subTypology,
+  )
+  subTypologyAppSettings: SubTypologyAppSettings[];
 }
