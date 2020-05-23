@@ -48,7 +48,7 @@ const options: SgConnectOptions = {
     ThirdpartiesModule,
     SubtypologiesModule,
     ScheduleModule.forRoot(),
-    TasksModule,
+    //TasksModule,
   ],
 })
 export class AppModule {}
