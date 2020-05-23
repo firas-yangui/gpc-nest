@@ -6,7 +6,7 @@ import { toSchemes } from './configuration.utils';
 // from environment variables (process.env.XXX)
 
 let globalPrefix = null;
-process.env.NODE_ENV == 'development' ? (globalPrefix = 'api/v1') : (globalPrefix = 'gpc/v2/api/v1');
+process.env.NODE_ENV == 'development' ? (globalPrefix = 'api/v1') : (globalPrefix = 'api/v1');
 
 const configuration: ApiConfiguration = {
   globalPrefix: globalPrefix,

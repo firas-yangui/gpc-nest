@@ -6,7 +6,7 @@ export class TerminusOptionsService implements TerminusOptionsFactory {
   public readonly healthEndpointUrl: string;
 
   constructor() {
-    this.healthEndpointUrl = '/api/health';
+    this.healthEndpointUrl = '/api/v1/health';
   }
   createTerminusOptions(): TerminusModuleOptions {
     const healthEndpoint: TerminusEndpoint = {
