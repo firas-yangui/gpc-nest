@@ -1,4 +1,4 @@
-version: '3'
+version: "3"
 
 services:
   gpc_novo_backend:
@@ -7,9 +7,17 @@ services:
       context: .
       dockerfile: Dockerfile
     volumes:
-      - '.:/app'
-      - '/app/node_modules'
+      - ".:/app"
+      - "/app/node_modules"
     ports:
-      - '999:9999'
+      - "999:9999"
     environment:
       - NODE_ENV=development
+  rabbit_mq:
+    image: rabbitmq:latest
+    volumes:
+      - "./provisioning/docker/rabbitMq.conf"
+    environment:
+      - NODE_ENV=development
+    ports:
+      - "80:80"

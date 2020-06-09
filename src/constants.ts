@@ -5,4 +5,8 @@ export const GLOBAL_CONST = Object.freeze({
     KEURO_SALES: 'keurossales',
     MD: 'mandays',
   }),
+  QUEUE: Object.freeze({
+    PYRAMID_QUEUE: 'pyramid_queue',
+    NOSICA_QUEUE: 'nosica_queue',
+  }),
 });

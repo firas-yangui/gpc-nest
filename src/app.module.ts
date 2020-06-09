@@ -16,7 +16,7 @@ import { SubnatureModule } from './modules/subnature/subnature.module';
 import { ThirdpartiesModule } from './modules/thirdparties/thirdparties.module';
 import { SubtypologiesModule } from './modules/subtypologies/subtypologies.module';
 import { ScheduleModule } from '@nestjs/schedule';
-import { TasksModule } from './modules/tasks/tasks.module';
+import { TasksModule } from './modules/tasks/tasks-manager.module';
 import { PyramidModule } from './modules/tasks/pyramid/pyramid.module';
 
 import DbLoader from './loader';
@@ -48,7 +48,7 @@ const options: SgConnectOptions = {
     ThirdpartiesModule,
     SubtypologiesModule,
     ScheduleModule.forRoot(),
-    //TasksModule,
+    TasksModule,
   ],
 })
 export class AppModule {}

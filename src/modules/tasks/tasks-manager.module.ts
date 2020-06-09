@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { TasksService } from './tasks.service';
+import { TasksService } from './tasks-manager.service';
 import { NosicaModule } from './nosica/nosica.module';
 import { PyramidModule } from './pyramid/pyramid.module';
 
