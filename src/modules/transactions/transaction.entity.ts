@@ -1,7 +1,7 @@
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { SubService } from '../subservices/subservice.entity';
 import { Thirdparty } from '../thirdparties/thirdparty.entity';
-import { UserEntity } from '../users/user.entity';
+import { User as UserEntity } from '../user/user.entity';
 import TransactionWorkload from './transaction-workloads/transaction-workload.entity';
 
 @Entity('transaction')

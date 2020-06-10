@@ -1,8 +1,9 @@
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
-import { Workload } from './../workloads/workload.entity';
-import { Thirdparty } from '../thirdparties/thirdparty.entity';
-import { UserThirdpartiesAuthorizations } from './user-thirdparties-authorizations.entity';
 import { GpcAppSettings } from './../gpcappsettings/gpcappsettings.entity';
+import { Thirdparty } from '../thirdparties/thirdparty.entity';
+import { TransactionEntity } from '../transactions/transaction.entity';
+import { UserThirdpartiesAuthorizations } from './user-thirdparties-authorizations.entity';
+import { Workload } from './../workloads/workload.entity';
 
 @Entity('gpcuser')
 export class User {
@@ -94,4 +95,16 @@ export class User {
     { onDelete: 'SET NULL' },
   )
   workloads: Workload[];
+
+  @OneToMany(
+    () => TransactionEntity,
+    (transaction: TransactionEntity) => transaction.receiver,
+  )
+  receivedTransactions: TransactionEntity[];
+
+  @OneToMany(
+    () => TransactionEntity,
+    (transaction: TransactionEntity) => transaction.sender,
+  )
+  sentTransactions: TransactionEntity[];
 }
