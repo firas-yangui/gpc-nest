@@ -69,4 +69,7 @@ export class PyramidParser {
   parseNosicaFile = (filePath: string) => {
     return this.parseCsvFile(filePath, { separator: this.separator, headers: false });
   };
+
+  pyramidCallback = data => this.callbackPyramidParser.parse(data);
+  endPyramidCallback = () => this.callbackPyramidParser.end();
 }

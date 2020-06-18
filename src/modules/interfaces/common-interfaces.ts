@@ -125,7 +125,7 @@ export interface RabbitMQOptionsFactory {
 
 export interface RabbitMQConnectAsyncOptions {
   inject?: any[];
-  useExisting?: Type<RabbitMQConnectOptions>;
-  useClass?: Type<RabbitMQConnectOptions>;
+  useExisting?: Type<any>;
+  useClass?: Type<any>;
   useFactory?: (...args: any[]) => Promise<RabbitMQConnectOptions> | RabbitMQConnectOptions;
 }
