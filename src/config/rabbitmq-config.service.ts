@@ -3,6 +3,7 @@ import { RabbitMQOptionsFactory, RabbitMQConnectOptions } from 'src/modules/inte
 
 @Injectable()
 export class ConfigService implements RabbitMQOptionsFactory {
+  protocol = process.env.RMQ_PROTOCOL || 'amqp';
   host = process.env.RMQ_HOST || 'rabbitmq-server';
   port = process.env.RMQ_PORT || 5672;
   user = process.env.RMQ_USER || 'guest';
@@ -10,6 +11,6 @@ export class ConfigService implements RabbitMQOptionsFactory {
   vhost = process.env.RMQ_VHOST || '/';
 
   createRabbitMQConnectOptions(): RabbitMQConnectOptions | string {
-    return `amqp://${this.user}:${this.password}@${this.host}:${this.port}/${this.vhost}`;
+    return `${this.protocol}://${this.user}:${this.password}@${this.host}:${this.port}/${this.vhost}`;
   }
 }

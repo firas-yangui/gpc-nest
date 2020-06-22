@@ -1,5 +1,6 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { Connection, connect } from 'amqplib';
+import { readFileSync } from 'fs';
 
 @Injectable()
 export class AmqplibService {
@@ -8,6 +9,10 @@ export class AmqplibService {
   constructor(@Inject('AMQPLIB_CONNECT_OPTIONS') private _amqplibConnectOptions) {}
 
   async connect(): Promise<Connection> {
-    return this._amqplibClient ? this._amqplibClient : (this._amqplibClient = await connect(this._amqplibConnectOptions));
+    return this._amqplibClient
+      ? this._amqplibClient
+      : (this._amqplibClient = await connect(this._amqplibConnectOptions, {
+          ca: process.env.CA,
+        }));
   }
 }
