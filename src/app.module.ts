@@ -6,7 +6,6 @@ import { TransactionModule } from './modules/transactions/transaction.module';
 import { SgConnectModule, SgConnectOptions } from '@societe-generale/nestjs-sg-connect';
 import { ConfigurationModule } from './modules/configuration/configuration.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { typeOrmConfig } from './config/typeorm.config';
 import { UserModule } from './modules/user/user.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { PeriodsModule } from './modules/periods/periods.module';
@@ -16,8 +15,8 @@ import { SubnatureModule } from './modules/subnature/subnature.module';
 import { ThirdpartiesModule } from './modules/thirdparties/thirdparties.module';
 import { SubtypologiesModule } from './modules/subtypologies/subtypologies.module';
 import { ScheduleModule } from '@nestjs/schedule';
-import { TasksModule } from './modules/tasks/tasks.module';
-import { PyramidModule } from './modules/tasks/pyramid/pyramid.module';
+import { TasksModule } from './modules/tasks/tasks-manager.module';
+import { ConstantsModule } from './modules/constants/constants.module';
 
 import DbLoader from './loader';
 
@@ -33,6 +32,7 @@ const options: SgConnectOptions = {
   imports: [
     TypeOrmModule.forRoot(DbLoader),
     ConfigurationModule,
+    ConstantsModule,
     SgConnectModule.register(options),
     TerminusModule.forRootAsync({
       useClass: TerminusOptionsService,
@@ -48,7 +48,7 @@ const options: SgConnectOptions = {
     ThirdpartiesModule,
     SubtypologiesModule,
     ScheduleModule.forRoot(),
-    //TasksModule,
+    TasksModule,
   ],
 })
 export class AppModule {}

@@ -1,3 +1,5 @@
+import { Type } from '@nestjs/common';
+
 export interface FindAndCountInterface<E, N> extends Array<E[] | N> {
   0: E[];
   1: N;
@@ -107,4 +109,23 @@ export interface MonthlyBusinessPlanAmount {
 
 export default interface EnvConfigInterface {
   [key: string]: string;
+}
+
+export interface RabbitMQConnectOptions {
+  host: string;
+  port: number;
+  user: string;
+  password: string;
+  vhost?: string;
+}
+
+export interface RabbitMQOptionsFactory {
+  createRabbitMQConnectOptions(): Promise<RabbitMQConnectOptions> | RabbitMQConnectOptions | Promise<string> | string;
+}
+
+export interface RabbitMQConnectAsyncOptions {
+  inject?: any[];
+  useExisting?: Type<any>;
+  useClass?: Type<any>;
+  useFactory?: (...args: any[]) => Promise<RabbitMQConnectOptions> | RabbitMQConnectOptions;
 }

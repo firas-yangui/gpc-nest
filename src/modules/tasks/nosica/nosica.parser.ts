@@ -82,4 +82,7 @@ export class NosicaParser {
   parseNosicaFile = (filePath: string) => {
     return this.parseCsvFile(filePath, { separator: this.separator, headers: false });
   };
+
+  nosicaCallback = data => this.callbackNosicaParser.nosicaCallback(data);
+  endNosicaCallback = () => this.callbackNosicaParser.endNosicaCallback();
 }
