@@ -53,7 +53,7 @@ export class TasksService implements OnModuleInit {
         ]);
       })
       .catch(error => {
-        this.logger.error('Error: ', error);
+        this.logger.error(error);
       });
   }
 }
