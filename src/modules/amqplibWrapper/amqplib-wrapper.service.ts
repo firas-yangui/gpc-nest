@@ -12,7 +12,7 @@ export class AmqplibService {
     return this._amqplibClient
       ? this._amqplibClient
       : (this._amqplibClient = await connect(this._amqplibConnectOptions, {
-          ca: process.env.CERTIFICATE_AUTHORITY,
+          ca: readFileSync('/data/ca-certificate'),
         }));
   }
 }
