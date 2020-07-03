@@ -10,8 +10,8 @@ export class ConstantService {
       MD: 'mandays',
     }),
     QUEUE: Object.freeze({
-      PYRAMID_QUEUE: 'pyramid_queue',
-      NOSICA_QUEUE: 'nosica_queue',
+      PYRAMID_QUEUE: 'PYRAMID',
+      NOSICA_QUEUE: 'NOSICA',
     }),
   });
 }
