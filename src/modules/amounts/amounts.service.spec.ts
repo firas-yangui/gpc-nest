@@ -34,14 +34,14 @@ describe('AmountsService', () => {
   describe('the save function', () => {
     it('should call find from the repository', () => {
       expect(amountRepository.save).not.toHaveBeenCalled;
-      amountsService.save([]);
+      amountsService.save({ workload: {}, period: {}, klocalcurrency: 0, keuros: 0, mandays: 0, keurossales: 0 });
       expect(amountRepository.save).toHaveBeenCalled;
     });
 
     it('should return value from the repository', async () => {
       expect(amountRepository.save).not.toHaveBeenCalled;
       saveMock.mockResolvedValue([]);
-      const savedAmount = await amountsService.save([]);
+      const savedAmount = await amountsService.save({ workload: {}, period: {}, klocalcurrency: 0, keuros: 0, mandays: 0, keurossales: 0 });
       expect(amountRepository.save).toHaveBeenCalled;
       expect(savedAmount).toEqual([]);
     });

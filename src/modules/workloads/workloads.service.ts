@@ -59,7 +59,7 @@ export class WorkloadsService {
   }
 
   async getNosicaWorkloadInSubserviceName(subserviceName: string) {
-    const subService = await this.subservicesService.findOne(null, { name: Like(subserviceName) });
+    const subService = await this.subservicesService.findOne({ name: Like(subserviceName) });
     if (!subService) {
       Logger.error(`subService not found by subServiceName: ${subserviceName}`);
       return;

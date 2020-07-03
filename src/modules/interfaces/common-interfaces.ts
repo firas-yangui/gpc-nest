@@ -68,8 +68,8 @@ export interface UnitsAmount {
 
 export interface Amount extends UnitsAmount {
   id?: number;
-  workloadid: number;
-  periodid: number;
+  workload: any;
+  period: any;
 }
 
 export interface ThirdpartyTree {
