@@ -10,9 +10,19 @@ import { AmountsModule } from './../../../modules/amounts/amounts.module';
 import { PeriodsModule } from './../../../modules/periods/periods.module';
 import { WorkloadsModule } from './../../../modules/workloads/workloads.module';
 import { ThirdpartiesModule } from './../../../modules/thirdparties/thirdparties.module';
+import { ConstantsModule } from './../../constants/constants.module';
 
 @Module({
-  imports: [AmountsModule, PeriodsModule, ThirdpartiesModule, ServicesModule, SubservicesModule, SubnatureappsettingsModule, WorkloadsModule],
+  imports: [
+    AmountsModule,
+    ConstantsModule,
+    PeriodsModule,
+    ThirdpartiesModule,
+    ServicesModule,
+    SubservicesModule,
+    SubnatureappsettingsModule,
+    WorkloadsModule,
+  ],
   providers: [NosicaParser, CallbackNosicaParser],
   exports: [NosicaParser, CallbackNosicaParser],
 })

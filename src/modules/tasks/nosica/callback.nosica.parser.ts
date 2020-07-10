@@ -18,7 +18,6 @@ const nosicaField = {
 };
 
 const serviceName = '%activité transverses BSC%';
-const separator = '|@|';
 const rejectedFileName = `nosica-rejected-lines-${Date.now()}.csv`;
 const writeStream = createWriteStream(`/tmp/${rejectedFileName}`);
 @Injectable()
@@ -37,11 +36,11 @@ export class CallbackNosicaParser {
     });
   };
 
-  private writeInRejectedFile = (line: string, error: string) => {
+  private writeInRejectedFile = (line: string, separator: string, error: string) => {
     writeStream.write(line.concat(separator, error));
   };
 
-  nosicaCallback = async (line: any[]) => {
+  nosicaCallback = async (line: Record<string, any>, separator: string) => {
     const receivedSakarahCode = line[nosicaField.sakarahCode].trim();
     const receivedYear = line[nosicaField.year].trim();
     const receivedNRGCode = line[nosicaField.NRG].trim();
@@ -53,9 +52,9 @@ export class CallbackNosicaParser {
     if (!nosicaWorkloads) {
       error = 'No Nosica workload found in database, exit the script.';
       Logger.error(error);
-      this.writeInRejectedFile('Global rejection', error);
-      writeStream.end();
-      process.exit(1);
+      // this.writeInRejectedFile('Global rejection', separator, error);
+      // writeStream.end();
+      return;
     }
 
     const thirdparty: Thirdparty = await this.thirdpartiesService.findOne({ radical: Like(receivedSakarahCode) });
@@ -63,7 +62,7 @@ export class CallbackNosicaParser {
     if (!thirdparty) {
       error = `No Thirdparty found for Sakarah Code : ${receivedSakarahCode}`;
       Logger.error(error);
-      this.writeInRejectedFile(line.join(separator), error);
+      // this.writeInRejectedFile(line, separator, error);
       return;
     }
 
@@ -72,7 +71,7 @@ export class CallbackNosicaParser {
     if (!subnatureappsetting) {
       error = `No Subnature found with NRG Code : ${receivedNRGCode}`;
       Logger.error(error);
-      this.writeInRejectedFile(line.join(separator), error);
+      // this.writeInRejectedFile(line, separator, error);
       return;
     }
 
@@ -80,7 +79,7 @@ export class CallbackNosicaParser {
     if (!actualPeriod) {
       error = `No Period found with year  ${receivedYear} and month ${receivedMonth} and type ${PeriodType.actual}`;
       Logger.error(error);
-      this.writeInRejectedFile(line.join(separator), error);
+      // this.writeInRejectedFile(line, separator, error);
       return;
     }
 
@@ -88,19 +87,27 @@ export class CallbackNosicaParser {
     if (!workload) {
       error = `No workload match with subnature ID   ${subnatureappsetting.subnature.id} and thirdparty ID ${thirdparty.id}`;
       Logger.error(error);
-      this.writeInRejectedFile(line.join(separator), error);
+      // this.writeInRejectedFile(line, separator, error);
       return;
     }
+
+    //getAmount by Period and Workload
+
     const amountObject: Amount = {
       keuros: 0,
       keurossales: 0,
       klocalcurrency: 0,
       mandays: amount,
-      periodid: actualPeriod.id,
-      workloadid: workload.id,
+      period: actualPeriod,
+      workload: workload,
     };
 
-    return this.amountsService.save([amountObject], { reloead: false });
+    const amountByPeriodAndWorkloadID = await this.amountsService.findOne({ period: actualPeriod, workload: workload });
+    if (amountByPeriodAndWorkloadID) {
+      amountObject.id = amountByPeriodAndWorkloadID.id;
+    }
+
+    return this.amountsService.save(amountObject, { reload: false });
   };
 
   endNosicaCallback = () => {

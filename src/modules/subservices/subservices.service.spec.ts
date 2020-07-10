@@ -51,14 +51,14 @@ describe('SubservicesService', () => {
   describe('the findOne function', () => {
     it('should call the findOne function of the repository', () => {
       expect(subServiceRepository.findOne).not.toHaveBeenCalled;
-      subservicesService.findOne(0, {});
-      expect(subServiceRepository.findOne).toHaveBeenCalledWith(0, {});
+      subservicesService.findOne({});
+      expect(subServiceRepository.findOne).toHaveBeenCalledWith({});
     });
 
     it('should return the right value of the repository', async () => {
       findOneMock.mockResolvedValue({});
-      const res = await subservicesService.findOne(0, {});
-      expect(subServiceRepository.findOne).toHaveBeenCalledWith(0, {});
+      const res = await subservicesService.findOne({});
+      expect(subServiceRepository.findOne).toHaveBeenCalledWith({});
       expect(res).toEqual({});
     });
   });

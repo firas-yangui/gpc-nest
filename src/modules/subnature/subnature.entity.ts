@@ -1,6 +1,7 @@
 import { Column, Entity, Index, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Workload } from './../workloads/workload.entity';
 import { SubNatureAppSettings } from './../subnatureappsettings/subnatureappsettings.entity';
+
 @Entity('subnature')
 @Index('subnature_code_unique_idx', ['code'], { unique: true })
 export class SubNature {

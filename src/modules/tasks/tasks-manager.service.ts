@@ -21,8 +21,7 @@ export class TasksService implements OnModuleInit {
   };
 
   handleNosicaMessage = message => {
-    this.logger.debug('get NosicaMessage', message);
-    this.nosicaParser.nosicaCallback(message);
+    this.nosicaParser.parseNosicaLine(message.content.toString('utf8'));
   };
 
   public onModuleInit() {
@@ -34,16 +33,16 @@ export class TasksService implements OnModuleInit {
       })
       .then((channel: Channel) => {
         Promise.all([
-          channel.assertQueue(this.constantService.GLOBAL_CONST.QUEUE.PYRAMID_QUEUE).then(ok =>
-            channel.consume(this.constantService.GLOBAL_CONST.QUEUE.PYRAMID_QUEUE, msg => {
+          channel.assertQueue(this.constantService.GLOBAL_CONST.QUEUE.PYRAMID_QUEUE.NAME).then(ok =>
+            channel.consume(this.constantService.GLOBAL_CONST.QUEUE.PYRAMID_QUEUE.NAME, msg => {
               if (msg !== null) {
                 this.handlePyramidMessage(msg);
                 channel.ack(msg);
               }
             }),
           ),
-          channel.assertQueue(this.constantService.GLOBAL_CONST.QUEUE.NOSICA_QUEUE).then(ok =>
-            channel.consume(this.constantService.GLOBAL_CONST.QUEUE.NOSICA_QUEUE, msg => {
+          channel.assertQueue(this.constantService.GLOBAL_CONST.QUEUE.NOSICA_QUEUE.NAME).then(ok =>
+            channel.consume(this.constantService.GLOBAL_CONST.QUEUE.NOSICA_QUEUE.NAME, msg => {
               if (msg !== null) {
                 this.handleNosicaMessage(msg);
                 channel.ack(msg);

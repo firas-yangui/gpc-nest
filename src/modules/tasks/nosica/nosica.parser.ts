@@ -2,6 +2,7 @@ import { createReadStream, statSync, readdirSync } from 'fs';
 import csvParser = require('csv-parser');
 import { Injectable, Logger } from '@nestjs/common';
 import { map, sortBy } from 'lodash';
+import * as stringToStream from 'string-to-stream';
 
 import { CallbackNosicaParser } from './callback.nosica.parser';
 import { ThirdpartiesService } from './../../thirdparties/thirdparties.service';
@@ -10,6 +11,7 @@ import { WorkloadsService } from './../../workloads/workloads.service';
 import { PeriodsService } from './../../periods/periods.service';
 import { AmountsService } from './../../amounts/amounts.service';
 import { SubservicesService } from './../../subservices/subservices.service';
+import { ConstantService } from './../../constants/constants';
 
 import { ThirdpartyRepository } from './../../thirdparties/thirdparties.repository';
 import { SubNatureAppSettingsRepository } from './../../subnatureappsettings/subnatureappsettings.repository';
@@ -20,6 +22,8 @@ import { SubServiceRepository } from './../../subservices/subservices.repository
 
 @Injectable()
 export class NosicaParser {
+  private readonly logger = new Logger(NosicaParser.name);
+
   constructor(
     private readonly callbackNosicaParser: CallbackNosicaParser,
     private readonly thirdpartiesService: ThirdpartiesService,
@@ -28,6 +32,7 @@ export class NosicaParser {
     private readonly periodsService: PeriodsService,
     private readonly amountsService: AmountsService,
     private readonly subservicesService: SubservicesService,
+    private readonly constantService: ConstantService,
   ) {
     thirdpartiesService = new ThirdpartiesService(new ThirdpartyRepository());
     subnatureappsettingsService = new SubnatureappsettingsService(new SubNatureAppSettingsRepository());
@@ -43,46 +48,35 @@ export class NosicaParser {
       amountsService,
     );
   }
-  private results = [];
-  private separator = '|@|';
 
-  private parseCsvFile = (filePath, options) => {
-    Logger.log(`start parsing file: ${filePath} with options: ${JSON.stringify(options)}`);
+  isHeader = (object: Record<string, any>): boolean => {
+    for (const key in object) {
+      const value = object[key];
+      if (value === key) return true;
+    }
+    return false;
+  };
 
-    const fileNames = readdirSync(filePath, { encoding: 'utf8' });
+  nosicaCallback = (data, separator) => this.callbackNosicaParser.nosicaCallback(data, separator);
+  endNosicaCallback = () => this.callbackNosicaParser.endNosicaCallback();
 
-    const filesInDirectory = map(fileNames, fileName => {
-      if (statSync(filePath + fileName).isFile()) {
-        return {
-          name: fileName,
-          time: statSync(filePath + '/' + fileName).mtime.getTime(),
-        };
-      }
-    });
+  parseNosicaLine = (data: string) => {
+    const separator = this.constantService.GLOBAL_CONST.QUEUE.NOSICA_QUEUE.SEPARATOR;
+    const header = this.constantService.GLOBAL_CONST.QUEUE.NOSICA_QUEUE.HEADER;
 
-    const sortedFiles = sortBy(filesInDirectory.filter(Boolean), 'time');
-
-    Logger.log(`Files found in the directory: ${filePath} are: ${JSON.stringify(sortedFiles)} sorted by timestamp`);
-    const file = sortedFiles[0].name;
-
-    Logger.log(`Selected file: ${filePath}${file}`);
-
-    createReadStream(`${filePath}${file}`)
-      .pipe(csvParser({ separator: options.separator }))
-      .on('data', data => {
-        this.callbackNosicaParser.nosicaCallback(data);
-        this.results.push(data);
-      })
-      .on('end', () => {
-        Logger.log(`end, receiving data`);
-        this.callbackNosicaParser.endNosicaCallback();
+    const readable = stringToStream(data);
+    readable
+      .pipe(
+        csvParser({
+          separator: separator,
+          headers: header,
+        }),
+      )
+      .on('data', parsedData => {
+        if (!(parsedData == null || typeof parsedData === 'undefined' || this.isHeader(parsedData))) {
+          Logger.log('Data to parse: ', JSON.stringify(parsedData));
+          this.nosicaCallback(parsedData, separator);
+        }
       });
   };
-
-  parseNosicaFile = (filePath: string) => {
-    return this.parseCsvFile(filePath, { separator: this.separator, headers: false });
-  };
-
-  nosicaCallback = data => this.callbackNosicaParser.nosicaCallback(data);
-  endNosicaCallback = () => this.callbackNosicaParser.endNosicaCallback();
 }

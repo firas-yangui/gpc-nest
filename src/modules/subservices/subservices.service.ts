@@ -14,7 +14,7 @@ export class SubservicesService {
     return await this.subServiceRepository.find(options);
   }
 
-  async findOne(id: number | string, options: object = {}): Promise<SubService> {
-    return await this.subServiceRepository.findOne(id, options);
+  async findOne(options: object = {}): Promise<SubService> {
+    return await this.subServiceRepository.findOne(options);
   }
 }

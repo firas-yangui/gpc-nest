@@ -93,7 +93,7 @@ describe('WorkloadsService', () => {
       // expect(workloadRepository.find).not.toHaveBeenCalled();
       const res = await workloadsService.getNosicaWorkloadInSubserviceName(subserviceName);
 
-      expect(subservicesService.findOne).toHaveBeenCalledWith(null, { name: Like(subserviceName) });
+      expect(subservicesService.findOne).toHaveBeenCalledWith({ name: Like(subserviceName) });
     });
 
     it('should found the subservice', async () => {
