@@ -5,6 +5,7 @@ import { UserThirdpartiesAuthorizations } from '../user/user-thirdparties-author
 import { Thirdpartyappsettings } from './thirdpartyappsettings/thirdpartyappsettings.entity';
 import { Country } from './../country/country.entity';
 import { PortfolioAppSettings } from './../portfolioAppSettings/portfolioappsettings.entity';
+import { Price } from './../prices/prices.entity';
 import { Workload } from '../workloads/workload.entity';
 import { Type } from 'class-transformer';
 
@@ -101,6 +102,12 @@ export class Thirdparty {
     (portfolioAppSettings: PortfolioAppSettings) => portfolioAppSettings.thirdparty,
   )
   portfolioappsettings: PortfolioAppSettings[];
+
+  @OneToMany(
+    () => Price,
+    (price: Price) => price.thirdparty,
+  )
+  prices: Price[];
 
   @ManyToOne(
     () => Country,

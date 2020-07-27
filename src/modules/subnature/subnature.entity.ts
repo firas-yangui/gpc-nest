@@ -1,6 +1,7 @@
 import { Column, Entity, Index, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Workload } from './../workloads/workload.entity';
 import { SubNatureAppSettings } from './../subnatureappsettings/subnatureappsettings.entity';
+import { Price } from './../prices/prices.entity';
 
 @Entity('subnature')
 @Index('subnature_code_unique_idx', ['code'], { unique: true })
@@ -52,6 +53,13 @@ export class SubNature {
     { onUpdate: 'CASCADE' },
   )
   workloads: Workload[];
+
+  @OneToMany(
+    () => Price,
+    (price: Price) => price.subnature,
+    { onUpdate: 'CASCADE' },
+  )
+  prices: Price[];
 
   @OneToMany(
     () => SubNatureAppSettings,
