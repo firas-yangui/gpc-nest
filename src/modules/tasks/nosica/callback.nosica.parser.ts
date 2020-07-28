@@ -8,6 +8,10 @@ import { SubnatureappsettingsService } from './../../../modules/subnatureappsett
 import { PeriodsService } from './../../../modules/periods/periods.service';
 import { Thirdparty, Amount, PeriodType } from './../../../modules/interfaces/common-interfaces';
 import { AmountsService } from './../../../modules/amounts/amounts.service';
+import { PricesService } from './../../prices/prices.service';
+import { CurrencyRateService } from './../../currency-rate/currency-rate.service';
+import { ConstantService } from './../../constants/constants';
+import { AmountConverter } from '../../amounts/amounts.converter';
 
 const nosicaField = {
   sakarahCode: 'code_dept_local',
@@ -28,6 +32,10 @@ export class CallbackNosicaParser {
     private readonly workloadsService: WorkloadsService,
     private readonly periodsService: PeriodsService,
     private readonly amountsService: AmountsService,
+    private readonly amountConverter: AmountConverter,
+    private readonly pricesService: PricesService,
+    private readonly currencyRateService: CurrencyRateService,
+    private readonly constantService: ConstantService,
   ) {}
 
   private getWorkloadByNrgAndSakarah = (nosicaWorkloads: any[], SubnaturId, thirdpartyId) => {
@@ -71,7 +79,7 @@ export class CallbackNosicaParser {
     if (!subnatureappsetting) {
       error = `No Subnature found with NRG Code : ${receivedNRGCode}`;
       Logger.error(error);
-      // this.writeInRejectedFile(line, separator, error);
+
       return;
     }
 
@@ -79,7 +87,7 @@ export class CallbackNosicaParser {
     if (!actualPeriod) {
       error = `No Period found with year  ${receivedYear} and month ${receivedMonth} and type ${PeriodType.actual}`;
       Logger.error(error);
-      // this.writeInRejectedFile(line, separator, error);
+
       return;
     }
 
@@ -87,27 +95,31 @@ export class CallbackNosicaParser {
     if (!workload) {
       error = `No workload match with subnature ID   ${subnatureappsetting.subnature.id} and thirdparty ID ${thirdparty.id}`;
       Logger.error(error);
-      // this.writeInRejectedFile(line, separator, error);
       return;
     }
 
-    //getAmount by Period and Workload
+    const prices = await this.pricesService.getPricesFromWorkload(workload, actualPeriod.type);
+    const rate = await this.currencyRateService.getCurrencyRateFromWorkloadAndPeriod(workload, actualPeriod.id);
+    const GLOBAL_CONST = this.constantService.GLOBAL_CONST;
+    if (!prices) {
+      Logger.error('Price not found with: ', JSON.stringify(workload), actualPeriod.type);
+      return;
+    }
 
-    const amountObject: Amount = {
-      keuros: 0,
-      keurossales: 0,
-      klocalcurrency: 0,
-      mandays: amount,
-      period: actualPeriod,
-      workload: workload,
-    };
+    const createdAmount = this.amountConverter.createAmountEntity(
+      parseInt(amount, 10),
+      GLOBAL_CONST.AMOUNT_UNITS.KLC,
+      rate.value,
+      prices.price,
+      prices.saleprice,
+    );
 
     const amountByPeriodAndWorkloadID = await this.amountsService.findOne({ period: actualPeriod, workload: workload });
     if (amountByPeriodAndWorkloadID) {
-      amountObject.id = amountByPeriodAndWorkloadID.id;
+      createdAmount.id = amountByPeriodAndWorkloadID.id;
     }
 
-    return this.amountsService.save(amountObject, { reload: false });
+    return this.amountsService.save(createdAmount, { reload: false });
   };
 
   endNosicaCallback = () => {

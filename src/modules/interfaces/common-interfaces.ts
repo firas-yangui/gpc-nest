@@ -129,3 +129,13 @@ export interface RabbitMQConnectAsyncOptions {
   useClass?: Type<any>;
   useFactory?: (...args: any[]) => Promise<RabbitMQConnectOptions> | RabbitMQConnectOptions;
 }
+
+export interface Workload {
+  id: number;
+  code?: string;
+  description?: string;
+  status?: string;
+  thirdpartyid?: string;
+  subnatureid?: string;
+  subserviceid?: string;
+}

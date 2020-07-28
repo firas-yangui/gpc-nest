@@ -1,5 +1,6 @@
 import { Column, Entity, Index, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
 import { Amount } from './../amounts/amount.entity';
+import { CurrencyRate } from './../currency-rate/currency-rate.entity';
 
 @Entity('period')
 @Index('period_code_uniqueness', ['code'], { unique: true })
@@ -64,4 +65,11 @@ export class Period {
     { onUpdate: 'CASCADE' },
   )
   amounts: Amount[];
+
+  @OneToMany(
+    () => CurrencyRate,
+    (currencyRate: CurrencyRate) => currencyRate.period,
+    { onUpdate: 'CASCADE' },
+  )
+  currencyrates: CurrencyRate[];
 }

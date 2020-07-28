@@ -1,6 +1,6 @@
-import { Injectable } from '@nestjs/common';
+import { Global } from '@nestjs/common';
 
-@Injectable()
+@Global()
 export class ConstantService {
   public GLOBAL_CONST = Object.freeze({
     AMOUNT_UNITS: Object.freeze({

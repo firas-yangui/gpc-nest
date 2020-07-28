@@ -11,12 +11,16 @@ import { PeriodsModule } from './../../../modules/periods/periods.module';
 import { WorkloadsModule } from './../../../modules/workloads/workloads.module';
 import { ThirdpartiesModule } from './../../../modules/thirdparties/thirdparties.module';
 import { ConstantsModule } from './../../constants/constants.module';
+import { CurrencyRateModule } from './../../currency-rate/currency-rate.module';
+import { PricesModule } from './../../prices/prices.module';
 
 @Module({
   imports: [
     AmountsModule,
     ConstantsModule,
+    CurrencyRateModule,
     PeriodsModule,
+    PricesModule,
     ThirdpartiesModule,
     ServicesModule,
     SubservicesModule,
