@@ -14,11 +14,18 @@ import { ConstantService } from './../../constants/constants';
 import { AmountConverter } from '../../amounts/amounts.converter';
 
 const nosicaField = {
-  sakarahCode: 'code_dept_local',
+  trigram: 'cds',
   year: 'fiscal_year',
   period: 'accounting_period',
-  NRG: 'sprias',
+  NRG: 'code_snrg',
   amount: 'ytd_amount_eur_currency_wi_adjust',
+};
+
+const cdsType = {
+  coo: 'RESG/BSC/COO',
+  dir: 'RESG/BSC/DIR',
+  fat: 'RESG/BSC/FAT',
+  PRF: 'RESG/BSC/PRF',
 };
 
 const serviceName = '%activité transverses BSC%';
@@ -44,12 +51,27 @@ export class CallbackNosicaParser {
     });
   };
 
+  private cdsToCsm = (cds: string) => {
+    switch (cds) {
+      case cdsType.coo:
+        return cdsType.coo.concat('/PRF');
+      case cdsType.fat:
+        return cdsType.coo.concat('/PRF');
+      case cdsType.PRF:
+        return cdsType.coo.concat('/PRF');
+      case cdsType.dir:
+        return cdsType.dir.concat('/DIR');
+      default:
+        return cds.concat('/COO');
+    }
+  };
+
   private writeInRejectedFile = (line: string, separator: string, error: string) => {
     writeStream.write(line.concat(separator, error));
   };
 
   nosicaCallback = async (line: Record<string, any>, separator: string) => {
-    const receivedSakarahCode = line[nosicaField.sakarahCode].trim();
+    const receivedTrigram = this.cdsToCsm(line[nosicaField.trigram].trim());
     const receivedYear = line[nosicaField.year].trim();
     const receivedNRGCode = line[nosicaField.NRG].trim();
     const receivedMonth = line[nosicaField.period].trim();
@@ -65,10 +87,10 @@ export class CallbackNosicaParser {
       return;
     }
 
-    const thirdparty: Thirdparty = await this.thirdpartiesService.findOne({ radical: Like(receivedSakarahCode) });
+    const thirdparty: Thirdparty = await this.thirdpartiesService.findOne({ trigram: Like(receivedTrigram) });
 
     if (!thirdparty) {
-      error = `No Thirdparty found for Sakarah Code : ${receivedSakarahCode}`;
+      error = `No Thirdparty found for Trigram Code : ${receivedTrigram}`;
       Logger.error(error);
       // this.writeInRejectedFile(line, separator, error);
       return;
