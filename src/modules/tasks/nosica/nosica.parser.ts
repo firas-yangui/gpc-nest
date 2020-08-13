@@ -1,7 +1,5 @@
-import { createReadStream, statSync, readdirSync } from 'fs';
 import csvParser = require('csv-parser');
 import { Injectable, Logger } from '@nestjs/common';
-import { map, sortBy } from 'lodash';
 import * as stringToStream from 'string-to-stream';
 
 import { CallbackNosicaParser } from './callback.nosica.parser';
@@ -12,6 +10,7 @@ import { PeriodsService } from './../../periods/periods.service';
 import { PricesService } from './../../prices/prices.service';
 import { AmountsService } from './../../amounts/amounts.service';
 import { SubservicesService } from './../../subservices/subservices.service';
+import { ServicesService } from './../../services/services.service';
 import { ConstantService } from './../../constants/constants';
 import { CurrencyRateService } from './../../currency-rate/currency-rate.service';
 
@@ -37,6 +36,7 @@ export class NosicaParser {
     private readonly workloadsService: WorkloadsService,
     private readonly periodsService: PeriodsService,
     private readonly amountsService: AmountsService,
+    private readonly servicesService: ServicesService,
     private readonly subservicesService: SubservicesService,
     private readonly constantService: ConstantService,
     private readonly amountConverter: AmountConverter,
@@ -48,7 +48,7 @@ export class NosicaParser {
     periodsService = new PeriodsService(new PeriodRepository());
     amountsService = new AmountsService(new AmountRepository());
     subservicesService = new SubservicesService(new SubServiceRepository());
-    workloadsService = new WorkloadsService(new WorkloadRepository(), thirdpartiesService, subservicesService, periodsService);
+    workloadsService = new WorkloadsService(new WorkloadRepository(), thirdpartiesService, servicesService, subservicesService, periodsService);
     amountConverter = new AmountConverter(constantService);
     pricesService = new PricesService(new PriceRepository());
     currencyRateService = new CurrencyRateService(new CurrencyRateRepository(), thirdpartiesService);

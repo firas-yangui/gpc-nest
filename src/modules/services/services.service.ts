@@ -12,4 +12,8 @@ export class ServicesService {
   async find(options: object = {}): Promise<Service[]> {
     return await this.serviceRepository.find(options);
   }
+
+  async findOne(options: object = {}): Promise<Service> {
+    return await this.serviceRepository.findOne(options);
+  }
 }

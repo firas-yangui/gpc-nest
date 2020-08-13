@@ -7,6 +7,7 @@ import { WorkloadsService } from '../../workloads/workloads.service';
 import { CallbackPyramidParser } from './callback.pyramid.parser';
 import { ThirdpartiesService } from '../../thirdparties/thirdparties.service';
 import { PeriodsService } from '../../periods/periods.service';
+import { ServicesService } from '../../services/services.service';
 import { SubservicesService } from '../../subservices/subservices.service';
 
 import { ThirdpartyRepository } from '../../thirdparties/thirdparties.repository';
@@ -21,12 +22,13 @@ export class PyramidParser {
     private readonly thirdpartiesService: ThirdpartiesService,
     private readonly workloadsService: WorkloadsService,
     private readonly periodsService: PeriodsService,
+    private readonly servicesService: ServicesService,
     private readonly subservicesService: SubservicesService,
   ) {
     thirdpartiesService = new ThirdpartiesService(new ThirdpartyRepository());
     periodsService = new PeriodsService(new PeriodRepository());
     subservicesService = new SubservicesService(new SubServiceRepository());
-    workloadsService = new WorkloadsService(new WorkloadRepository(), thirdpartiesService, subservicesService, periodsService);
+    workloadsService = new WorkloadsService(new WorkloadRepository(), thirdpartiesService, servicesService, subservicesService, periodsService);
     callbackPyramidParser = new CallbackPyramidParser(workloadsService);
   }
 
