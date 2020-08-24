@@ -21,7 +21,9 @@ export class TasksService implements OnModuleInit {
   };
 
   handleNosicaMessage = message => {
-    this.nosicaParser.parseNosicaLine(message.content.toString('utf8'));
+    let data: string = message.content.toString('utf8');
+    data = data.replace(/\|@\|/g, ';');
+    this.nosicaParser.parseNosicaLine(data);
   };
 
   public onModuleInit() {
