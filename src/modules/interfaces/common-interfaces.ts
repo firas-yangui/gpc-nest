@@ -28,6 +28,7 @@ export interface Service {
   name: string;
   lastupdatedate: string;
   description: string;
+  subservices: SubService[];
 }
 
 export interface SubService {

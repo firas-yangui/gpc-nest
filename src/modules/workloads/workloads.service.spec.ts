@@ -1,15 +1,15 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { Like, Repository } from 'typeorm';
-import { Logger } from '@nestjs/common';
-
 import { WorkloadsService } from './workloads.service';
 import { Workload } from './workload.entity';
 import { WorkloadRepository } from './workload.repository';
 import { ThirdpartiesService } from '../thirdparties/thirdparties.service';
+import { ServicesService } from '../services/services.service';
 import { SubservicesService } from '../subservices/subservices.service';
 import { PeriodsService } from '../periods/periods.service';
 
 const mockWorkloadRepositoryFindMock = jest.fn();
+const mockServicesServiceFindOneMock = jest.fn();
 const mockSubservicesServiceFindOneMock = jest.fn();
 const errorMock = jest.fn();
 
@@ -17,6 +17,9 @@ const mockWorkloadRepository = () => ({
   find: mockWorkloadRepositoryFindMock,
 });
 const mockThirdpartiesService = () => ({});
+const mockServicesService = () => ({
+  findOne: mockServicesServiceFindOneMock,
+});
 const mockSubservicesService = () => ({
   findOne: mockSubservicesServiceFindOneMock,
 });
@@ -28,6 +31,7 @@ const mockLogger = () => ({
 describe('WorkloadsService', () => {
   let workloadsService: WorkloadsService;
   let workloadRepository: Repository<Workload>;
+  let servicesService: ServicesService;
   let subservicesService: SubservicesService;
   let expectedWorkload;
   beforeEach(async () => {
@@ -43,6 +47,10 @@ describe('WorkloadsService', () => {
           useFactory: mockThirdpartiesService,
         },
         {
+          provide: ServicesService,
+          useFactory: mockServicesService,
+        },
+        {
           provide: SubservicesService,
           useFactory: mockSubservicesService,
         },
@@ -55,6 +63,7 @@ describe('WorkloadsService', () => {
 
     workloadsService = module.get<WorkloadsService>(WorkloadsService);
     workloadRepository = module.get<WorkloadRepository>(WorkloadRepository);
+    servicesService = module.get<ServicesService>(ServicesService);
     subservicesService = module.get<SubservicesService>(SubservicesService);
   });
 
@@ -82,23 +91,31 @@ describe('WorkloadsService', () => {
 
   describe('the getNosicaWorkloadInSubserviceName function', () => {
     const subserviceName = 'A_NOSICA_SUBSERVICE';
+    const service = {
+      id: 1,
+      name: 'a-service-name',
+      subservices: [
+        { id: 1, name: 'a-sub-service-name' },
+        { id: 2, name: 'a-sub-service-name' },
+      ],
+    };
     const subService = { id: 1, name: 'a-sub-service-name' };
-
     beforeEach(async () => {
-      mockSubservicesServiceFindOneMock.mockReturnValue(subService);
+      mockServicesServiceFindOneMock.mockReturnValue(service);
+      //mockSubservicesServiceFindOneMock.mockReturnValue(subService);
     });
 
     it('should find the subservice by name', async () => {
-      expect(subservicesService.findOne).not.toHaveBeenCalled();
-      // expect(workloadRepository.find).not.toHaveBeenCalled();
+      expect(servicesService.findOne).not.toHaveBeenCalled();
       const res = await workloadsService.getNosicaWorkloadInSubserviceName(subserviceName);
 
-      expect(subservicesService.findOne).toHaveBeenCalledWith({ name: Like(subserviceName) });
+      expect(servicesService.findOne).toHaveBeenCalledWith({ where: { name: Like(subserviceName) }, relations: ['subservices'] });
     });
 
     it('should found the subservice', async () => {
       const res = await workloadsService.getNosicaWorkloadInSubserviceName(subserviceName);
-      expect(mockSubservicesServiceFindOneMock.mock.results[0].value).toEqual(subService);
+      expect(mockServicesServiceFindOneMock.mock.results[0].value).toEqual(service);
+      //expect(mockSubservicesServiceFindOneMock.mock.results[0].value).toEqual(subService);
     });
 
     it('should find the workload with the right params', async () => {
@@ -107,7 +124,7 @@ describe('WorkloadsService', () => {
         where: {
           description: Like('%NOS_TRANS%'),
           subService: {
-            id: subService.id,
+            id: [1, 2],
           },
         },
       };

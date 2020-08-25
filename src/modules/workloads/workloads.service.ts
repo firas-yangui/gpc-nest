@@ -18,6 +18,7 @@ import {
 import { getConnection, Like } from 'typeorm';
 import { Workload } from './workload.entity';
 import { SubservicesService } from './../subservices/subservices.service';
+import { ServicesService } from './../services/services.service';
 
 @Injectable()
 export class WorkloadsService {
@@ -25,6 +26,7 @@ export class WorkloadsService {
     @InjectRepository(WorkloadRepository)
     private workloadRepository: WorkloadRepository,
     private readonly thirdpartiesService: ThirdpartiesService,
+    private readonly servicesService: ServicesService,
     private readonly subservicesService: SubservicesService,
     private readonly periodsService: PeriodsService,
   ) {}
@@ -59,17 +61,25 @@ export class WorkloadsService {
   }
 
   async getNosicaWorkloadInSubserviceName(subserviceName: string) {
-    const subService = await this.subservicesService.findOne({ name: Like(subserviceName) });
-    if (!subService) {
-      Logger.error(`subService not found by subServiceName: ${subserviceName}`);
+    const service = await this.servicesService.findOne({ where: { name: Like(subserviceName) }, relations: ['subservices'] });
+    if (!service) {
+      Logger.error(`No service called "${subserviceName}" found in database`);
       return;
     }
+
+    if (!service.subservices || service.subservices.length === 0) {
+      Logger.error(`No sub-services found in the "${subserviceName}" service`);
+      return;
+    }
+
+    const subServicesIds = _.map(service.subservices, 'id');
+
     return await this.find({
       relations: ['subservice', 'subnature', 'thirdparty'],
       where: {
         description: Like('%NOS_TRANS%'),
         subService: {
-          id: subService.id,
+          id: subServicesIds,
         },
       },
     });
