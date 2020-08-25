@@ -22,7 +22,9 @@ export class TasksService implements OnModuleInit {
 
   handleNosicaMessage = message => {
     let data: string = message.content.toString('utf8');
-    data = data.replace(/\|@\|/g, ';');
+    const separator = this.constantService.GLOBAL_CONST.QUEUE.NOSICA_QUEUE.ORIGIN_SEPARATOR;
+    const regex = new RegExp(separator, 'g');
+    data = data.replace(regex, ';');
     this.nosicaParser.parseNosicaLine(data);
   };
 

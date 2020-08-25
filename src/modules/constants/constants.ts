@@ -12,6 +12,7 @@ export class ConstantService {
     QUEUE: Object.freeze({
       PYRAMID_QUEUE: Object.freeze({
         NAME: 'PYRAMID',
+        ORIGIN_SEPARATOR: '\\|@\\|',
         SEPARATOR: ';',
         HEADER: [
           'Ressource_Staff_Type',
@@ -35,6 +36,7 @@ export class ConstantService {
       }),
       NOSICA_QUEUE: Object.freeze({
         NAME: 'NOSICA',
+        ORIGIN_SEPARATOR: '\\|@\\|',
         SEPARATOR: ';',
         HEADER: [
           'fiscal_year',
