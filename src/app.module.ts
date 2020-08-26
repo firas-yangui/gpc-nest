@@ -28,27 +28,33 @@ const options: SgConnectOptions = {
 /**
  * This is the main application module, which imports all the other modules.
  */
+
+const applicationModules = [
+  TypeOrmModule.forRoot(DbLoader),
+  ConfigurationModule,
+  ConstantsModule,
+  SgConnectModule.register(options),
+  TerminusModule.forRootAsync({
+    useClass: TerminusOptionsService,
+  }),
+  EmployeesModule,
+  UserModule,
+  NotificationsModule,
+  TransactionModule,
+  PeriodsModule,
+  AmountsModule,
+  WorkloadsModule,
+  SubnatureModule,
+  ThirdpartiesModule,
+  SubtypologiesModule,
+  ScheduleModule.forRoot(),
+];
+
+if (process.env.TASKS_MODULE_ENABLED) {
+  applicationModules.push(TasksModule);
+}
+
 @Module({
-  imports: [
-    TypeOrmModule.forRoot(DbLoader),
-    ConfigurationModule,
-    ConstantsModule,
-    SgConnectModule.register(options),
-    TerminusModule.forRootAsync({
-      useClass: TerminusOptionsService,
-    }),
-    EmployeesModule,
-    UserModule,
-    NotificationsModule,
-    TransactionModule,
-    PeriodsModule,
-    AmountsModule,
-    WorkloadsModule,
-    SubnatureModule,
-    ThirdpartiesModule,
-    SubtypologiesModule,
-    ScheduleModule.forRoot(),
-    TasksModule,
-  ],
+  imports: applicationModules,
 })
 export class AppModule {}

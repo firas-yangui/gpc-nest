@@ -2,6 +2,7 @@ import csvParser = require('csv-parser');
 import { Injectable, Logger } from '@nestjs/common';
 import * as stringToStream from 'string-to-stream';
 
+import { ResourceManager } from './resource-store';
 import { CallbackNosicaParser } from './callback.nosica.parser';
 import { ThirdpartiesService } from './../../thirdparties/thirdparties.service';
 import { SubnatureappsettingsService } from './../../subnatureappsettings/subnatureappsettings.service';
@@ -42,7 +43,9 @@ export class NosicaParser {
     private readonly amountConverter: AmountConverter,
     private readonly pricesService: PricesService,
     private readonly currencyRateService: CurrencyRateService,
+    private readonly resourceManager: ResourceManager,
   ) {
+    resourceManager = new ResourceManager();
     thirdpartiesService = new ThirdpartiesService(new ThirdpartyRepository());
     subnatureappsettingsService = new SubnatureappsettingsService(new SubNatureAppSettingsRepository());
     periodsService = new PeriodsService(new PeriodRepository());
@@ -62,6 +65,7 @@ export class NosicaParser {
       pricesService,
       currencyRateService,
       constantService,
+      resourceManager,
     );
   }
 
@@ -73,10 +77,10 @@ export class NosicaParser {
     return false;
   };
 
-  nosicaCallback = (data, separator) => this.callbackNosicaParser.nosicaCallback(data, separator);
+  nosicaCallback = (data, separator, metadata) => this.callbackNosicaParser.nosicaCallback(data, separator, metadata);
   endNosicaCallback = () => this.callbackNosicaParser.endNosicaCallback();
 
-  parseNosicaLine = (data: string) => {
+  parseNosicaLine = (data: string, metadata: object) => {
     const separator = this.constantService.GLOBAL_CONST.QUEUE.NOSICA_QUEUE.SEPARATOR;
     const header = this.constantService.GLOBAL_CONST.QUEUE.NOSICA_QUEUE.HEADER;
 
@@ -91,7 +95,7 @@ export class NosicaParser {
       .on('data', parsedData => {
         if (!(parsedData == null || typeof parsedData === 'undefined' || this.isHeader(parsedData))) {
           Logger.log('Data to parse: ', JSON.stringify(parsedData));
-          this.nosicaCallback(parsedData, separator);
+          this.nosicaCallback(parsedData, separator, metadata);
         }
       });
   };
