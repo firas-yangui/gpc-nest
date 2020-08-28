@@ -2,6 +2,8 @@ import { createWriteStream } from 'fs';
 import { Injectable, Logger } from '@nestjs/common';
 import { Like } from 'typeorm';
 
+import { ResourceManager } from './resource-store';
+
 import { ThirdpartiesService } from './../../../modules/thirdparties/thirdparties.service';
 import { WorkloadsService } from './../../../modules/workloads/workloads.service';
 import { SubnatureappsettingsService } from './../../../modules/subnatureappsettings/subnatureappsettings.service';
@@ -43,6 +45,7 @@ export class CallbackNosicaParser {
     private readonly pricesService: PricesService,
     private readonly currencyRateService: CurrencyRateService,
     private readonly constantService: ConstantService,
+    private readonly resourceManager: ResourceManager,
   ) {}
 
   private getWorkloadByNrgAndSakarah = (nosicaWorkloads: any[], SubnaturId, thirdpartyId) => {
@@ -70,7 +73,7 @@ export class CallbackNosicaParser {
     writeStream.write(line.concat(separator, error));
   };
 
-  nosicaCallback = async (line: Record<string, any>, separator: string) => {
+  nosicaCallback = async (line: Record<string, any>, separator: string, metadata: Record<string, any>) => {
     const receivedTrigram = this.cdsToCsm(line[nosicaField.trigram].trim());
     const receivedYear = line[nosicaField.year].trim();
     const receivedNRGCode = line[nosicaField.NRG].trim();
@@ -133,7 +136,7 @@ export class CallbackNosicaParser {
       Logger.warn(`Price not found with: ${JSON.stringify(workload)} and period type ${actualPeriod.type}`);
     }
 
-    const createdAmount = this.amountConverter.createAmountEntity(
+    let createdAmount = this.amountConverter.createAmountEntity(
       parseInt(amount, 10),
       GLOBAL_CONST.AMOUNT_UNITS.KLC,
       rate.value,
@@ -148,6 +151,21 @@ export class CallbackNosicaParser {
 
     createdAmount.workload = workload;
     createdAmount.period = actualPeriod;
+
+    if (metadata.isFirst) {
+      this.resourceManager.reset();
+    }
+
+    if (!this.resourceManager.exists(workload)) {
+      this.resourceManager.add(workload);
+      return this.amountsService.save(createdAmount, { reload: false });
+    }
+    try {
+      createdAmount = this.amountConverter.sum(createdAmount, amountByPeriodAndWorkloadID);
+    } catch (error) {
+      Logger.error(error);
+      return;
+    }
     return this.amountsService.save(createdAmount, { reload: false });
   };
 
