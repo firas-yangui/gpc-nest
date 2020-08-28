@@ -21,11 +21,11 @@ export class TasksService implements OnModuleInit {
   };
 
   handleNosicaMessage = message => {
-    let data: string = message.content.toString('utf8');
+    const data = JSON.parse(message.content.toString('utf8'));
     const separator = this.constantService.GLOBAL_CONST.QUEUE.NOSICA_QUEUE.ORIGIN_SEPARATOR;
     const regex = new RegExp(separator, 'g');
-    data = data.replace(regex, ';');
-    this.nosicaParser.parseNosicaLine(data);
+    const line = data.line.replace(regex, ';');
+    this.nosicaParser.parseNosicaLine(line, data.metadata);
   };
 
   public onModuleInit() {

@@ -60,7 +60,11 @@ export class WorkloadsService {
     return await this.workloadRepository.find(options);
   }
 
-  async getNosicaWorkloadInSubserviceName(subserviceName: string) {
+  async findOne(options: object = {}): Promise<Workload> {
+    return await this.workloadRepository.findOne(options);
+  }
+
+  async getNosicaWorkloadInSubserviceName(subserviceName: string, thirdpartyId: number, subnatureId: number) {
     const service = await this.servicesService.findOne({ where: { name: Like(subserviceName) }, relations: ['subservices'] });
     if (!service) {
       Logger.error(`No service called "${subserviceName}" found in database`);
@@ -73,19 +77,22 @@ export class WorkloadsService {
     }
 
     const subServicesIds = _.map(service.subservices, 'id');
-
-    return await this.find({
+    return await this.findOne({
       relations: ['subservice', 'subnature', 'thirdparty'],
       where: {
-        description: Like('%NOS_TRANS%'),
-        subService: {
-          id: subServicesIds,
+        thirdparty: {
+          id: thirdpartyId,
         },
+        subnature: {
+          id: subnatureId,
+        },
+        // subservice: {
+        //   id: subServicesIds,
+        // },
       },
     });
   }
 
-  // , subservice: subService.id
   async update(criteria: any, partialEntity: any): Promise<UpdateResult> {
     return await this.workloadRepository.update(criteria, partialEntity);
   }

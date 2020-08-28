@@ -2,6 +2,8 @@ import { createWriteStream } from 'fs';
 import { Injectable, Logger } from '@nestjs/common';
 import { Like } from 'typeorm';
 
+import { ResourceManager } from './resource-store';
+
 import { ThirdpartiesService } from './../../../modules/thirdparties/thirdparties.service';
 import { WorkloadsService } from './../../../modules/workloads/workloads.service';
 import { SubnatureappsettingsService } from './../../../modules/subnatureappsettings/subnatureappsettings.service';
@@ -43,13 +45,8 @@ export class CallbackNosicaParser {
     private readonly pricesService: PricesService,
     private readonly currencyRateService: CurrencyRateService,
     private readonly constantService: ConstantService,
+    private readonly resourceManager: ResourceManager,
   ) {}
-
-  private getWorkloadByNrgAndSakarah = (nosicaWorkloads: any[], SubnaturId, thirdpartyId) => {
-    return nosicaWorkloads.find(nosicaWorkload => {
-      return nosicaWorkload.thirdparty.id === thirdpartyId && nosicaWorkload.subnature.id === SubnaturId;
-    });
-  };
 
   private cdsToCsm = (cds: string) => {
     switch (cds) {
@@ -70,7 +67,7 @@ export class CallbackNosicaParser {
     writeStream.write(line.concat(separator, error));
   };
 
-  nosicaCallback = async (line: Record<string, any>, separator: string) => {
+  nosicaCallback = async (line: Record<string, any>, separator: string, metadata: Record<string, any>) => {
     const receivedTrigram = this.cdsToCsm(line[nosicaField.trigram].trim());
     const receivedYear = line[nosicaField.year].trim();
     const receivedNRGCode = line[nosicaField.NRG].trim();
@@ -78,12 +75,11 @@ export class CallbackNosicaParser {
     const amount = line[nosicaField.amount].trim();
     let error = '';
 
-    const nosicaWorkloads = await this.workloadsService.getNosicaWorkloadInSubserviceName(serviceName);
-    if (!nosicaWorkloads || !nosicaWorkloads.length) {
-      error = 'No Nosica workload found in database, exit the script.';
+    const actualPeriod = await this.periodsService.findOne({ where: { year: receivedYear, month: receivedMonth, type: PeriodType.actual } });
+    if (!actualPeriod) {
+      error = `No Period found with year  ${receivedYear} and month ${receivedMonth} and type ${PeriodType.actual}`;
       Logger.error(error);
-      // this.writeInRejectedFile('Global rejection', separator, error);
-      // writeStream.end();
+      // reject all lines and exit
       return;
     }
 
@@ -102,24 +98,20 @@ export class CallbackNosicaParser {
     if (!subnatureappsetting) {
       error = `No Subnature found with NRG Code : ${receivedNRGCode}`;
       Logger.error(error);
-
       return;
     }
 
-    const actualPeriod = await this.periodsService.findOne({ where: { year: receivedYear, month: receivedMonth, type: PeriodType.actual } });
-    if (!actualPeriod) {
-      error = `No Period found with year  ${receivedYear} and month ${receivedMonth} and type ${PeriodType.actual}`;
-      Logger.error(error);
-
-      return;
-    }
-
-    const workload = this.getWorkloadByNrgAndSakarah(nosicaWorkloads, subnatureappsetting.subnature.id, thirdparty.id);
+    const workload = await this.workloadsService.getNosicaWorkloadInSubserviceName(serviceName, thirdparty.id, subnatureappsetting.subnature.id);
     if (!workload) {
-      error = `No workload match with subnature ID   ${subnatureappsetting.subnature.id} and thirdparty ID ${thirdparty.id}`;
+      error = `No workload match with subnature ID ${subnatureappsetting.subnature.id} - nrgCode "${subnatureappsetting.nrgcode}" and thirdparty ID ${thirdparty.id} - Thirdparty Name "${thirdparty.name}"`;
       Logger.error(error);
       return;
     }
+    Logger.log(
+      `Workload found with subnature ID ${subnatureappsetting.subnature.id} - nrgCode "${subnatureappsetting.nrgcode}" and thirdparty ID ${
+        thirdparty.id
+      } - Thirdparty Name "${thirdparty.name}": ${JSON.stringify(workload)}`,
+    );
 
     const prices = await this.pricesService.getPricesFromWorkload(workload, actualPeriod.type);
     const rate = await this.currencyRateService.getCurrencyRateFromWorkloadAndPeriod(workload, actualPeriod.id);
@@ -133,7 +125,7 @@ export class CallbackNosicaParser {
       Logger.warn(`Price not found with: ${JSON.stringify(workload)} and period type ${actualPeriod.type}`);
     }
 
-    const createdAmount = this.amountConverter.createAmountEntity(
+    let createdAmount = this.amountConverter.createAmountEntity(
       parseInt(amount, 10),
       GLOBAL_CONST.AMOUNT_UNITS.KLC,
       rate.value,
@@ -141,13 +133,30 @@ export class CallbackNosicaParser {
       salePrice,
     );
 
-    const amountByPeriodAndWorkloadID = await this.amountsService.findOne({ period: actualPeriod, workload: workload });
+    const amountByPeriodAndWorkloadID = await this.amountsService.findOne({ where: { period: actualPeriod, workload: workload } });
     if (amountByPeriodAndWorkloadID) {
       createdAmount.id = amountByPeriodAndWorkloadID.id;
     }
 
     createdAmount.workload = workload;
     createdAmount.period = actualPeriod;
+
+    if (metadata.isFirst) {
+      this.resourceManager.reset();
+    }
+
+    if (!this.resourceManager.exists(workload.id.toString())) {
+      this.resourceManager.add(workload.id.toString());
+      Logger.log(`amount saved with success for workload "${workload.code}" and period "${actualPeriod.code}"`);
+      return this.amountsService.save(createdAmount, { reload: false });
+    }
+    try {
+      createdAmount = this.amountConverter.sum(createdAmount, amountByPeriodAndWorkloadID);
+    } catch (error) {
+      Logger.error(error);
+      return;
+    }
+    Logger.log(`amount saved with success for workload "${workload.code}" and period "${actualPeriod.code}"`);
     return this.amountsService.save(createdAmount, { reload: false });
   };
 

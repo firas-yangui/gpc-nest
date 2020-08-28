@@ -10,6 +10,21 @@ export class AmountConverter {
 
   constructor(private readonly constantService: ConstantService) {}
 
+  sum = (amountA, amountB) => {
+    if (!amountA || !amountB) {
+      throw new Error(`amount not found`);
+    }
+
+    const amount = { ...amountA };
+    const AMOUNT_UNITS = this.constantService.GLOBAL_CONST.AMOUNT_UNITS;
+
+    Object.values(AMOUNT_UNITS).forEach(unit => {
+      if (amountB[unit]) amount[unit] = amount[unit] + amountB[unit];
+    });
+
+    return amount;
+  };
+
   multiply = (value, multiplier) => {
     if (isNumber(value) && isNumber(multiplier)) {
       return value * multiplier;

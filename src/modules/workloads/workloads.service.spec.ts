@@ -14,7 +14,7 @@ const mockSubservicesServiceFindOneMock = jest.fn();
 const errorMock = jest.fn();
 
 const mockWorkloadRepository = () => ({
-  find: mockWorkloadRepositoryFindMock,
+  findOne: mockWorkloadRepositoryFindMock,
 });
 const mockThirdpartiesService = () => ({});
 const mockServicesService = () => ({
@@ -77,15 +77,15 @@ describe('WorkloadsService', () => {
   });
 
   it('should call find from the repository', () => {
-    expect(workloadRepository.find).not.toHaveBeenCalled();
-    workloadsService.find({});
-    expect(workloadRepository.find).toHaveBeenCalled();
+    expect(workloadRepository.findOne).not.toHaveBeenCalled();
+    workloadsService.findOne({});
+    expect(workloadRepository.findOne).toHaveBeenCalled();
   });
 
   it('should return the value from the repository', async () => {
-    const res = await workloadsService.find({});
+    const res = await workloadsService.findOne({});
 
-    expect(workloadRepository.find).toHaveBeenCalled();
+    expect(workloadRepository.findOne).toHaveBeenCalled();
     expect(res).toEqual(expectedWorkload);
   });
 
@@ -107,30 +107,35 @@ describe('WorkloadsService', () => {
 
     it('should find the subservice by name', async () => {
       expect(servicesService.findOne).not.toHaveBeenCalled();
-      const res = await workloadsService.getNosicaWorkloadInSubserviceName(subserviceName);
+      const res = await workloadsService.getNosicaWorkloadInSubserviceName(subserviceName, 1, 1);
 
       expect(servicesService.findOne).toHaveBeenCalledWith({ where: { name: Like(subserviceName) }, relations: ['subservices'] });
     });
 
     it('should found the subservice', async () => {
-      const res = await workloadsService.getNosicaWorkloadInSubserviceName(subserviceName);
+      const res = await workloadsService.getNosicaWorkloadInSubserviceName(subserviceName, 1, 1);
       expect(mockServicesServiceFindOneMock.mock.results[0].value).toEqual(service);
       //expect(mockSubservicesServiceFindOneMock.mock.results[0].value).toEqual(subService);
     });
 
-    it('should find the workload with the right params', async () => {
+    it('should find One the workload with the right params', async () => {
       const expectedFindCallParams = {
         relations: ['subservice', 'subnature', 'thirdparty'],
         where: {
-          description: Like('%NOS_TRANS%'),
-          subService: {
-            id: [1, 2],
+          thirdparty: {
+            id: 1,
           },
+          subnature: {
+            id: 1,
+          },
+          // subservice: {
+          //   id: [1, 2],
+          // },
         },
       };
 
-      const res = await workloadsService.getNosicaWorkloadInSubserviceName(subserviceName);
-      expect(workloadRepository.find).toHaveBeenCalledWith(expectedFindCallParams);
+      const res = await workloadsService.getNosicaWorkloadInSubserviceName(subserviceName, 1, 1);
+      expect(workloadRepository.findOne).toHaveBeenCalledWith(expectedFindCallParams);
     });
   });
 });

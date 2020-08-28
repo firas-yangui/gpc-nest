@@ -2,7 +2,7 @@ import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn } 
 import { Thirdparty } from './../thirdparties/thirdparty.entity';
 import { SubNature } from './../subnature/subnature.entity';
 
-@Entity('price', { schema: 'public' })
+@Entity('price')
 @Index('price_unicity', ['periodtype', 'subnature', 'thirdparty'], { unique: true })
 export class Price {
   @PrimaryGeneratedColumn({
