@@ -72,7 +72,7 @@ export class CallbackNosicaParser {
     const receivedYear = line[nosicaField.year].trim();
     const receivedNRGCode = line[nosicaField.NRG].trim();
     const receivedMonth = line[nosicaField.period].trim();
-    const amount = line[nosicaField.amount].trim();
+    let amount = line[nosicaField.amount].trim();
     let error = '';
 
     const actualPeriod = await this.periodsService.findOne({ where: { year: receivedYear, month: receivedMonth, type: PeriodType.actual } });
@@ -82,6 +82,15 @@ export class CallbackNosicaParser {
       // reject all lines and exit
       return;
     }
+
+    if (!amount || !Number(amount)) {
+      error = `No amount defined for this line :${line}`;
+      Logger.error(error);
+      // reject line
+      return;
+    }
+    // convert euro to Keuro
+    amount = amount / 1000;
 
     const thirdparty: Thirdparty = await this.thirdpartiesService.findOne({ name: Like(receivedTrigram) });
     if (!thirdparty) {
