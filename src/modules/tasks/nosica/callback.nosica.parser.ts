@@ -14,6 +14,7 @@ import { PricesService } from './../../prices/prices.service';
 import { CurrencyRateService } from './../../currency-rate/currency-rate.service';
 import { ConstantService } from './../../constants/constants';
 import { AmountConverter } from '../../amounts/amounts.converter';
+import { Period } from 'src/modules/periods/period.entity';
 
 const nosicaField = {
   trigram: 'cds',
@@ -75,13 +76,19 @@ export class CallbackNosicaParser {
     let amount = line[nosicaField.amount].trim();
     let error = '';
 
-    const actualPeriod = await this.periodsService.findOne({ where: { year: receivedYear, month: receivedMonth, type: PeriodType.actual } });
-    if (!actualPeriod) {
+    const actualPeriodAppSettings = await this.periodsService.findOneInAppSettings(this.constantService.GLOBAL_CONST.SCOPES.BSC, {
+      year: receivedYear,
+      month: receivedMonth,
+      type: PeriodType.actual,
+    });
+    if (!actualPeriodAppSettings) {
       error = `No Period found with year  ${receivedYear} and month ${receivedMonth} and type ${PeriodType.actual}`;
       Logger.error(error);
       // reject all lines and exit
       return;
     }
+
+    const actualPeriod = actualPeriodAppSettings.period;
 
     if (!amount || !Number(amount)) {
       error = `No amount defined for this line :${line}`;

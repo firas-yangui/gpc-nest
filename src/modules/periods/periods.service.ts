@@ -3,7 +3,7 @@ import { PeriodRepository } from './period.repository';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PeriodType } from './../interfaces/common-interfaces';
 import { Period } from './period.entity';
-import { Like } from 'typeorm';
+import { createQueryBuilder, Like } from 'typeorm';
 import * as moment from 'moment';
 
 @Injectable()
@@ -21,8 +21,14 @@ export class PeriodsService {
     return await this.periodRepository.find(options);
   }
 
-  async findOne(options: object): Promise<Period> {
-    return await this.periodRepository.findOne(options);
+  async findOneInAppSettings(appSettings: number, options: any): Promise<any> {
+    return await createQueryBuilder('periodappsettings', 'pas')
+      .leftJoinAndSelect('pas.period', 'p')
+      .where('pas.gpcappsettingsid = :gpcappsettingsid', { gpcappsettingsid: appSettings })
+      .andWhere('p.type = :type', { type: options.type })
+      .andWhere('p.year = :year', { year: options.year })
+      .andWhere('p.month = :month', { month: options.month })
+      .getOne();
   }
 
   async getPeriodsByType(type: PeriodType): Promise<Period[]> {
