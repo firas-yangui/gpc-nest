@@ -14,7 +14,6 @@ import { PricesService } from './../../prices/prices.service';
 import { CurrencyRateService } from './../../currency-rate/currency-rate.service';
 import { ConstantService } from './../../constants/constants';
 import { AmountConverter } from '../../amounts/amounts.converter';
-import { Period } from 'src/modules/periods/period.entity';
 
 const nosicaField = {
   trigram: 'cds',
@@ -68,13 +67,17 @@ export class CallbackNosicaParser {
     writeStream.write(line.concat(separator, error));
   };
 
-  nosicaCallback = async (line: Record<string, any>, separator: string, metadata: Record<string, any>) => {
+  nosicaCallback = async (line: Record<string, any>, separator: string, metadata: Record<string, any>): Promise<Record<string, any>> => {
     const receivedTrigram = this.cdsToCsm(line[nosicaField.trigram].trim());
     const receivedYear = line[nosicaField.year].trim();
     const receivedNRGCode = line[nosicaField.NRG].trim();
     const receivedMonth = line[nosicaField.period].trim();
     let amount = line[nosicaField.amount].trim();
     let error = '';
+
+    if (metadata.isFirst) {
+      this.resourceManager.reset();
+    }
 
     const actualPeriodAppSettings = await this.periodsService.findOneInAppSettings(this.constantService.GLOBAL_CONST.SCOPES.BSC, {
       year: receivedYear,
@@ -91,10 +94,14 @@ export class CallbackNosicaParser {
     const actualPeriod = actualPeriodAppSettings.period;
 
     if (!amount || !Number(amount)) {
-      error = `No amount defined for this line :${line}`;
+      error = `No amount defined for this line :${JSON.stringify(line)}`;
       Logger.error(error);
       // reject line
       return;
+    }
+
+    if (amount < 0) {
+      amount = amount * -1;
     }
     // convert euro to Keuro
     amount = amount / 1000;
@@ -108,7 +115,7 @@ export class CallbackNosicaParser {
     }
 
     const subnatureappsetting = await this.subnatureappsettingsService.findOne({
-      where: { nrgcode: Like(receivedNRGCode), gpcappsettingsid: 2 },
+      where: { nrgcode: Like(`%${receivedNRGCode}%`), gpcappsettingsid: this.constantService.GLOBAL_CONST.SCOPES.BSC },
       relations: ['subnature'],
     });
     if (!subnatureappsetting) {
@@ -138,41 +145,23 @@ export class CallbackNosicaParser {
       costPrice = prices.price;
       salePrice = prices.saleprice;
     } else {
-      Logger.warn(`Price not found with: ${JSON.stringify(workload)} and period type ${actualPeriod.type}`);
+      Logger.warn(`Price not found with: ${workload.code} and period type ${actualPeriod.type}`);
     }
 
-    let createdAmount = this.amountConverter.createAmountEntity(
-      parseInt(amount, 10),
-      GLOBAL_CONST.AMOUNT_UNITS.KLC,
-      rate.value,
-      costPrice,
-      salePrice,
-    );
+    let createdAmount = this.amountConverter.createAmountEntity(parseFloat(amount), GLOBAL_CONST.AMOUNT_UNITS.KLC, rate.value, costPrice, salePrice);
 
-    const amountByPeriodAndWorkloadID = await this.amountsService.findOne({ where: { period: actualPeriod, workload: workload } });
-    if (amountByPeriodAndWorkloadID) {
-      createdAmount.id = amountByPeriodAndWorkloadID.id;
+    createdAmount = { ...createdAmount, workload: workload, period: actualPeriod };
+    // console.log('created Amount ....> ', createdAmount);
+    const existingAmount = await this.amountsService.findOne({ where: { period: actualPeriod, workload: workload } });
+    if (existingAmount) {
+      createdAmount.id = existingAmount.id;
+      if (this.resourceManager.exists(workload.id.toString())) {
+        createdAmount = this.amountConverter.sum(createdAmount, existingAmount);
+      }
     }
 
-    createdAmount.workload = workload;
-    createdAmount.period = actualPeriod;
-
-    if (metadata.isFirst) {
-      this.resourceManager.reset();
-    }
-
-    if (!this.resourceManager.exists(workload.id.toString())) {
-      this.resourceManager.add(workload.id.toString());
-      Logger.log(`amount saved with success for workload "${workload.code}" and period "${actualPeriod.code}"`);
-      return this.amountsService.save(createdAmount, { reload: false });
-    }
-    try {
-      createdAmount = this.amountConverter.sum(createdAmount, amountByPeriodAndWorkloadID);
-    } catch (error) {
-      Logger.error(error);
-      return;
-    }
     Logger.log(`amount saved with success for workload "${workload.code}" and period "${actualPeriod.code}"`);
+    this.resourceManager.add(workload.id.toString());
     return this.amountsService.save(createdAmount, { reload: false });
   };
 
