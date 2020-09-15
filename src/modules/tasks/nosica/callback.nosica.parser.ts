@@ -27,6 +27,7 @@ const cdsType = {
   coo: 'RESG/BSC/COO',
   dir: 'RESG/BSC/DIR',
   fat: 'RESG/BSC/FAT',
+  fae: 'RESG/BSC/FAE',
   PRF: 'RESG/BSC/PRF',
 };
 
@@ -53,6 +54,8 @@ export class CallbackNosicaParser {
       case cdsType.coo:
         return cdsType.coo.concat('/PRF');
       case cdsType.fat:
+        return cdsType.coo.concat('/PRF');
+      case cdsType.fae:
         return cdsType.coo.concat('/PRF');
       case cdsType.PRF:
         return cdsType.coo.concat('/PRF');
@@ -100,11 +103,7 @@ export class CallbackNosicaParser {
       return;
     }
 
-    if (amount < 0) {
-      amount = amount * -1;
-    }
-    // convert euro to Keuro
-    amount = amount / 1000;
+    amount = (amount * -1) / 1000;
 
     const thirdparty: Thirdparty = await this.thirdpartiesService.findOne({ name: Like(receivedTrigram) });
     if (!thirdparty) {
