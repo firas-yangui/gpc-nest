@@ -78,7 +78,8 @@ export class CallbackNosicaParser {
     let amount = line[nosicaField.amount].trim();
     let error = '';
 
-    if (metadata.isFirst) {
+    // is the first line after the header
+    if (metadata.lineNumber == 1) {
       this.resourceManager.reset();
     }
 
@@ -150,7 +151,6 @@ export class CallbackNosicaParser {
     let createdAmount = this.amountConverter.createAmountEntity(parseFloat(amount), GLOBAL_CONST.AMOUNT_UNITS.KLC, rate.value, costPrice, salePrice);
 
     createdAmount = { ...createdAmount, workload: workload, period: actualPeriod };
-    // console.log('created Amount ....> ', createdAmount);
     const existingAmount = await this.amountsService.findOne({ where: { period: actualPeriod, workload: workload } });
     if (existingAmount) {
       createdAmount.id = existingAmount.id;
