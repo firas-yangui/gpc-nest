@@ -15,7 +15,7 @@ export class AmqplibService {
     process.env.NODE_ENV == 'development'
       ? (options = {})
       : (options = {
-          ca: readFileSync('/data/ca-certificate'),
+          ca: readFileSync('/config/ca-certificate'),
         });
 
     return this._amqplibClient ? this._amqplibClient : (this._amqplibClient = await connect(this._amqplibConnectOptions, options));
