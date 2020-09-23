@@ -46,11 +46,15 @@ export class TasksService implements OnModuleInit {
             }),
           ),
           channel.assertQueue(this.constantService.GLOBAL_CONST.QUEUE.NOSICA_QUEUE.NAME).then(ok =>
-            channel.consume(this.constantService.GLOBAL_CONST.QUEUE.NOSICA_QUEUE.NAME, msg => {
-              if (msg !== null) {
-                this.handleNosicaMessage(msg);
-                channel.ack(msg);
-              }
+            channel.prefetch(1).then(() => {
+              channel.consume(this.constantService.GLOBAL_CONST.QUEUE.NOSICA_QUEUE.NAME, msg => {
+                if (msg !== null) {
+                  this.handleNosicaMessage(msg);
+                  setTimeout(() => {
+                    channel.ack(msg);
+                  }, 100);
+                }
+              });
             }),
           ),
         ]);

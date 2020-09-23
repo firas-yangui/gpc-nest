@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { includes } from 'lodash';
 
 @Injectable()
 export class ResourceManager {
@@ -13,7 +14,7 @@ export class ResourceManager {
   };
 
   exists = (resourceId: string) => {
-    return this.resourceIds[resourceId];
+    return includes(this.resourceIds, resourceId);
   };
 
   reset = () => {

@@ -9,6 +9,10 @@ export class ConstantService {
       KEURO_SALES: 'keurossales',
       MD: 'mandays',
     }),
+    SCOPES: Object.freeze({
+      IRBS: 1,
+      BSC: 2,
+    }),
     QUEUE: Object.freeze({
       PYRAMID_QUEUE: Object.freeze({
         NAME: 'PYRAMID',

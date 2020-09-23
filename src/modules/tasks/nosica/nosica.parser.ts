@@ -25,6 +25,7 @@ import { PriceRepository } from './../../prices/prices.repository';
 import { CurrencyRateRepository } from './../../currency-rate/currency-rate.repository';
 
 import { SubServiceRepository } from './../../subservices/subservices.repository';
+import { async } from 'rxjs/internal/scheduler/async';
 
 @Injectable()
 export class NosicaParser {
@@ -77,7 +78,7 @@ export class NosicaParser {
     return false;
   };
 
-  nosicaCallback = (data, separator, metadata) => this.callbackNosicaParser.nosicaCallback(data, separator, metadata);
+  nosicaCallback = async (data, separator, metadata) => await this.callbackNosicaParser.nosicaCallback(data, separator, metadata);
   endNosicaCallback = () => this.callbackNosicaParser.endNosicaCallback();
 
   parseNosicaLine = (data: string, metadata: object) => {
@@ -92,10 +93,10 @@ export class NosicaParser {
           headers: header,
         }),
       )
-      .on('data', parsedData => {
+      .on('data', async parsedData => {
         if (!(parsedData == null || typeof parsedData === 'undefined' || this.isHeader(parsedData))) {
           Logger.log('Data to parse: ', JSON.stringify(parsedData));
-          this.nosicaCallback(parsedData, separator, metadata);
+          await this.nosicaCallback(parsedData, separator, metadata);
         }
       });
   };

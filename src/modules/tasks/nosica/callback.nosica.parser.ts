@@ -27,6 +27,7 @@ const cdsType = {
   coo: 'RESG/BSC/COO',
   dir: 'RESG/BSC/DIR',
   fat: 'RESG/BSC/FAT',
+  fae: 'RESG/BSC/FAE',
   PRF: 'RESG/BSC/PRF',
 };
 
@@ -48,17 +49,13 @@ export class CallbackNosicaParser {
     private readonly resourceManager: ResourceManager,
   ) {}
 
-  private getWorkloadByNrgAndSakarah = (nosicaWorkloads: any[], SubnaturId, thirdpartyId) => {
-    return nosicaWorkloads.find(nosicaWorkload => {
-      return nosicaWorkload.thirdparty.id === thirdpartyId && nosicaWorkload.subnature.id === SubnaturId;
-    });
-  };
-
   private cdsToCsm = (cds: string) => {
     switch (cds) {
       case cdsType.coo:
         return cdsType.coo.concat('/PRF');
       case cdsType.fat:
+        return cdsType.coo.concat('/PRF');
+      case cdsType.fae:
         return cdsType.coo.concat('/PRF');
       case cdsType.PRF:
         return cdsType.coo.concat('/PRF');
@@ -73,22 +70,41 @@ export class CallbackNosicaParser {
     writeStream.write(line.concat(separator, error));
   };
 
-  nosicaCallback = async (line: Record<string, any>, separator: string, metadata: Record<string, any>) => {
+  nosicaCallback = async (line: Record<string, any>, separator: string, metadata: Record<string, any>): Promise<Record<string, any>> => {
     const receivedTrigram = this.cdsToCsm(line[nosicaField.trigram].trim());
     const receivedYear = line[nosicaField.year].trim();
     const receivedNRGCode = line[nosicaField.NRG].trim();
     const receivedMonth = line[nosicaField.period].trim();
-    const amount = line[nosicaField.amount].trim();
+    let amount = line[nosicaField.amount].trim();
     let error = '';
 
-    const nosicaWorkloads = await this.workloadsService.getNosicaWorkloadInSubserviceName(serviceName);
-    if (!nosicaWorkloads || !nosicaWorkloads.length) {
-      error = 'No Nosica workload found in database, exit the script.';
+    // is the first line after the header
+    if (metadata.lineNumber == 1) {
+      this.resourceManager.reset();
+    }
+
+    const actualPeriodAppSettings = await this.periodsService.findOneInAppSettings(this.constantService.GLOBAL_CONST.SCOPES.BSC, {
+      year: receivedYear,
+      month: receivedMonth,
+      type: PeriodType.actual,
+    });
+    if (!actualPeriodAppSettings) {
+      error = `No Period found with year  ${receivedYear} and month ${receivedMonth} and type ${PeriodType.actual}`;
       Logger.error(error);
-      // this.writeInRejectedFile('Global rejection', separator, error);
-      // writeStream.end();
+      // reject all lines and exit
       return;
     }
+
+    const actualPeriod = actualPeriodAppSettings.period;
+
+    if (!amount || !Number(amount)) {
+      error = `No amount defined for this line :${JSON.stringify(line)}`;
+      Logger.error(error);
+      // reject line
+      return;
+    }
+
+    amount = (amount * -1) / 1000;
 
     const thirdparty: Thirdparty = await this.thirdpartiesService.findOne({ name: Like(receivedTrigram) });
     if (!thirdparty) {
@@ -99,30 +115,26 @@ export class CallbackNosicaParser {
     }
 
     const subnatureappsetting = await this.subnatureappsettingsService.findOne({
-      where: { nrgcode: Like(receivedNRGCode), gpcappsettingsid: 2 },
+      where: { nrgcode: Like(`%${receivedNRGCode}%`), gpcappsettingsid: this.constantService.GLOBAL_CONST.SCOPES.BSC },
       relations: ['subnature'],
     });
     if (!subnatureappsetting) {
       error = `No Subnature found with NRG Code : ${receivedNRGCode}`;
       Logger.error(error);
-
       return;
     }
 
-    const actualPeriod = await this.periodsService.findOne({ where: { year: receivedYear, month: receivedMonth, type: PeriodType.actual } });
-    if (!actualPeriod) {
-      error = `No Period found with year  ${receivedYear} and month ${receivedMonth} and type ${PeriodType.actual}`;
-      Logger.error(error);
-
-      return;
-    }
-
-    const workload = this.getWorkloadByNrgAndSakarah(nosicaWorkloads, subnatureappsetting.subnature.id, thirdparty.id);
+    const workload = await this.workloadsService.getNosicaWorkloadInSubserviceName(serviceName, thirdparty.id, subnatureappsetting.subnature.id);
     if (!workload) {
-      error = `No workload match with subnature ID   ${subnatureappsetting.subnature.id} and thirdparty ID ${thirdparty.id}`;
+      error = `No workload match with subnature ID ${subnatureappsetting.subnature.id} - nrgCode "${subnatureappsetting.nrgcode}" and thirdparty ID ${thirdparty.id} - Thirdparty Name "${thirdparty.name}"`;
       Logger.error(error);
       return;
     }
+    Logger.log(
+      `Workload found with subnature ID ${subnatureappsetting.subnature.id} - nrgCode "${subnatureappsetting.nrgcode}" and thirdparty ID ${
+        thirdparty.id
+      } - Thirdparty Name "${thirdparty.name}": ${JSON.stringify(workload)}`,
+    );
 
     const prices = await this.pricesService.getPricesFromWorkload(workload, actualPeriod.type);
     const rate = await this.currencyRateService.getCurrencyRateFromWorkloadAndPeriod(workload, actualPeriod.id);
@@ -133,39 +145,22 @@ export class CallbackNosicaParser {
       costPrice = prices.price;
       salePrice = prices.saleprice;
     } else {
-      Logger.warn(`Price not found with: ${JSON.stringify(workload)} and period type ${actualPeriod.type}`);
+      Logger.warn(`Price not found with: ${workload.code} and period type ${actualPeriod.type}`);
     }
 
-    let createdAmount = this.amountConverter.createAmountEntity(
-      parseInt(amount, 10),
-      GLOBAL_CONST.AMOUNT_UNITS.KLC,
-      rate.value,
-      costPrice,
-      salePrice,
-    );
+    let createdAmount = this.amountConverter.createAmountEntity(parseFloat(amount), GLOBAL_CONST.AMOUNT_UNITS.KLC, rate.value, costPrice, salePrice);
 
-    const amountByPeriodAndWorkloadID = await this.amountsService.findOne({ period: actualPeriod, workload: workload });
-    if (amountByPeriodAndWorkloadID) {
-      createdAmount.id = amountByPeriodAndWorkloadID.id;
+    createdAmount = { ...createdAmount, workload: workload, period: actualPeriod };
+    const existingAmount = await this.amountsService.findOne({ where: { period: actualPeriod, workload: workload } });
+    if (existingAmount) {
+      createdAmount.id = existingAmount.id;
+      if (this.resourceManager.exists(workload.id.toString())) {
+        createdAmount = this.amountConverter.sum(createdAmount, existingAmount);
+      }
     }
 
-    createdAmount.workload = workload;
-    createdAmount.period = actualPeriod;
-
-    if (metadata.isFirst) {
-      this.resourceManager.reset();
-    }
-
-    if (!this.resourceManager.exists(workload)) {
-      this.resourceManager.add(workload);
-      return this.amountsService.save(createdAmount, { reload: false });
-    }
-    try {
-      createdAmount = this.amountConverter.sum(createdAmount, amountByPeriodAndWorkloadID);
-    } catch (error) {
-      Logger.error(error);
-      return;
-    }
+    Logger.log(`amount saved with success for workload "${workload.code}" and period "${actualPeriod.code}"`);
+    this.resourceManager.add(workload.id.toString());
     return this.amountsService.save(createdAmount, { reload: false });
   };
 
