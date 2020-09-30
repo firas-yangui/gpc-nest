@@ -137,7 +137,7 @@ export class CallbackNosicaParser {
     );
 
     const prices = await this.pricesService.getPricesFromWorkload(workload, actualPeriod.type);
-    const rate = await this.currencyRateService.getCurrencyRateFromWorkloadAndPeriod(workload, actualPeriod.id);
+    const rate = await this.currencyRateService.getCurrencyRateByThirdpartyAndPeriod(workload.thirdparty.id, actualPeriod.id);
     const GLOBAL_CONST = this.constantService.GLOBAL_CONST;
     let costPrice = null;
     let salePrice = null;

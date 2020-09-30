@@ -23,9 +23,8 @@ import { AmountRepository } from './../../amounts/amounts.repository';
 import { AmountConverter } from './../../amounts/amounts.converter';
 import { PriceRepository } from './../../prices/prices.repository';
 import { CurrencyRateRepository } from './../../currency-rate/currency-rate.repository';
-
+import { Helpers } from './../../../services/helpers';
 import { SubServiceRepository } from './../../subservices/subservices.repository';
-import { async } from 'rxjs/internal/scheduler/async';
 
 @Injectable()
 export class NosicaParser {
@@ -45,6 +44,7 @@ export class NosicaParser {
     private readonly pricesService: PricesService,
     private readonly currencyRateService: CurrencyRateService,
     private readonly resourceManager: ResourceManager,
+    private readonly helpers: Helpers,
   ) {
     resourceManager = new ResourceManager();
     thirdpartiesService = new ThirdpartiesService(new ThirdpartyRepository());
@@ -70,14 +70,6 @@ export class NosicaParser {
     );
   }
 
-  isHeader = (object: Record<string, any>): boolean => {
-    for (const key in object) {
-      const value = object[key];
-      if (value === key) return true;
-    }
-    return false;
-  };
-
   nosicaCallback = async (data, separator, metadata) => await this.callbackNosicaParser.nosicaCallback(data, separator, metadata);
   endNosicaCallback = () => this.callbackNosicaParser.endNosicaCallback();
 
@@ -94,7 +86,7 @@ export class NosicaParser {
         }),
       )
       .on('data', async parsedData => {
-        if (!(parsedData == null || typeof parsedData === 'undefined' || this.isHeader(parsedData))) {
+        if (!(parsedData == null || typeof parsedData === 'undefined' || this.helpers.isHeader(parsedData))) {
           Logger.log('Data to parse: ', JSON.stringify(parsedData));
           await this.nosicaCallback(parsedData, separator, metadata);
         }
