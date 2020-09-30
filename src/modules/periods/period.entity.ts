@@ -2,6 +2,7 @@ import { Column, Entity, Index, PrimaryGeneratedColumn, OneToMany } from 'typeor
 import { Amount } from './../amounts/amount.entity';
 import { CurrencyRate } from './../currency-rate/currency-rate.entity';
 import { PeriodAppSettings } from './periodappsettings/periodappsettings.entity';
+import { SubsidiaryAllocation } from './../subsidiaryallocation/subsidiaryallocation.entity';
 
 @Entity('period')
 @Index('period_code_uniqueness', ['code'], { unique: true })
@@ -79,4 +80,11 @@ export class Period {
     (periodappsettings: PeriodAppSettings) => periodappsettings.period,
   )
   periodappsettings: PeriodAppSettings[];
+
+  @OneToMany(
+    () => SubsidiaryAllocation,
+    (subsidiaryAllocation: SubsidiaryAllocation) => subsidiaryAllocation.period,
+    { onUpdate: 'CASCADE' },
+  )
+  subsidiaryAllocations: SubsidiaryAllocation[];
 }

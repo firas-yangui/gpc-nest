@@ -7,7 +7,7 @@ import { Country } from './../country/country.entity';
 import { PortfolioAppSettings } from './../portfolioAppSettings/portfolioappsettings.entity';
 import { Price } from './../prices/prices.entity';
 import { Workload } from '../workloads/workload.entity';
-import { Type } from 'class-transformer';
+import { SubsidiaryAllocation } from './../subsidiaryallocation/subsidiaryallocation.entity';
 
 @Entity('thirdparty')
 export class Thirdparty {
@@ -66,6 +66,12 @@ export class Thirdparty {
     name: 'level',
   })
   level: number;
+
+  @OneToMany(
+    () => SubsidiaryAllocation,
+    (subsidiaryAllocation: SubsidiaryAllocation) => subsidiaryAllocation.thirdparty,
+  )
+  subsidiaryAllocations: SubsidiaryAllocation[];
 
   @OneToMany(
     () => TransactionEntity,
