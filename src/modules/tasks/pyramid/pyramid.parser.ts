@@ -32,8 +32,8 @@ export class PyramidParser {
         }),
       )
       .on('data', async parsedData => {
-        if (!parsedData || this.helpers.isHeader(parsedData)) {
-          this.logger.log('Data to parse: ', JSON.stringify(parsedData));
+        if (parsedData || !this.helpers.isHeader(parsedData)) {
+          this.logger.debug('Data to parse: ', JSON.stringify(parsedData));
           try {
             const insertedData = await this.pyramidCallback(parsedData, metadata);
             this.logger.debug('inserted pyramid data: ', JSON.stringify(insertedData));
