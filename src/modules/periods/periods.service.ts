@@ -5,6 +5,13 @@ import { PeriodType } from './../interfaces/common-interfaces';
 import { Period } from './period.entity';
 import { createQueryBuilder, Like } from 'typeorm';
 import * as moment from 'moment';
+import { Object } from 'lodash';
+
+interface IfindOneInAppSettings {
+  type: string;
+  month: string;
+  year: string;
+}
 
 @Injectable()
 export class PeriodsService {
@@ -21,7 +28,11 @@ export class PeriodsService {
     return await this.periodRepository.find(options);
   }
 
-  async findOneInAppSettings(appSettings: number, options: any): Promise<any> {
+  async findOne(options: object): Promise<Period> {
+    return await this.periodRepository.findOne(options);
+  }
+
+  async findOneInAppSettings(appSettings: number, options: IfindOneInAppSettings): Promise<any> {
     return await createQueryBuilder('periodappsettings', 'pas')
       .leftJoinAndSelect('pas.period', 'p')
       .where('pas.gpcappsettingsid = :gpcappsettingsid', { gpcappsettingsid: appSettings })

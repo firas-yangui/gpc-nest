@@ -16,6 +16,7 @@ import { ThirdpartiesModule } from './modules/thirdparties/thirdparties.module';
 import { SubtypologiesModule } from './modules/subtypologies/subtypologies.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { TasksModule } from './modules/tasks/tasks-manager.module';
+import { GlobalServicesModule } from './services/global-services.module';
 import { ConstantsModule } from './modules/constants/constants.module';
 
 import DbLoader from './loader';
@@ -47,6 +48,7 @@ const applicationModules = [
   SubnatureModule,
   ThirdpartiesModule,
   SubtypologiesModule,
+  GlobalServicesModule,
   ScheduleModule.forRoot(),
 ];
 

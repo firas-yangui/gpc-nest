@@ -29,6 +29,6 @@ import { PricesModule } from './../../prices/prices.module';
     WorkloadsModule,
   ],
   providers: [ResourceManager, NosicaParser, CallbackNosicaParser],
-  exports: [NosicaParser, CallbackNosicaParser],
+  exports: [ResourceManager, NosicaParser, CallbackNosicaParser],
 })
 export class NosicaModule {}

@@ -16,14 +16,20 @@ export class CurrencyRateService {
     return await this.currencyRateRepository.findOne(options);
   }
 
-  async getCurrencyRateFromWorkloadAndPeriod(workload, periodId) {
-    const thirdParty = await this.thirdpartiesService.findOne({ id: workload.thirdparty.id });
+  async getCurrencyRateByThirdpartyAndPeriod(thirdpartyId, periodId) {
+    const thirdParty = await this.thirdpartiesService.findOne({ id: thirdpartyId });
     if (!thirdParty) {
-      Logger.error('thirdParty not found with id', workload.thirdparty.id);
+      Logger.error('thirdParty not found with id', thirdpartyId);
       return;
     }
 
     const currencyRate = await this.findOne({ country: thirdParty.countryid, period: periodId });
+    if (!currencyRate) return { value: 1 };
+    return currencyRate;
+  }
+
+  async getCurrencyRateByCountryAndPeriod(countryid, periodId) {
+    const currencyRate = await this.findOne({ country: countryid, period: periodId });
     if (!currencyRate) return { value: 1 };
     return currencyRate;
   }

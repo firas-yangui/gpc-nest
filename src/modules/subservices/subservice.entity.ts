@@ -55,12 +55,6 @@ export class SubService {
   })
   irtApplicationId: number;
 
-  @Column('integer', {
-    nullable: true,
-    name: 'portfolioid',
-  })
-  portfolioId: number;
-
   @Column('timestamp with time zone', {
     nullable: true,
     name: 'startingdate',

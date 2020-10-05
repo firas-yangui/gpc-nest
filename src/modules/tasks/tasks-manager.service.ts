@@ -17,7 +17,11 @@ export class TasksService implements OnModuleInit {
 
   handlePyramidMessage = message => {
     this.logger.debug(`get PyramidMessage ${message}`);
-    this.pyramidParser.pyramidCallback(message);
+    const data = JSON.parse(message.content.toString('utf8'));
+    const separator = this.constantService.GLOBAL_CONST.QUEUE.PYRAMID_QUEUE.ORIGIN_SEPARATOR;
+    const regex = new RegExp(separator, 'g');
+    const line = data.line.replace(regex, ';');
+    this.pyramidParser.parsePramidLine(line, data.metadata);
   };
 
   handleNosicaMessage = message => {
