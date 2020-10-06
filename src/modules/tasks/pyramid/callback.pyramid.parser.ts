@@ -16,6 +16,7 @@ import { SubsidiaryAllocation } from './../../subsidiaryallocation/subsidiaryall
 import { SubsidiaryallocationService } from './../../subsidiaryallocation/subsidiaryallocation.service';
 import { SubtypologiesService } from './../../subtypologies/subtypologies.service';
 import { SubnatureService } from './../../subnature/subnature.service';
+import { ServicesService } from './../../services/services.service';
 import { PricesService } from './../../prices/prices.service';
 import { ConstantService } from './../../constants/constants';
 import { Like, In, Equal } from 'typeorm';
@@ -62,7 +63,7 @@ export class CallbackPyramidParser {
     private readonly thirdpartiesService: ThirdpartiesService,
     private readonly periodsService: PeriodsService,
     private readonly subservicesService: SubservicesService,
-    private readonly portfolioService: PortfolioService,
+    private readonly servicesService: ServicesService,
     private readonly subsidiaryallocationService: SubsidiaryallocationService,
     private readonly subtypologiesService: SubtypologiesService,
     private readonly subnatureService: SubnatureService,
@@ -92,10 +93,10 @@ export class CallbackPyramidParser {
     return this.subtypologiesService.findOne({ name: name });
   };
 
-  getPortfolioByName = async (portfolioName: string) => {
+  getServiceByPortfolioName = async (portfolioName: string) => {
     //TODO mapping portfolio english & frensh
-    return this.portfolioService.findOne({
-      where: [{ englishname: Like(portfolioName) }, { frenchname: Like(portfolioName) }],
+    return this.servicesService.findOne({
+      where: { name: Like(portfolioName) },
     });
   };
 
@@ -112,9 +113,9 @@ export class CallbackPyramidParser {
     });
   };
 
-  findSubServiceByProjectPortefeuillePlan = async (portfolio: Record<string, any>, subtypology: Record<string, any>, projectCode: string) => {
+  findSubService = async (service: Record<string, any>, subtypology: Record<string, any>, projectCode: string) => {
     return this.subservicesService.findOne({
-      where: { portfolio: Equal(portfolio.id), subtypology: Equal(subtypology.id), code: Equal(projectCode) },
+      where: { service: Equal(service.id), subtypology: Equal(subtypology.id), code: Equal(projectCode) },
     });
   };
 
@@ -178,9 +179,9 @@ export class CallbackPyramidParser {
       throw new Error('period not found');
     }
 
-    const portfolio = await this.getPortfolioByName(portfolioName);
-    if (!portfolio) {
-      throw new Error('Portfolio not found');
+    const service = await this.getServiceByPortfolioName(portfolioName);
+    if (!service) {
+      throw new Error('Service not found');
     }
 
     const subtypology = await this.getSubtypologyByName(subtypologyName);
@@ -193,7 +194,7 @@ export class CallbackPyramidParser {
       throw new Error('thirdparty not found');
     }
 
-    const subservice = await this.findSubServiceByProjectPortefeuillePlan(portfolio, subtypology, projectCode);
+    const subservice = await this.findSubService(service, subtypology, projectCode);
     if (!subservice) {
       throw new Error('subservice not found');
     }
