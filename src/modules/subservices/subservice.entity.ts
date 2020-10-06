@@ -31,12 +31,6 @@ export class SubService {
   })
   thirdpPartyId: number;
 
-  @Column('integer', {
-    nullable: false,
-    name: 'serviceid',
-  })
-  serviceId: number;
-
   @Column('text', {
     nullable: true,
     name: 'description',

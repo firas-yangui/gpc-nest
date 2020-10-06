@@ -15,13 +15,13 @@ export class TasksService implements OnModuleInit {
     private constantService: ConstantService,
   ) {}
 
-  handlePyramidMessage = message => {
+  handlePyramidMessage = async (message: Record<string, any>) => {
     this.logger.debug(`get PyramidMessage ${message}`);
     const data = JSON.parse(message.content.toString('utf8'));
     const separator = this.constantService.GLOBAL_CONST.QUEUE.PYRAMID_QUEUE.ORIGIN_SEPARATOR;
     const regex = new RegExp(separator, 'g');
     const line = data.line.replace(regex, ';');
-    this.pyramidParser.parsePramidLine(line, data.metadata);
+    return this.pyramidParser.parsePramidLine(line, data.metadata);
   };
 
   handleNosicaMessage = message => {
@@ -41,14 +41,19 @@ export class TasksService implements OnModuleInit {
       })
       .then((channel: Channel) => {
         Promise.all([
-          channel.assertQueue(this.constantService.GLOBAL_CONST.QUEUE.PYRAMID_QUEUE.NAME).then(ok =>
-            channel.consume(this.constantService.GLOBAL_CONST.QUEUE.PYRAMID_QUEUE.NAME, msg => {
-              if (msg !== null) {
-                this.handlePyramidMessage(msg);
-                channel.ack(msg);
-              }
-            }),
-          ),
+          channel.assertQueue(this.constantService.GLOBAL_CONST.QUEUE.PYRAMID_QUEUE.NAME).then(ok => {
+            channel.prefetch(1).then(() => {
+              channel.consume(this.constantService.GLOBAL_CONST.QUEUE.PYRAMID_QUEUE.NAME, msg => {
+                if (msg !== null) {
+                  return this.handlePyramidMessage(msg).then(() => {
+                    setTimeout(() => {
+                      channel.ack(msg);
+                    }, 350);
+                  });
+                }
+              });
+            });
+          }),
           channel.assertQueue(this.constantService.GLOBAL_CONST.QUEUE.NOSICA_QUEUE.NAME).then(ok =>
             channel.prefetch(1).then(() => {
               channel.consume(this.constantService.GLOBAL_CONST.QUEUE.NOSICA_QUEUE.NAME, msg => {
