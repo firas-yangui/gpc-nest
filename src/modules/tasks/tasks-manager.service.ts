@@ -15,13 +15,22 @@ export class TasksService implements OnModuleInit {
     private constantService: ConstantService,
   ) {}
 
-  handlePyramidMessage = async (message: Record<string, any>) => {
-    this.logger.debug(`get PyramidMessage ${message}`);
+  handlePyramidEACMessage = async (message: Record<string, any>) => {
+    this.logger.debug(`get Pyramid EAC Message ${message}`);
     const data = JSON.parse(message.content.toString('utf8'));
     const separator = this.constantService.GLOBAL_CONST.QUEUE.PYRAMID_QUEUE.ORIGIN_SEPARATOR;
     const regex = new RegExp(separator, 'g');
     const line = data.line.replace(regex, ';');
     return this.pyramidParser.parsePramidLine(line, data.metadata);
+  };
+
+  handlePyramidActualsMessage = async (message: Record<string, any>) => {
+    this.logger.debug(`get Pyramid Actuals Message ${message}`);
+    const data = JSON.parse(message.content.toString('utf8'));
+    const separator = this.constantService.GLOBAL_CONST.QUEUE.PYRAMID_QUEUE.ORIGIN_SEPARATOR;
+    const regex = new RegExp(separator, 'g');
+    const line = data.line.replace(regex, ';');
+    return this.pyramidParser.parsePramidLine(line, data.metadata, true);
   };
 
   handleNosicaMessage = message => {
@@ -45,7 +54,20 @@ export class TasksService implements OnModuleInit {
             channel.prefetch(1).then(() => {
               channel.consume(this.constantService.GLOBAL_CONST.QUEUE.PYRAMID_QUEUE.NAME, msg => {
                 if (msg !== null) {
-                  return this.handlePyramidMessage(msg).then(() => {
+                  return this.handlePyramidEACMessage(msg).then(() => {
+                    setTimeout(() => {
+                      channel.ack(msg);
+                    }, 350);
+                  });
+                }
+              });
+            });
+          }),
+          channel.assertQueue(this.constantService.GLOBAL_CONST.QUEUE.PYRAMIDACTUALS_QUEUE.NAME).then(ok => {
+            channel.prefetch(1).then(() => {
+              channel.consume(this.constantService.GLOBAL_CONST.QUEUE.PYRAMIDACTUALS_QUEUE.NAME, msg => {
+                if (msg !== null) {
+                  return this.handlePyramidActualsMessage(msg).then(() => {
                     setTimeout(() => {
                       channel.ack(msg);
                     }, 350);

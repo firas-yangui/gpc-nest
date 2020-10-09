@@ -1,13 +1,14 @@
 import { Injectable } from '@nestjs/common';
+import { Like, In, Equal } from 'typeorm';
 import * as moment from 'moment';
 import { includes } from 'lodash';
+
 import { AmountsService } from './../../amounts/amounts.service';
 import { ResourceManager } from './../nosica/resource-store';
 import { AmountConverter } from './../../amounts/amounts.converter';
 import { CurrencyRateService } from './../../currency-rate/currency-rate.service';
 import { WorkloadsService } from './../../../modules/workloads/workloads.service';
 import { PeriodsService } from './../../periods/periods.service';
-import { PortfolioService } from './../../portfolio/portfolio.service';
 import { SubservicesService } from './../../subservices/subservices.service';
 import { Workload } from './../../workloads/workload.entity';
 import { ThirdpartiesService } from './../../thirdparties/thirdparties.service';
@@ -19,40 +20,58 @@ import { SubnatureService } from './../../subnature/subnature.service';
 import { ServicesService } from './../../services/services.service';
 import { PricesService } from './../../prices/prices.service';
 import { ConstantService } from './../../constants/constants';
-import { Like, In, Equal } from 'typeorm';
 
 const pyramidFields = {
-  ProjectCode: 'Project_Code',
-  ProjectName: 'Project_Name',
-  activityApplication: 'Activity_Application',
-  activityApplicationLabel: 'Activity_Application_Label',
-  curveType: 'curve_type',
-  eac: 'eac',
-  eacKe: 'eac_ke',
-  actualMd: 'actuals_md',
-  cds: 'CDS',
-  csm: 'CSM',
-  parentDescr: 'PARENT_DESCR',
-  staffType: 'staff_type',
-  activityPlan: 'activity_plan',
-  activityType: 'activity_type',
-  portfolio: 'portfolio',
-  subPortfolio: 'sub_portfolio',
-  partner: 'partner',
-  caPayor: 'Activity_Ca payor',
-  caPayorLabel: 'Activity_Ca payor label',
-  clientEntity: 'Client_Entity',
-  pyrTmpMonthMr: 'pyr_tmp_month_mr',
+  eac: {
+    ProjectCode: 'Project_Code',
+    ProjectName: 'Project_Name',
+    activityApplication: 'Activity_Application',
+    activityApplicationLabel: 'Activity_Application_Label',
+    curveType: 'curve_type',
+    eac: 'eac',
+    eacKe: 'eac_ke',
+    actualMd: 'actuals_md',
+    cds: 'CDS',
+    csm: 'CSM',
+    parentDescr: 'PARENT_DESCR',
+    staffType: 'staff_type',
+    activityPlan: 'activity_plan',
+    activityType: 'activity_type',
+    portfolio: 'portfolio',
+    subPortfolio: 'sub_portfolio',
+    partner: 'partner',
+    caPayor: 'Activity_Ca payor',
+    caPayorLabel: 'Activity_Ca payor label',
+    clientEntity: 'Client_Entity',
+    pyrTmpMonthMr: 'pyr_tmp_month_mr',
+  },
+  actuals: {
+    cds: 'ressource_cds',
+    staffType: 'ressource_staff_type',
+    portfolio: 'portfolio_sub_portfolio',
+    activityPlan: 'plan',
+    ProjectCode: 'project_code',
+    amount: 'standard_actuals_md',
+  },
 };
 
-const requiredFileds = [
-  pyramidFields.staffType,
-  pyramidFields.portfolio,
-  pyramidFields.activityPlan,
-  pyramidFields.ProjectCode,
-  pyramidFields.eac,
-  pyramidFields.eacKe,
-];
+const requiredFileds = {
+  eac: [
+    pyramidFields.eac.staffType,
+    pyramidFields.eac.portfolio,
+    pyramidFields.eac.activityPlan,
+    pyramidFields.eac.ProjectCode,
+    pyramidFields.eac.eac,
+    pyramidFields.eac.eacKe,
+  ],
+  actuals: [
+    pyramidFields.actuals.staffType,
+    pyramidFields.actuals.portfolio,
+    pyramidFields.actuals.activityPlan,
+    pyramidFields.actuals.ProjectCode,
+    pyramidFields.actuals.amount,
+  ],
+};
 
 @Injectable()
 export class CallbackPyramidParser {
@@ -73,10 +92,16 @@ export class CallbackPyramidParser {
     private readonly resourceManager: ResourceManager,
   ) {}
 
-  isValidParams = (line: any) => {
-    requiredFileds.forEach(field => {
+  isValidParams = (line: any, isActual = false) => {
+    let fileds: string[];
+
+    if (isActual) fileds = requiredFileds.actuals;
+    if (!isActual) fileds = requiredFileds.eac;
+
+    fileds.forEach(field => {
       if (!line[field]) return false;
     });
+
     return true;
   };
 
@@ -144,30 +169,48 @@ export class CallbackPyramidParser {
     });
   };
 
-  getAmountData = line => {
-    if (this.isJH(line[pyramidFields.staffType]))
-      return {
-        amount: line[pyramidFields.eac],
-        unit: this.constantService.GLOBAL_CONST.AMOUNT_UNITS.MD,
-      };
-    if (this.isKLC(line[pyramidFields.staffType]))
-      return {
-        amount: line[pyramidFields.eacKe],
-        unit: this.constantService.GLOBAL_CONST.AMOUNT_UNITS.KLC,
-      };
+  getAmountData = (line, isActuals = false) => {
+    if (!isActuals) {
+      if (this.isJH(line[pyramidFields.eac.staffType]))
+        return {
+          amount: line[pyramidFields.eac.eac],
+          unit: this.constantService.GLOBAL_CONST.AMOUNT_UNITS.MD,
+        };
+      if (this.isKLC(line[pyramidFields.eac.staffType]))
+        return {
+          amount: line[pyramidFields.eac.eacKe],
+          unit: this.constantService.GLOBAL_CONST.AMOUNT_UNITS.KLC,
+        };
+    }
+
+    if (isActuals) {
+      if (this.isJH(line[pyramidFields.actuals.staffType]))
+        return {
+          amount: line[pyramidFields.actuals.amount],
+          unit: this.constantService.GLOBAL_CONST.AMOUNT_UNITS.MD,
+        };
+      if (this.isKLC(line[pyramidFields.actuals.staffType]))
+        return {
+          amount: line[pyramidFields.actuals.amount],
+          unit: this.constantService.GLOBAL_CONST.AMOUNT_UNITS.KLC,
+        };
+    }
   };
 
-  parse = async (line: any, metadata: Record<string, any>) => {
-    let workload;
+  parse = async (line: any, metadata: Record<string, any>, isActuals = false) => {
+    let workload: Record<string, any>;
+    let fields: Record<string, any>;
+    if (isActuals) fields = pyramidFields.actuals;
+    if (!isActuals) fields = pyramidFields.eac;
 
-    if (!this.isValidParams(line)) {
+    if (!this.isValidParams(line, isActuals)) {
       return Promise.reject(new Error('invalide line param'));
     }
 
-    const subnatureName = line[pyramidFields.staffType];
-    const portfolioName = line[pyramidFields.portfolio];
-    const subtypologyName = line[pyramidFields.activityPlan];
-    const projectCode = line[pyramidFields.ProjectCode];
+    const subnatureName = line[fields.staffType];
+    const portfolioName = line[fields.portfolio];
+    const subtypologyName = line[fields.activityPlan];
+    const projectCode = line[fields.ProjectCode];
 
     const month = moment(Date.now())
       .subtract(1, 'month')
@@ -189,7 +232,7 @@ export class CallbackPyramidParser {
       throw new Error('subTypology not found');
     }
 
-    const thirdparty = await this.getThirdpartyByName(line[pyramidFields.cds]);
+    const thirdparty = await this.getThirdpartyByName(line[fields.cds]);
     if (!thirdparty) {
       throw new Error('thirdparty not found');
     }
@@ -235,7 +278,7 @@ export class CallbackPyramidParser {
     const costPrice = prices.price;
     const salePrice = prices.saleprice;
 
-    const amountData = this.getAmountData(line);
+    const amountData = this.getAmountData(line, isActuals);
 
     let createdAmount = this.amountConverter.createAmountEntity(parseFloat(amountData.amount), amountData.unit, rate.value, costPrice, salePrice);
 
