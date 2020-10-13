@@ -16,10 +16,11 @@ export class PyramidParser {
     private readonly helpers: Helpers,
   ) {}
 
-  pyramidCallback = async (data: string, metadata: Record<string, any>) => await this.callbackPyramidParser.parse(data, metadata);
+  pyramidCallback = async (data: string, metadata: Record<string, any>, isActuals = false) =>
+    await this.callbackPyramidParser.parse(data, metadata, isActuals);
   endPyramidCallback = () => this.callbackPyramidParser.end();
 
-  parsePramidLine = async (data: string, metadata: Record<string, any>) => {
+  parsePramidLine = async (data: string, metadata: Record<string, any>, isActuals = false) => {
     const separator = this.constantService.GLOBAL_CONST.QUEUE.PYRAMID_QUEUE.SEPARATOR;
     const header = this.constantService.GLOBAL_CONST.QUEUE.PYRAMID_QUEUE.HEADER;
 
@@ -35,7 +36,7 @@ export class PyramidParser {
         if (parsedData && !this.helpers.isHeader(parsedData)) {
           this.logger.debug('Data to parse: ', JSON.stringify(parsedData));
           try {
-            const insertedData = await this.pyramidCallback(parsedData, metadata);
+            const insertedData = await this.pyramidCallback(parsedData, metadata, isActuals);
             this.logger.debug('inserted pyramid data: ', JSON.stringify(insertedData));
             return insertedData;
           } catch (error) {
