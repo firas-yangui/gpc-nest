@@ -2,14 +2,13 @@ import csvParser = require('csv-parser');
 import { Injectable, Logger } from '@nestjs/common';
 import * as stringToStream from 'string-to-stream';
 
-import { ResourceManager } from './resource-store';
 import { CallbackNosicaParser } from './callback.nosica.parser';
 import { ThirdpartiesService } from './../../thirdparties/thirdparties.service';
 import { SubnatureappsettingsService } from './../../subnatureappsettings/subnatureappsettings.service';
 import { WorkloadsService } from './../../workloads/workloads.service';
 import { PeriodsService } from './../../periods/periods.service';
 import { PricesService } from './../../prices/prices.service';
-import { AmountsService } from './../../amounts/amounts.service';
+import { RawAmountsService } from './../../rawamounts/rawamounts.service';
 import { SubservicesService } from './../../subservices/subservices.service';
 import { ServicesService } from './../../services/services.service';
 import { ConstantService } from './../../constants/constants';
@@ -19,7 +18,7 @@ import { ThirdpartyRepository } from './../../thirdparties/thirdparties.reposito
 import { SubNatureAppSettingsRepository } from './../../subnatureappsettings/subnatureappsettings.repository';
 import { WorkloadRepository } from './../../workloads/workload.repository';
 import { PeriodRepository } from './../../periods/period.repository';
-import { AmountRepository } from './../../amounts/amounts.repository';
+import { RawAmountRepository } from './../../rawamounts/rawamounts.repository';
 import { AmountConverter } from './../../amounts/amounts.converter';
 import { PriceRepository } from './../../prices/prices.repository';
 import { CurrencyRateRepository } from './../../currency-rate/currency-rate.repository';
@@ -36,21 +35,19 @@ export class NosicaParser {
     private readonly subnatureappsettingsService: SubnatureappsettingsService,
     private readonly workloadsService: WorkloadsService,
     private readonly periodsService: PeriodsService,
-    private readonly amountsService: AmountsService,
+    private readonly rawAmountsService: RawAmountsService,
     private readonly servicesService: ServicesService,
     private readonly subservicesService: SubservicesService,
     private readonly constantService: ConstantService,
     private readonly amountConverter: AmountConverter,
     private readonly pricesService: PricesService,
     private readonly currencyRateService: CurrencyRateService,
-    private readonly resourceManager: ResourceManager,
     private readonly helpers: Helpers,
   ) {
-    resourceManager = new ResourceManager();
     thirdpartiesService = new ThirdpartiesService(new ThirdpartyRepository());
     subnatureappsettingsService = new SubnatureappsettingsService(new SubNatureAppSettingsRepository());
     periodsService = new PeriodsService(new PeriodRepository());
-    amountsService = new AmountsService(new AmountRepository());
+    rawAmountsService = new RawAmountsService(new RawAmountRepository());
     subservicesService = new SubservicesService(new SubServiceRepository());
     workloadsService = new WorkloadsService(new WorkloadRepository(), thirdpartiesService, servicesService, subservicesService, periodsService);
     amountConverter = new AmountConverter(constantService);
@@ -61,12 +58,11 @@ export class NosicaParser {
       subnatureappsettingsService,
       workloadsService,
       periodsService,
-      amountsService,
+      rawAmountsService,
       amountConverter,
       pricesService,
       currencyRateService,
       constantService,
-      resourceManager,
     );
   }
 
