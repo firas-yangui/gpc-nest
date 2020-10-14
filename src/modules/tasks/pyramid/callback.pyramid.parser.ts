@@ -3,8 +3,7 @@ import { Like, In, Equal } from 'typeorm';
 import * as moment from 'moment';
 import { includes } from 'lodash';
 
-import { AmountsService } from './../../amounts/amounts.service';
-import { ResourceManager } from './../nosica/resource-store';
+import { RawAmountsService } from './../../rawamounts/rawamounts.service';
 import { AmountConverter } from './../../amounts/amounts.converter';
 import { CurrencyRateService } from './../../currency-rate/currency-rate.service';
 import { WorkloadsService } from './../../../modules/workloads/workloads.service';
@@ -76,7 +75,7 @@ const requiredFileds = {
 @Injectable()
 export class CallbackPyramidParser {
   constructor(
-    private readonly amountsService: AmountsService,
+    private readonly rawAmountsService: RawAmountsService,
     private readonly amountConverter: AmountConverter,
     private readonly workloadsService: WorkloadsService,
     private readonly thirdpartiesService: ThirdpartiesService,
@@ -89,7 +88,6 @@ export class CallbackPyramidParser {
     private readonly constantService: ConstantService,
     private readonly currencyRateService: CurrencyRateService,
     private readonly pricesService: PricesService,
-    private readonly resourceManager: ResourceManager,
   ) {}
 
   isValidParams = (line: any, isActual = false) => {
@@ -211,6 +209,7 @@ export class CallbackPyramidParser {
     const portfolioName = line[fields.portfolio];
     const subtypologyName = line[fields.activityPlan];
     const projectCode = line[fields.ProjectCode];
+    const datasource = metadata.filename;
 
     const month = moment(Date.now())
       .subtract(1, 'month')
@@ -282,18 +281,9 @@ export class CallbackPyramidParser {
 
     let createdAmount = this.amountConverter.createAmountEntity(parseFloat(amountData.amount), amountData.unit, rate.value, costPrice, salePrice);
 
-    createdAmount = { ...createdAmount, workload: workload, period: actualPeriod };
+    createdAmount = { ...createdAmount, workloadid: workload.id, periodid: actualPeriod.id, datasource: datasource };
 
-    const existingAmount = await this.amountsService.findOne({ where: { period: actualPeriod, workload: workload } });
-    if (existingAmount) {
-      createdAmount.id = existingAmount.id;
-      if (this.resourceManager.exists(workload.id.toString())) {
-        createdAmount = this.amountConverter.sum(createdAmount, existingAmount);
-      }
-    }
-    this.resourceManager.add(workload.id.toString());
-
-    return this.amountsService.save(createdAmount, { reload: false });
+    return this.rawAmountsService.save(createdAmount);
   };
   end = () => {};
 }
