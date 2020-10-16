@@ -6,9 +6,10 @@ import { PyramidModule } from './pyramid/pyramid.module';
 import { AmqplibWrapper } from './../amqplibWrapper/amqplib-wrapper.module';
 import { ConfigService } from './../../config/rabbitmq-config.service';
 import { ConstantsModule } from '../constants/constants.module';
-
+import { AmountsModule } from '../amounts/amounts.module';
+import { RawAmountsModule } from '../rawamounts/rawamounts.module';
 @Module({
-  imports: [NosicaModule, PyramidModule, AmqplibWrapper.registerAsync({ useClass: ConfigService }), ConstantsModule],
+  imports: [NosicaModule, PyramidModule, AmountsModule, RawAmountsModule, AmqplibWrapper.registerAsync({ useClass: ConfigService }), ConstantsModule],
   providers: [TasksService, TasksSchedulerService],
   exports: [TasksService, TasksSchedulerService],
 })

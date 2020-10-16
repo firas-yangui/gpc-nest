@@ -47,7 +47,7 @@ export class NosicaParser {
     thirdpartiesService = new ThirdpartiesService(new ThirdpartyRepository());
     subnatureappsettingsService = new SubnatureappsettingsService(new SubNatureAppSettingsRepository());
     periodsService = new PeriodsService(new PeriodRepository());
-    rawAmountsService = new RawAmountsService(new RawAmountRepository());
+    rawAmountsService = new RawAmountsService(new RawAmountRepository(), constantService);
     subservicesService = new SubservicesService(new SubServiceRepository());
     workloadsService = new WorkloadsService(new WorkloadRepository(), thirdpartiesService, servicesService, subservicesService, periodsService);
     amountConverter = new AmountConverter(constantService);
