@@ -19,6 +19,7 @@ import { SubnatureService } from './../../subnature/subnature.service';
 import { ServicesService } from './../../services/services.service';
 import { PricesService } from './../../prices/prices.service';
 import { ConstantService } from './../../constants/constants';
+import { PeriodType as PeriodTypeInterface } from './../../interfaces/common-interfaces';
 
 const pyramidFields = {
   eac: {
@@ -128,11 +129,14 @@ export class CallbackPyramidParser {
     return this.thirdpartiesService.findOne({ name: name });
   };
 
-  getActualLastPeriodAppSettings = async (month: string) => {
+  getPeriodAppSettings = async (type: string, isActual: boolean) => {
+    let month = moment(Date.now());
+
+    if (isActual) month = month.subtract(1, 'month');
     return this.periodsService.findOneInAppSettings(this.constantService.GLOBAL_CONST.SCOPES.BSC, {
-      type: 'actual',
+      type: type,
       year: moment(Date.now()).format('YYYY'),
-      month: month,
+      month: month.format('MM'),
     });
   };
 
@@ -200,6 +204,7 @@ export class CallbackPyramidParser {
     let fields: Record<string, any>;
     if (isActuals) fields = pyramidFields.actuals;
     if (!isActuals) fields = pyramidFields.eac;
+    const periodType: string = isActuals ? PeriodTypeInterface.actual : PeriodTypeInterface.forecast;
 
     if (!this.isValidParams(line, isActuals)) {
       return Promise.reject(new Error('invalide line param'));
@@ -211,13 +216,9 @@ export class CallbackPyramidParser {
     const projectCode = line[fields.ProjectCode];
     const datasource = metadata.filename;
 
-    const month = moment(Date.now())
-      .subtract(1, 'month')
-      .format('MM');
+    const periodAppSettings = await this.getPeriodAppSettings(periodType, isActuals);
 
-    const actualPeriodAppSettings = await this.getActualLastPeriodAppSettings(month);
-
-    if (!actualPeriodAppSettings) {
+    if (!periodAppSettings) {
       throw new Error('period not found');
     }
 
@@ -254,18 +255,14 @@ export class CallbackPyramidParser {
     workload = workloadsBySubserviceThirdpartySubnature[0];
 
     if (workloadsBySubserviceThirdpartySubnature.length > 1) {
-      const subsidiaryAllocation = await this.getAllocationsByThirdparty(
-        workloadsBySubserviceThirdpartySubnature,
-        thirdparty,
-        actualPeriodAppSettings,
-      );
+      const subsidiaryAllocation = await this.getAllocationsByThirdparty(workloadsBySubserviceThirdpartySubnature, thirdparty, periodAppSettings);
       if (!subsidiaryAllocation.workload) {
         throw new Error('workload not found by subsidiary allocations');
       }
       workload = subsidiaryAllocation.workload;
     }
 
-    const actualPeriod = actualPeriodAppSettings.period;
+    const actualPeriod = periodAppSettings.period;
 
     const prices = await this.pricesService.findOne({ where: { thirdparty: thirdparty.id, subnature: subnature.id, periodtype: actualPeriod.type } });
     const rate = await this.currencyRateService.getCurrencyRateByCountryAndPeriod(thirdparty.countryid, actualPeriod.id);
