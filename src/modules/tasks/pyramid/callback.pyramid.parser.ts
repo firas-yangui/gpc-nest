@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Like, In, Equal } from 'typeorm';
 import * as moment from 'moment';
-import { includes } from 'lodash';
+import { findKey, includes } from 'lodash';
 
 import { RawAmountsService } from './../../rawamounts/rawamounts.service';
 import { AmountConverter } from './../../amounts/amounts.converter';
@@ -112,9 +112,19 @@ export class CallbackPyramidParser {
     return includes(['outsourcing consulting', 'outsourcing fixed price'], subnature.toLocaleLowerCase());
   };
 
-  getSubtypologyByName = async (name: string) => {
-    //TODO mapping
-    return this.subtypologiesService.findOne({ name: name });
+  getSubtypologyByCode = async (code: string) => {
+    return this.subtypologiesService.findOne({ code: code });
+  };
+
+  getPlanCode = (plan: string) => {
+    const plans = {
+      35: 'Structure',
+      12: 'Evolutive Maintenance',
+      58: 'Run activities',
+      P1: 'Project',
+      13: 'Tech Plan',
+    };
+    return findKey(plans, value => value === plan);
   };
 
   getServiceByPortfolioName = async (portfolioName: string) => {
@@ -212,7 +222,7 @@ export class CallbackPyramidParser {
 
     const subnatureName = line[fields.staffType];
     const portfolioName = line[fields.portfolio];
-    const subtypologyName = line[fields.activityPlan];
+    const plan = line[fields.activityPlan];
     const projectCode = line[fields.ProjectCode];
     const datasource = metadata.filename;
 
@@ -227,7 +237,12 @@ export class CallbackPyramidParser {
       throw new Error('Service not found');
     }
 
-    const subtypology = await this.getSubtypologyByName(subtypologyName);
+    const planCode = this.getPlanCode(plan);
+    if (!planCode) {
+      throw new Error(`Plan Code not found for plan ${plan}`);
+    }
+
+    const subtypology = await this.getSubtypologyByCode(planCode);
     if (!subtypology) {
       throw new Error('subTypology not found');
     }

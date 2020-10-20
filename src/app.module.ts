@@ -14,6 +14,7 @@ import { WorkloadsModule } from './modules/workloads/workloads.module';
 import { SubnatureModule } from './modules/subnature/subnature.module';
 import { ThirdpartiesModule } from './modules/thirdparties/thirdparties.module';
 import { SubtypologiesModule } from './modules/subtypologies/subtypologies.module';
+import { SubtypologyAppSettingsModule } from './modules/subTypologyAppSettings/subtypologyappsettings.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { TasksModule } from './modules/tasks/tasks-manager.module';
 import { GlobalServicesModule } from './services/global-services.module';
@@ -48,6 +49,7 @@ const applicationModules = [
   SubnatureModule,
   ThirdpartiesModule,
   SubtypologiesModule,
+  SubtypologyAppSettingsModule,
   GlobalServicesModule,
   ScheduleModule.forRoot(),
 ];

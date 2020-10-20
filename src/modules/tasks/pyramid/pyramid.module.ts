@@ -15,6 +15,7 @@ import { ThirdpartiesModule } from './../../../modules/thirdparties/thirdparties
 import { PortfolioModule } from './../../portfolio/portfolio.module';
 import { SubsidiaryallocationModule } from './../../subsidiaryallocation/subsidiaryallocation.module';
 import { SubtypologiesModule } from './../../subtypologies/subtypologies.module';
+import { SubtypologyAppSettingsModule } from './../../subTypologyAppSettings/subtypologyappsettings.module';
 import { SubnatureModule } from './../../subnature/subnature.module';
 
 @Module({
@@ -31,6 +32,7 @@ import { SubnatureModule } from './../../subnature/subnature.module';
     ServicesModule,
     SubsidiaryallocationModule,
     SubtypologiesModule,
+    SubtypologyAppSettingsModule,
     SubservicesModule,
     SubnatureModule,
     WorkloadsModule,
