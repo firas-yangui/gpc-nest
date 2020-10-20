@@ -47,6 +47,7 @@ const pyramidFields = {
   },
   actuals: {
     cds: 'ressource_cds',
+    csm: 'ressource_csm',
     staffType: 'ressource_staff_type',
     portfolio: 'portfolio_sub_portfolio',
     activityPlan: 'plan',
@@ -247,7 +248,7 @@ export class CallbackPyramidParser {
       throw new Error('subTypology not found');
     }
 
-    const thirdparty = await this.getThirdpartyByName(line[fields.cds]);
+    const thirdparty = await this.getThirdpartyByName(line[fields.csm]);
     if (!thirdparty) {
       throw new Error('thirdparty not found');
     }
