@@ -26,7 +26,7 @@ export class RawAmountsService {
   async findWaitingFlows(): Promise<any | undefined> {
     return this.rawAmountRepository
       .createQueryBuilder()
-      .select('MAX(created)')
+      .select('MAX(created) AS created')
       .addSelect('datasource')
       .where(`created < now()::timestamp - interval '${this.constantService.GLOBAL_CONST.CRON_INTERVAL}'`)
       .groupBy('datasource')
