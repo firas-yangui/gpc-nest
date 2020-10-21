@@ -13,7 +13,7 @@ export class ConstantService {
       IRBS: 1,
       BSC: 2,
     }),
-    CRON_INTERVAL: '1 hours', // One hours
+    CRON_INTERVAL: '10 minutes', // 10 minutes
     QUEUE: Object.freeze({
       PYRAMID_QUEUE: Object.freeze({
         NAME: 'PYRAMID',

@@ -10,7 +10,7 @@ export class TasksSchedulerService {
   private readonly logger = new Logger(TasksSchedulerService.name);
   constructor(private constantService: ConstantService, private rawAmountsService: RawAmountsService, private amountsService: AmountsService) {}
 
-  @Cron(CronExpression.EVERY_30_MINUTES)
+  @Cron(CronExpression.EVERY_10_MINUTES)
   async handleFlowsDedupLinesCron() {
     Logger.log('START cron to handle duplicates flows lines');
     const waitingFlows = await this.rawAmountsService.findWaitingFlows();
