@@ -17,6 +17,7 @@ import { SubtypologiesModule } from './modules/subtypologies/subtypologies.modul
 import { SubtypologyAppSettingsModule } from './modules/subTypologyAppSettings/subtypologyappsettings.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { TasksModule } from './modules/tasks/tasks-manager.module';
+import { SchedulerModule } from './modules/scheduler/scheduler.module';
 import { GlobalServicesModule } from './services/global-services.module';
 import { ConstantsModule } from './modules/constants/constants.module';
 
@@ -56,6 +57,10 @@ const applicationModules = [
 
 if (process.env.TASKS_MODULE_ENABLED) {
   applicationModules.push(TasksModule);
+}
+
+if (process.env.SCHEDULER_MODULE_ENABLED) {
+  applicationModules.push(SchedulerModule);
 }
 
 @Module({
