@@ -49,7 +49,7 @@ const pyramidFields = {
     cds: 'ressource_cds',
     csm: 'ressource_csm',
     staffType: 'ressource_staff_type',
-    portfolio: 'schedule_name',
+    portfolio: 'portfolio_sub_portfolio',
     activityPlan: 'plan',
     ProjectCode: 'project_code',
     amount: 'standard_actuals_md',
@@ -110,7 +110,7 @@ export class CallbackPyramidParser {
   };
 
   isKLC = (subnature: string) => {
-    return includes(['outsourcing consulting', 'outsourcing fixed price'], subnature.toLocaleLowerCase());
+    return includes(['outsourcing - consulting', 'outsourcing - fixed-price contract'], subnature.toLocaleLowerCase());
   };
 
   getSubtypologyByCode = async (code: string) => {
