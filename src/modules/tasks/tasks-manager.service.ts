@@ -51,39 +51,33 @@ export class TasksService implements OnModuleInit {
       .then((channel: Channel) => {
         Promise.all([
           channel.assertQueue(this.constantService.GLOBAL_CONST.QUEUE.PYRAMID_QUEUE.NAME).then(ok => {
-            channel.prefetch(10).then(() => {
+            channel.prefetch(50).then(() => {
               channel.consume(this.constantService.GLOBAL_CONST.QUEUE.PYRAMID_QUEUE.NAME, msg => {
                 if (msg !== null) {
                   return this.handlePyramidEACMessage(msg).then(() => {
-                    setTimeout(() => {
-                      channel.ack(msg);
-                    }, 350);
+                    channel.ack(msg);
                   });
                 }
               });
             });
           }),
           channel.assertQueue(this.constantService.GLOBAL_CONST.QUEUE.PYRAMIDACTUALS_QUEUE.NAME).then(ok => {
-            channel.prefetch(10).then(() => {
+            channel.prefetch(50).then(() => {
               channel.consume(this.constantService.GLOBAL_CONST.QUEUE.PYRAMIDACTUALS_QUEUE.NAME, msg => {
                 if (msg !== null) {
                   return this.handlePyramidActualsMessage(msg).then(() => {
-                    setTimeout(() => {
-                      channel.ack(msg);
-                    }, 350);
+                    channel.ack(msg);
                   });
                 }
               });
             });
           }),
           channel.assertQueue(this.constantService.GLOBAL_CONST.QUEUE.NOSICA_QUEUE.NAME).then(ok =>
-            channel.prefetch(1).then(() => {
+            channel.prefetch(50).then(() => {
               channel.consume(this.constantService.GLOBAL_CONST.QUEUE.NOSICA_QUEUE.NAME, msg => {
                 if (msg !== null) {
                   this.handleNosicaMessage(msg);
-                  setTimeout(() => {
-                    channel.ack(msg);
-                  }, 100);
+                  channel.ack(msg);
                 }
               });
             }),
