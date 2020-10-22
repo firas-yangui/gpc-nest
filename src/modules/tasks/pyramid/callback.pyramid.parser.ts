@@ -49,7 +49,7 @@ const pyramidFields = {
     cds: 'ressource_cds',
     csm: 'ressource_csm',
     staffType: 'ressource_staff_type',
-    portfolio: 'portfolio_sub_portfolio',
+    portfolio: 'schedule_name',
     activityPlan: 'plan',
     ProjectCode: 'project_code',
     amount: 'standard_actuals_md',
