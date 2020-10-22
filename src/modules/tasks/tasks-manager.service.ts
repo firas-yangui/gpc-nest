@@ -52,11 +52,10 @@ export class TasksService implements OnModuleInit {
         Promise.all([
           channel.assertQueue(this.constantService.GLOBAL_CONST.QUEUE.PYRAMID_QUEUE.NAME).then(ok => {
             channel.prefetch(50).then(() => {
-              channel.consume(this.constantService.GLOBAL_CONST.QUEUE.PYRAMID_QUEUE.NAME, msg => {
+              channel.consume(this.constantService.GLOBAL_CONST.QUEUE.PYRAMID_QUEUE.NAME, async msg => {
                 if (msg !== null) {
-                  return this.handlePyramidEACMessage(msg).then(() => {
-                    channel.ack(msg);
-                  });
+                  await this.handlePyramidEACMessage(msg);
+                  channel.ack(msg);
                 }
               });
             });
