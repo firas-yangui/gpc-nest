@@ -21,7 +21,10 @@ export class TasksService implements OnModuleInit {
     const separator = this.constantService.GLOBAL_CONST.QUEUE.PYRAMID_QUEUE.ORIGIN_SEPARATOR;
     const regex = new RegExp(separator, 'g');
     const line = data.line.replace(regex, ';');
-    return this.pyramidParser.parsePramidLine(line, data.metadata);
+    const parsedData = await this.pyramidParser.parsePramidLine(line, data.metadata);
+    const insertedData = await this.pyramidParser.pyramidCallback(parsedData, data.metadata, false);
+    this.logger.debug('inserted pyramid data: ', JSON.stringify(insertedData));
+    return insertedData;
   };
 
   handlePyramidActualsMessage = async (message: Record<string, any>) => {
@@ -33,12 +36,13 @@ export class TasksService implements OnModuleInit {
     return this.pyramidParser.parsePramidLine(line, data.metadata, true);
   };
 
-  handleNosicaMessage = message => {
+  handleNosicaMessage = async (message): Promise<any> => {
     const data = JSON.parse(message.content.toString('utf8'));
     const separator = this.constantService.GLOBAL_CONST.QUEUE.NOSICA_QUEUE.ORIGIN_SEPARATOR;
     const regex = new RegExp(separator, 'g');
     const line = data.line.replace(regex, ';');
-    this.nosicaParser.parseNosicaLine(line, data.metadata);
+    const parsed = await this.nosicaParser.parseNosicaLine(line, data.metadata);
+    return this.nosicaParser.nosicaCallback(parsed, separator, data.metadata);
   };
 
   public onModuleInit() {
@@ -51,11 +55,12 @@ export class TasksService implements OnModuleInit {
       .then((channel: Channel) => {
         Promise.all([
           channel.assertQueue(this.constantService.GLOBAL_CONST.QUEUE.PYRAMID_QUEUE.NAME).then(ok => {
-            channel.prefetch(1).then(() => {
+            channel.prefetch(10).then(() => {
               channel.consume(this.constantService.GLOBAL_CONST.QUEUE.PYRAMID_QUEUE.NAME, async msg => {
                 if (msg !== null) {
-                  await this.handlePyramidEACMessage(msg);
-                  channel.ack(msg);
+                  this.handlePyramidEACMessage(msg)
+                    .then(() => channel.ack(msg))
+                    .catch(error => this.logger.error(error));
                 }
               });
             });
@@ -72,11 +77,10 @@ export class TasksService implements OnModuleInit {
             });
           }),
           channel.assertQueue(this.constantService.GLOBAL_CONST.QUEUE.NOSICA_QUEUE.NAME).then(ok =>
-            channel.prefetch(50).then(() => {
+            channel.prefetch(10).then(() => {
               channel.consume(this.constantService.GLOBAL_CONST.QUEUE.NOSICA_QUEUE.NAME, msg => {
                 if (msg !== null) {
-                  this.handleNosicaMessage(msg);
-                  channel.ack(msg);
+                  this.handleNosicaMessage(msg).then(() => channel.ack(msg));
                 }
               });
             }),

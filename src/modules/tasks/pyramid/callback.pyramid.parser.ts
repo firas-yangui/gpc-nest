@@ -272,6 +272,9 @@ export class CallbackPyramidParser {
 
     if (workloadsBySubserviceThirdpartySubnature.length > 1) {
       const subsidiaryAllocation = await this.getAllocationsByThirdparty(workloadsBySubserviceThirdpartySubnature, thirdparty, periodAppSettings);
+      if (!subsidiaryAllocation) {
+        throw new Error('subsidiaryAllocation not found by subsidiary allocations');
+      }
       if (!subsidiaryAllocation.workload) {
         throw new Error('workload not found by subsidiary allocations');
       }

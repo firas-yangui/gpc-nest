@@ -69,23 +69,26 @@ export class NosicaParser {
   nosicaCallback = async (data, separator, metadata) => await this.callbackNosicaParser.nosicaCallback(data, separator, metadata);
   endNosicaCallback = () => this.callbackNosicaParser.endNosicaCallback();
 
-  parseNosicaLine = (data: string, metadata: object) => {
+  parseNosicaLine = (data: string, metadata: object): Promise<string> => {
     const separator = this.constantService.GLOBAL_CONST.QUEUE.NOSICA_QUEUE.SEPARATOR;
     const header = this.constantService.GLOBAL_CONST.QUEUE.NOSICA_QUEUE.HEADER;
 
     const readable = stringToStream(data);
-    readable
-      .pipe(
-        csvParser({
-          separator: separator,
-          headers: header,
-        }),
-      )
-      .on('data', async parsedData => {
-        if (!(parsedData == null || typeof parsedData === 'undefined' || this.helpers.isHeader(parsedData))) {
-          Logger.log('Data to parse: ', JSON.stringify(parsedData));
-          await this.nosicaCallback(parsedData, separator, metadata);
-        }
-      });
+    return new Promise((resolve, reject) =>
+      readable
+        .pipe(
+          csvParser({
+            separator: separator,
+            headers: header,
+          }),
+        )
+        .on('data', async parsedData => {
+          if (!(parsedData == null || typeof parsedData === 'undefined' || this.helpers.isHeader(parsedData))) {
+            this.logger.debug('Data to parse: ', JSON.stringify(parsedData));
+            return resolve(parsedData);
+          }
+        })
+        .on('error', error => reject(error)),
+    );
   };
 }
