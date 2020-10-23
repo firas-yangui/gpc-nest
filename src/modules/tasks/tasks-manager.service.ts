@@ -51,7 +51,7 @@ export class TasksService implements OnModuleInit {
       .then((channel: Channel) => {
         Promise.all([
           channel.assertQueue(this.constantService.GLOBAL_CONST.QUEUE.PYRAMID_QUEUE.NAME).then(ok => {
-            channel.prefetch(50).then(() => {
+            channel.prefetch(1).then(() => {
               channel.consume(this.constantService.GLOBAL_CONST.QUEUE.PYRAMID_QUEUE.NAME, async msg => {
                 if (msg !== null) {
                   await this.handlePyramidEACMessage(msg);
