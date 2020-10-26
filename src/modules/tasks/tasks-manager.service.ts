@@ -21,10 +21,15 @@ export class TasksService implements OnModuleInit {
     const separator = this.constantService.GLOBAL_CONST.QUEUE.PYRAMID_QUEUE.ORIGIN_SEPARATOR;
     const regex = new RegExp(separator, 'g');
     const line = data.line.replace(regex, ';');
-    const parsedData = await this.pyramidParser.parsePramidLine(line, data.metadata);
-    const insertedData = await this.pyramidParser.pyramidCallback(parsedData, data.metadata, false);
-    this.logger.debug('inserted pyramid data: ', JSON.stringify(insertedData));
-    return insertedData;
+    try {
+      const parsedData = await this.pyramidParser.parsePramidLine(line, data.metadata);
+      const insertedData = await this.pyramidParser.pyramidCallback(parsedData, data.metadata, false);
+      this.logger.debug('inserted pyramid data: ', JSON.stringify(insertedData));
+      return insertedData;
+    } catch (error) {
+      this.logger.error(error);
+      return;
+    }
   };
 
   handlePyramidActualsMessage = async (message: Record<string, any>) => {
@@ -54,17 +59,17 @@ export class TasksService implements OnModuleInit {
       })
       .then((channel: Channel) => {
         Promise.all([
-          channel.assertQueue(this.constantService.GLOBAL_CONST.QUEUE.PYRAMID_QUEUE.NAME).then(ok => {
-            channel.prefetch(10).then(() => {
-              channel.consume(this.constantService.GLOBAL_CONST.QUEUE.PYRAMID_QUEUE.NAME, async msg => {
-                if (msg !== null) {
-                  this.handlePyramidEACMessage(msg)
-                    .then(() => channel.ack(msg))
-                    .catch(error => this.logger.error(error));
-                }
-              });
-            });
-          }),
+          channel
+            .assertQueue(this.constantService.GLOBAL_CONST.QUEUE.PYRAMID_QUEUE.NAME)
+            .then(ok => channel.prefetch(10))
+            .then(() =>
+              channel.consume(this.constantService.GLOBAL_CONST.QUEUE.PYRAMID_QUEUE.NAME, async msg =>
+                this.handlePyramidEACMessage(msg).then(() => {
+                  this.logger.debug('ack ', JSON.stringify(msg));
+                  return channel.ack(msg);
+                }),
+              ),
+            ),
           channel.assertQueue(this.constantService.GLOBAL_CONST.QUEUE.PYRAMIDACTUALS_QUEUE.NAME).then(ok => {
             channel.prefetch(50).then(() => {
               channel.consume(this.constantService.GLOBAL_CONST.QUEUE.PYRAMIDACTUALS_QUEUE.NAME, msg => {

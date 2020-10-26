@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { Like, In, Equal } from 'typeorm';
 import * as moment from 'moment';
 import { findKey, includes } from 'lodash';
@@ -92,13 +92,8 @@ export class CallbackPyramidParser {
     private readonly pricesService: PricesService,
   ) {}
 
-  isValidParams = (line: any, isActual = false) => {
-    let fileds: string[];
-
-    if (isActual) fileds = requiredFileds.actuals;
-    if (!isActual) fileds = requiredFileds.eac;
-
-    fileds.forEach(field => {
+  isValidParams = (requiredFileds: Record<string, any>, line: any, isActual = false) => {
+    requiredFileds.forEach(field => {
       if (!line[field]) return false;
     });
 
@@ -213,11 +208,16 @@ export class CallbackPyramidParser {
   parse = async (line: any, metadata: Record<string, any>, isActuals = false) => {
     let workload: Record<string, any>;
     let fields: Record<string, any>;
+    let requiredParams;
     if (isActuals) fields = pyramidFields.actuals;
     if (!isActuals) fields = pyramidFields.eac;
     const periodType: string = isActuals ? PeriodTypeInterface.actual : PeriodTypeInterface.forecast;
 
-    if (!this.isValidParams(line, isActuals)) {
+    if (isActuals) requiredParams = requiredFileds.actuals;
+    if (!isActuals) requiredParams = requiredFileds.eac;
+
+    if (!this.isValidParams(requiredParams, line, isActuals)) {
+      Logger.error('invalide line param');
       return Promise.reject(new Error('invalide line param'));
     }
 
@@ -230,41 +230,49 @@ export class CallbackPyramidParser {
     const periodAppSettings = await this.getPeriodAppSettings(periodType, isActuals);
 
     if (!periodAppSettings) {
+      Logger.error('period not found');
       throw new Error('period not found');
     }
 
     const service = await this.getServiceByPortfolioName(portfolioName);
     if (!service) {
+      Logger.error('Service not found');
       throw new Error('Service not found');
     }
 
     const planCode = this.getPlanCode(plan);
     if (!planCode) {
+      Logger.error(`Plan Code not found for plan ${plan}`);
       throw new Error(`Plan Code not found for plan ${plan}`);
     }
 
     const subtypology = await this.getSubtypologyByCode(planCode);
     if (!subtypology) {
+      Logger.error(`subTypology not found`);
       throw new Error('subTypology not found');
     }
 
     const thirdparty = await this.getThirdpartyByName(line[fields.csm]);
     if (!thirdparty) {
+      Logger.error(`thirdparty not found`);
       throw new Error('thirdparty not found');
     }
 
     const subservice = await this.findSubService(service, subtypology, projectCode);
     if (!subservice) {
+      Logger.error(`subservice not found`);
       throw new Error('subservice not found');
     }
 
     const subnature = await this.subnatureService.findOne({ where: { name: subnatureName } });
     if (!subnature) {
+      Logger.error(`subNature not found`);
       throw new Error('subNature not found');
     }
 
     const workloadsBySubserviceThirdpartySubnature = await this.findWorkloadBySubserviceThirdpartySubnature(subnature, subservice, thirdparty);
     if (!workloadsBySubserviceThirdpartySubnature.length) {
+      Logger.error(`workload not found`);
       throw new Error('workload not found');
     }
 
@@ -273,9 +281,11 @@ export class CallbackPyramidParser {
     if (workloadsBySubserviceThirdpartySubnature.length > 1) {
       const subsidiaryAllocation = await this.getAllocationsByThirdparty(workloadsBySubserviceThirdpartySubnature, thirdparty, periodAppSettings);
       if (!subsidiaryAllocation) {
+        Logger.error(`subsidiaryAllocation not found by subsidiary allocations`);
         throw new Error('subsidiaryAllocation not found by subsidiary allocations');
       }
       if (!subsidiaryAllocation.workload) {
+        Logger.error(`workload not found by subsidiary allocations`);
         throw new Error('workload not found by subsidiary allocations');
       }
       workload = subsidiaryAllocation.workload;
@@ -287,6 +297,7 @@ export class CallbackPyramidParser {
     const rate = await this.currencyRateService.getCurrencyRateByCountryAndPeriod(thirdparty.countryid, actualPeriod.id);
 
     if (!prices) {
+      Logger.error('Price not found');
       throw new Error('Price not found');
     }
 
