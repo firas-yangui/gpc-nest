@@ -21,7 +21,15 @@ export class TasksService implements OnModuleInit {
     const separator = this.constantService.GLOBAL_CONST.QUEUE.PYRAMID_QUEUE.ORIGIN_SEPARATOR;
     const regex = new RegExp(separator, 'g');
     const line = data.line.replace(regex, ';');
-    return this.pyramidParser.parsePramidLine(line, data.metadata);
+    try {
+      const parsedData = await this.pyramidParser.parsePramidLine(line, data.metadata);
+      const insertedData = await this.pyramidParser.pyramidCallback(parsedData, data.metadata, false);
+      this.logger.debug('inserted pyramid data: ', JSON.stringify(insertedData));
+      return insertedData;
+    } catch (error) {
+      this.logger.error(error);
+      return;
+    }
   };
 
   handlePyramidActualsMessage = async (message: Record<string, any>) => {
@@ -33,12 +41,13 @@ export class TasksService implements OnModuleInit {
     return this.pyramidParser.parsePramidLine(line, data.metadata, true);
   };
 
-  handleNosicaMessage = message => {
+  handleNosicaMessage = async (message): Promise<any> => {
     const data = JSON.parse(message.content.toString('utf8'));
     const separator = this.constantService.GLOBAL_CONST.QUEUE.NOSICA_QUEUE.ORIGIN_SEPARATOR;
     const regex = new RegExp(separator, 'g');
     const line = data.line.replace(regex, ';');
-    this.nosicaParser.parseNosicaLine(line, data.metadata);
+    const parsed = await this.nosicaParser.parseNosicaLine(line, data.metadata);
+    return this.nosicaParser.nosicaCallback(parsed, separator, data.metadata);
   };
 
   public onModuleInit() {
@@ -50,40 +59,33 @@ export class TasksService implements OnModuleInit {
       })
       .then((channel: Channel) => {
         Promise.all([
-          channel.assertQueue(this.constantService.GLOBAL_CONST.QUEUE.PYRAMID_QUEUE.NAME).then(ok => {
-            channel.prefetch(1).then(() => {
-              channel.consume(this.constantService.GLOBAL_CONST.QUEUE.PYRAMID_QUEUE.NAME, msg => {
-                if (msg !== null) {
-                  return this.handlePyramidEACMessage(msg).then(() => {
-                    setTimeout(() => {
-                      channel.ack(msg);
-                    }, 350);
-                  });
-                }
-              });
-            });
-          }),
+          channel
+            .assertQueue(this.constantService.GLOBAL_CONST.QUEUE.PYRAMID_QUEUE.NAME)
+            .then(ok => channel.prefetch(10))
+            .then(() =>
+              channel.consume(this.constantService.GLOBAL_CONST.QUEUE.PYRAMID_QUEUE.NAME, async msg =>
+                this.handlePyramidEACMessage(msg).then(() => {
+                  this.logger.debug('ack ', JSON.stringify(msg));
+                  return channel.ack(msg);
+                }),
+              ),
+            ),
           channel.assertQueue(this.constantService.GLOBAL_CONST.QUEUE.PYRAMIDACTUALS_QUEUE.NAME).then(ok => {
-            channel.prefetch(1).then(() => {
+            channel.prefetch(50).then(() => {
               channel.consume(this.constantService.GLOBAL_CONST.QUEUE.PYRAMIDACTUALS_QUEUE.NAME, msg => {
                 if (msg !== null) {
                   return this.handlePyramidActualsMessage(msg).then(() => {
-                    setTimeout(() => {
-                      channel.ack(msg);
-                    }, 350);
+                    channel.ack(msg);
                   });
                 }
               });
             });
           }),
           channel.assertQueue(this.constantService.GLOBAL_CONST.QUEUE.NOSICA_QUEUE.NAME).then(ok =>
-            channel.prefetch(1).then(() => {
+            channel.prefetch(10).then(() => {
               channel.consume(this.constantService.GLOBAL_CONST.QUEUE.NOSICA_QUEUE.NAME, msg => {
                 if (msg !== null) {
-                  this.handleNosicaMessage(msg);
-                  setTimeout(() => {
-                    channel.ack(msg);
-                  }, 100);
+                  this.handleNosicaMessage(msg).then(() => channel.ack(msg));
                 }
               });
             }),

@@ -1,10 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { Like, In, Equal } from 'typeorm';
 import * as moment from 'moment';
-import { includes } from 'lodash';
+import { findKey, includes } from 'lodash';
 
-import { AmountsService } from './../../amounts/amounts.service';
-import { ResourceManager } from './../nosica/resource-store';
+import { RawAmountsService } from './../../rawamounts/rawamounts.service';
 import { AmountConverter } from './../../amounts/amounts.converter';
 import { CurrencyRateService } from './../../currency-rate/currency-rate.service';
 import { WorkloadsService } from './../../../modules/workloads/workloads.service';
@@ -20,6 +19,7 @@ import { SubnatureService } from './../../subnature/subnature.service';
 import { ServicesService } from './../../services/services.service';
 import { PricesService } from './../../prices/prices.service';
 import { ConstantService } from './../../constants/constants';
+import { PeriodType as PeriodTypeInterface } from './../../interfaces/common-interfaces';
 
 const pyramidFields = {
   eac: {
@@ -47,6 +47,7 @@ const pyramidFields = {
   },
   actuals: {
     cds: 'ressource_cds',
+    csm: 'ressource_csm',
     staffType: 'ressource_staff_type',
     portfolio: 'portfolio_sub_portfolio',
     activityPlan: 'plan',
@@ -76,7 +77,7 @@ const requiredFileds = {
 @Injectable()
 export class CallbackPyramidParser {
   constructor(
-    private readonly amountsService: AmountsService,
+    private readonly rawAmountsService: RawAmountsService,
     private readonly amountConverter: AmountConverter,
     private readonly workloadsService: WorkloadsService,
     private readonly thirdpartiesService: ThirdpartiesService,
@@ -89,16 +90,10 @@ export class CallbackPyramidParser {
     private readonly constantService: ConstantService,
     private readonly currencyRateService: CurrencyRateService,
     private readonly pricesService: PricesService,
-    private readonly resourceManager: ResourceManager,
   ) {}
 
-  isValidParams = (line: any, isActual = false) => {
-    let fileds: string[];
-
-    if (isActual) fileds = requiredFileds.actuals;
-    if (!isActual) fileds = requiredFileds.eac;
-
-    fileds.forEach(field => {
+  isValidParams = (requiredFileds: Record<string, any>, line: any, isActual = false) => {
+    requiredFileds.forEach(field => {
       if (!line[field]) return false;
     });
 
@@ -110,12 +105,22 @@ export class CallbackPyramidParser {
   };
 
   isKLC = (subnature: string) => {
-    return includes(['outsourcing consulting', 'outsourcing fixed price'], subnature.toLocaleLowerCase());
+    return includes(['outsourcing - consulting', 'outsourcing - fixed-price contract'], subnature.toLocaleLowerCase());
   };
 
-  getSubtypologyByName = async (name: string) => {
-    //TODO mapping
-    return this.subtypologiesService.findOne({ name: name });
+  getSubtypologyByCode = async (code: string) => {
+    return this.subtypologiesService.findOne({ code: code });
+  };
+
+  getPlanCode = (plan: string) => {
+    const plans = {
+      35: 'Structure',
+      12: 'Evolutive Maintenance',
+      58: 'Run activities',
+      P1: 'Project',
+      13: 'Tech Plan',
+    };
+    return findKey(plans, value => value === plan);
   };
 
   getServiceByPortfolioName = async (portfolioName: string) => {
@@ -130,11 +135,14 @@ export class CallbackPyramidParser {
     return this.thirdpartiesService.findOne({ name: name });
   };
 
-  getActualLastPeriodAppSettings = async (month: string) => {
+  getPeriodAppSettings = async (type: string, isActual: boolean) => {
+    let month = moment(Date.now());
+
+    if (isActual) month = month.subtract(1, 'month');
     return this.periodsService.findOneInAppSettings(this.constantService.GLOBAL_CONST.SCOPES.BSC, {
-      type: 'actual',
+      type: type,
       year: moment(Date.now()).format('YYYY'),
-      month: month,
+      month: month.format('MM'),
     });
   };
 
@@ -200,78 +208,96 @@ export class CallbackPyramidParser {
   parse = async (line: any, metadata: Record<string, any>, isActuals = false) => {
     let workload: Record<string, any>;
     let fields: Record<string, any>;
+    let requiredParams;
     if (isActuals) fields = pyramidFields.actuals;
     if (!isActuals) fields = pyramidFields.eac;
+    const periodType: string = isActuals ? PeriodTypeInterface.actual : PeriodTypeInterface.forecast;
 
-    if (!this.isValidParams(line, isActuals)) {
+    if (isActuals) requiredParams = requiredFileds.actuals;
+    if (!isActuals) requiredParams = requiredFileds.eac;
+
+    if (!this.isValidParams(requiredParams, line, isActuals)) {
+      Logger.error('invalide line param');
       return Promise.reject(new Error('invalide line param'));
     }
 
     const subnatureName = line[fields.staffType];
     const portfolioName = line[fields.portfolio];
-    const subtypologyName = line[fields.activityPlan];
+    const plan = line[fields.activityPlan];
     const projectCode = line[fields.ProjectCode];
+    const datasource = metadata.filename;
 
-    const month = moment(Date.now())
-      .subtract(1, 'month')
-      .format('MM');
+    const periodAppSettings = await this.getPeriodAppSettings(periodType, isActuals);
 
-    const actualPeriodAppSettings = await this.getActualLastPeriodAppSettings(month);
-
-    if (!actualPeriodAppSettings) {
+    if (!periodAppSettings) {
+      Logger.error('period not found');
       throw new Error('period not found');
     }
 
     const service = await this.getServiceByPortfolioName(portfolioName);
     if (!service) {
+      Logger.error('Service not found');
       throw new Error('Service not found');
     }
 
-    const subtypology = await this.getSubtypologyByName(subtypologyName);
+    const planCode = this.getPlanCode(plan);
+    if (!planCode) {
+      Logger.error(`Plan Code not found for plan ${plan}`);
+      throw new Error(`Plan Code not found for plan ${plan}`);
+    }
+
+    const subtypology = await this.getSubtypologyByCode(planCode);
     if (!subtypology) {
+      Logger.error(`subTypology not found`);
       throw new Error('subTypology not found');
     }
 
-    const thirdparty = await this.getThirdpartyByName(line[fields.cds]);
+    const thirdparty = await this.getThirdpartyByName(line[fields.csm]);
     if (!thirdparty) {
+      Logger.error(`thirdparty not found`);
       throw new Error('thirdparty not found');
     }
 
     const subservice = await this.findSubService(service, subtypology, projectCode);
     if (!subservice) {
+      Logger.error(`subservice not found`);
       throw new Error('subservice not found');
     }
 
     const subnature = await this.subnatureService.findOne({ where: { name: subnatureName } });
     if (!subnature) {
+      Logger.error(`subNature not found`);
       throw new Error('subNature not found');
     }
 
     const workloadsBySubserviceThirdpartySubnature = await this.findWorkloadBySubserviceThirdpartySubnature(subnature, subservice, thirdparty);
     if (!workloadsBySubserviceThirdpartySubnature.length) {
+      Logger.error(`workload not found`);
       throw new Error('workload not found');
     }
 
     workload = workloadsBySubserviceThirdpartySubnature[0];
 
     if (workloadsBySubserviceThirdpartySubnature.length > 1) {
-      const subsidiaryAllocation = await this.getAllocationsByThirdparty(
-        workloadsBySubserviceThirdpartySubnature,
-        thirdparty,
-        actualPeriodAppSettings,
-      );
+      const subsidiaryAllocation = await this.getAllocationsByThirdparty(workloadsBySubserviceThirdpartySubnature, thirdparty, periodAppSettings);
+      if (!subsidiaryAllocation) {
+        Logger.error(`subsidiaryAllocation not found by subsidiary allocations`);
+        throw new Error('subsidiaryAllocation not found by subsidiary allocations');
+      }
       if (!subsidiaryAllocation.workload) {
+        Logger.error(`workload not found by subsidiary allocations`);
         throw new Error('workload not found by subsidiary allocations');
       }
       workload = subsidiaryAllocation.workload;
     }
 
-    const actualPeriod = actualPeriodAppSettings.period;
+    const actualPeriod = periodAppSettings.period;
 
     const prices = await this.pricesService.findOne({ where: { thirdparty: thirdparty.id, subnature: subnature.id, periodtype: actualPeriod.type } });
     const rate = await this.currencyRateService.getCurrencyRateByCountryAndPeriod(thirdparty.countryid, actualPeriod.id);
 
     if (!prices) {
+      Logger.error('Price not found');
       throw new Error('Price not found');
     }
 
@@ -282,18 +308,9 @@ export class CallbackPyramidParser {
 
     let createdAmount = this.amountConverter.createAmountEntity(parseFloat(amountData.amount), amountData.unit, rate.value, costPrice, salePrice);
 
-    createdAmount = { ...createdAmount, workload: workload, period: actualPeriod };
+    createdAmount = { ...createdAmount, workloadid: workload.id, periodid: actualPeriod.id, datasource: datasource };
 
-    const existingAmount = await this.amountsService.findOne({ where: { period: actualPeriod, workload: workload } });
-    if (existingAmount) {
-      createdAmount.id = existingAmount.id;
-      if (this.resourceManager.exists(workload.id.toString())) {
-        createdAmount = this.amountConverter.sum(createdAmount, existingAmount);
-      }
-    }
-    this.resourceManager.add(workload.id.toString());
-
-    return this.amountsService.save(createdAmount, { reload: false });
+    return this.rawAmountsService.save(createdAmount);
   };
   end = () => {};
 }

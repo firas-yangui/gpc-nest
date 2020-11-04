@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { AmountsModule } from './../../amounts/amounts.module';
+import { RawAmountsModule } from './../../rawamounts/rawamounts.module';
 import { CallbackPyramidParser } from './callback.pyramid.parser';
 import { ConstantsModule } from './../../constants/constants.module';
 import { CurrencyRateModule } from './../../currency-rate/currency-rate.module';
@@ -14,6 +15,7 @@ import { ThirdpartiesModule } from './../../../modules/thirdparties/thirdparties
 import { PortfolioModule } from './../../portfolio/portfolio.module';
 import { SubsidiaryallocationModule } from './../../subsidiaryallocation/subsidiaryallocation.module';
 import { SubtypologiesModule } from './../../subtypologies/subtypologies.module';
+import { SubtypologyAppSettingsModule } from './../../subTypologyAppSettings/subtypologyappsettings.module';
 import { SubnatureModule } from './../../subnature/subnature.module';
 
 @Module({
@@ -25,10 +27,12 @@ import { SubnatureModule } from './../../subnature/subnature.module';
     PortfolioModule,
     PricesModule,
     NosicaModule,
+    RawAmountsModule,
     ThirdpartiesModule,
     ServicesModule,
     SubsidiaryallocationModule,
     SubtypologiesModule,
+    SubtypologyAppSettingsModule,
     SubservicesModule,
     SubnatureModule,
     WorkloadsModule,
