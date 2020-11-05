@@ -144,6 +144,7 @@ export class CallbackNosicaParser {
     let createdAmount = this.amountConverter.createAmountEntity(parseFloat(amount), GLOBAL_CONST.AMOUNT_UNITS.KLC, rate.value, costPrice, salePrice);
     createdAmount = { ...createdAmount, workloadid: workload.id, periodid: actualPeriod.id, datasource: datasource };
     Logger.log(`amount saved with success for workload "${workload.code}" and period "${actualPeriod.code}"`);
+    Logger.log(`The created amount ... ${JSON.stringify(createdAmount)}`);
     return this.rawAmountsService.save(createdAmount);
   };
 
