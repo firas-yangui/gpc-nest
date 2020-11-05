@@ -21,6 +21,9 @@ import { PricesService } from './../../prices/prices.service';
 import { ConstantService } from './../../constants/constants';
 import { PeriodType as PeriodTypeInterface } from './../../interfaces/common-interfaces';
 
+const actualsValideStaffType = ['internal', 'external', 'nearshore', 'offshore'];
+const eacValideStaffType = ['outsourcing consulting', 'outsourcing fixed price'];
+
 const pyramidFields = {
   eac: {
     ProjectCode: 'Project_Code',
@@ -35,6 +38,7 @@ const pyramidFields = {
     csm: 'CSM',
     parentDescr: 'PARENT_DESCR',
     staffType: 'staff_type',
+    valideStaffType: [...actualsValideStaffType, ...eacValideStaffType],
     activityPlan: 'activity_plan',
     activityType: 'activity_type',
     portfolio: 'portfolio',
@@ -42,17 +46,21 @@ const pyramidFields = {
     partner: 'partner',
     caPayor: 'Activity_Ca payor',
     caPayorLabel: 'Activity_Ca payor label',
+    payor: 'code_ca_payor',
     clientEntity: 'Client_Entity',
     pyrTmpMonthMr: 'pyr_tmp_month_mr',
   },
   actuals: {
+    amount: 'standard_actuals_md',
+    activityPlan: 'plan',
+    activityType: 'activity_type',
     cds: 'ressource_cds',
     csm: 'ressource_csm',
     staffType: 'ressource_staff_type',
+    valideStaffType: actualsValideStaffType,
     portfolio: 'portfolio_sub_portfolio',
-    activityPlan: 'plan',
     ProjectCode: 'project_code',
-    amount: 'standard_actuals_md',
+    payor: 'payor',
   },
 };
 
@@ -100,12 +108,20 @@ export class CallbackPyramidParser {
     return true;
   };
 
+  isParseableLine = (line: any, fields: Record<string, any>): boolean => {
+    return fields.cds.trim() !== 'RISQ/DTO' && fields.payor.trim() !== '3000324000' && fields.activityType.trim() !== 'Absence';
+  };
+
+  isChargeableLine = (line: any, fields: Record<string, any>): boolean => {
+    return includes(fields.valideStaffType, line[fields.staffType].toLocaleLowerCase());
+  };
+
   isJH = (subnature: string) => {
-    return includes(['internal', 'external', 'nearshore', 'offshore'], subnature.toLocaleLowerCase());
+    return includes(actualsValideStaffType, subnature.toLocaleLowerCase());
   };
 
   isKLC = (subnature: string) => {
-    return includes(['outsourcing - consulting', 'outsourcing - fixed-price contract'], subnature.toLocaleLowerCase());
+    return includes(eacValideStaffType, subnature.toLocaleLowerCase());
   };
 
   getSubtypologyByCode = async (code: string) => {
@@ -219,6 +235,14 @@ export class CallbackPyramidParser {
     if (!this.isValidParams(requiredParams, line, isActuals)) {
       Logger.error('invalide line param');
       return Promise.reject(new Error('invalide line param'));
+    }
+
+    if (!this.isParseableLine(line, fields)) {
+      throw new Error('line is not parseable');
+    }
+
+    if (!this.isChargeableLine(line, fields)) {
+      throw new Error('line is not chargeable');
     }
 
     const subnatureName = line[fields.staffType];
