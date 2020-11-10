@@ -31,12 +31,6 @@ export class SubService {
   })
   thirdpPartyId: number;
 
-  @Column('integer', {
-    nullable: false,
-    name: 'serviceid',
-  })
-  serviceId: number;
-
   @Column('text', {
     nullable: true,
     name: 'description',
@@ -54,12 +48,6 @@ export class SubService {
     name: 'irtapplicationid',
   })
   irtApplicationId: number;
-
-  @Column('integer', {
-    nullable: true,
-    name: 'portfolioid',
-  })
-  portfolioId: number;
 
   @Column('timestamp with time zone', {
     nullable: true,

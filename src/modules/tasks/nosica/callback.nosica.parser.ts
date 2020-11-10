@@ -2,14 +2,12 @@ import { createWriteStream } from 'fs';
 import { Injectable, Logger } from '@nestjs/common';
 import { Like } from 'typeorm';
 
-import { ResourceManager } from './resource-store';
-
 import { ThirdpartiesService } from './../../../modules/thirdparties/thirdparties.service';
 import { WorkloadsService } from './../../../modules/workloads/workloads.service';
 import { SubnatureappsettingsService } from './../../../modules/subnatureappsettings/subnatureappsettings.service';
 import { PeriodsService } from './../../../modules/periods/periods.service';
 import { Thirdparty, PeriodType } from './../../../modules/interfaces/common-interfaces';
-import { AmountsService } from './../../../modules/amounts/amounts.service';
+import { RawAmountsService } from './../../../modules/rawamounts/rawamounts.service';
 import { PricesService } from './../../prices/prices.service';
 import { CurrencyRateService } from './../../currency-rate/currency-rate.service';
 import { ConstantService } from './../../constants/constants';
@@ -41,12 +39,11 @@ export class CallbackNosicaParser {
     private readonly subnatureappsettingsService: SubnatureappsettingsService,
     private readonly workloadsService: WorkloadsService,
     private readonly periodsService: PeriodsService,
-    private readonly amountsService: AmountsService,
+    private readonly rawAmountsService: RawAmountsService,
     private readonly amountConverter: AmountConverter,
     private readonly pricesService: PricesService,
     private readonly currencyRateService: CurrencyRateService,
     private readonly constantService: ConstantService,
-    private readonly resourceManager: ResourceManager,
   ) {}
 
   private cdsToCsm = (cds: string) => {
@@ -75,13 +72,9 @@ export class CallbackNosicaParser {
     const receivedYear = line[nosicaField.year].trim();
     const receivedNRGCode = line[nosicaField.NRG].trim();
     const receivedMonth = line[nosicaField.period].trim();
+    const datasource = metadata.filename;
     let amount = line[nosicaField.amount].trim();
     let error = '';
-
-    // is the first line after the header
-    if (metadata.lineNumber == 1) {
-      this.resourceManager.reset();
-    }
 
     const actualPeriodAppSettings = await this.periodsService.findOneInAppSettings(this.constantService.GLOBAL_CONST.SCOPES.BSC, {
       year: receivedYear,
@@ -137,7 +130,7 @@ export class CallbackNosicaParser {
     );
 
     const prices = await this.pricesService.getPricesFromWorkload(workload, actualPeriod.type);
-    const rate = await this.currencyRateService.getCurrencyRateFromWorkloadAndPeriod(workload, actualPeriod.id);
+    const rate = await this.currencyRateService.getCurrencyRateByThirdpartyAndPeriod(workload.thirdparty.id, actualPeriod.id);
     const GLOBAL_CONST = this.constantService.GLOBAL_CONST;
     let costPrice = null;
     let salePrice = null;
@@ -149,19 +142,10 @@ export class CallbackNosicaParser {
     }
 
     let createdAmount = this.amountConverter.createAmountEntity(parseFloat(amount), GLOBAL_CONST.AMOUNT_UNITS.KLC, rate.value, costPrice, salePrice);
-
-    createdAmount = { ...createdAmount, workload: workload, period: actualPeriod };
-    const existingAmount = await this.amountsService.findOne({ where: { period: actualPeriod, workload: workload } });
-    if (existingAmount) {
-      createdAmount.id = existingAmount.id;
-      if (this.resourceManager.exists(workload.id.toString())) {
-        createdAmount = this.amountConverter.sum(createdAmount, existingAmount);
-      }
-    }
-
+    createdAmount = { ...createdAmount, workloadid: workload.id, periodid: actualPeriod.id, datasource: datasource };
     Logger.log(`amount saved with success for workload "${workload.code}" and period "${actualPeriod.code}"`);
-    this.resourceManager.add(workload.id.toString());
-    return this.amountsService.save(createdAmount, { reload: false });
+    Logger.log(`The created amount ... ${JSON.stringify(createdAmount)}`);
+    return this.rawAmountsService.save(createdAmount);
   };
 
   endNosicaCallback = () => {

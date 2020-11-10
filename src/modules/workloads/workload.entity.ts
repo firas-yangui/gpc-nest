@@ -5,6 +5,8 @@ import { SubService } from './../subservices/subservice.entity';
 import { User as gpcUser } from './../user/user.entity';
 import { Amount } from './../amounts/amount.entity';
 import TransactionWorkload from './../transactions/transaction-workloads/transaction-workload.entity';
+import { SubsidiaryAllocation } from './../subsidiaryallocation/subsidiaryallocation.entity';
+
 @Entity('workload')
 @Index('workload_code_idx', ['code'], { unique: true })
 export class Workload {
@@ -104,4 +106,10 @@ export class Workload {
     (transactionWorkload: TransactionWorkload) => transactionWorkload.workload,
   )
   transactionWorkloads: TransactionWorkload[];
+
+  @OneToMany(
+    () => SubsidiaryAllocation,
+    (subsidiaryAllocation: SubsidiaryAllocation) => subsidiaryAllocation.workload,
+  )
+  subsidiaryAllocations: SubsidiaryAllocation[];
 }

@@ -1,7 +1,8 @@
 import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
+
 import { SubservicesController } from './subservices.controller';
 import { SubservicesService } from './subservices.service';
-import { TypeOrmModule } from '@nestjs/typeorm';
 import { SubServiceRepository } from './subservices.repository';
 
 @Module({

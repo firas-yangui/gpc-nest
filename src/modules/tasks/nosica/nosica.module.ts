@@ -8,6 +8,7 @@ import { ServicesModule } from './../../../modules/services/services.module';
 import { SubservicesModule } from './../../../modules/subservices/subservices.module';
 import { SubnatureappsettingsModule } from './../../../modules/subnatureappsettings/subnatureappsettings.module';
 import { AmountsModule } from './../../../modules/amounts/amounts.module';
+import { RawAmountsModule } from './../../../modules/rawamounts/rawamounts.module';
 import { PeriodsModule } from './../../../modules/periods/periods.module';
 import { WorkloadsModule } from './../../../modules/workloads/workloads.module';
 import { ThirdpartiesModule } from './../../../modules/thirdparties/thirdparties.module';
@@ -18,6 +19,7 @@ import { PricesModule } from './../../prices/prices.module';
 @Module({
   imports: [
     AmountsModule,
+    RawAmountsModule,
     ConstantsModule,
     CurrencyRateModule,
     PeriodsModule,
@@ -29,6 +31,6 @@ import { PricesModule } from './../../prices/prices.module';
     WorkloadsModule,
   ],
   providers: [ResourceManager, NosicaParser, CallbackNosicaParser],
-  exports: [NosicaParser, CallbackNosicaParser],
+  exports: [ResourceManager, NosicaParser, CallbackNosicaParser],
 })
 export class NosicaModule {}

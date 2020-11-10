@@ -1,4 +1,5 @@
 import { Type } from '@nestjs/common';
+import { Timestamp } from 'typeorm';
 
 export interface FindAndCountInterface<E, N> extends Array<E[] | N> {
   0: E[];
@@ -71,6 +72,14 @@ export interface Amount extends UnitsAmount {
   id?: number;
   workload: any;
   period: any;
+}
+
+export interface RawAmount extends UnitsAmount {
+  id?: number;
+  workloadid: number;
+  periodid: number;
+  datasource: string;
+  created?: Timestamp;
 }
 
 export interface ThirdpartyTree {

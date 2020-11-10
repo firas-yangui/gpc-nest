@@ -1,15 +1,15 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { SubnatureService } from './subnature.service';
+import { PortfolioService } from './portfolio.service';
 
-describe.skip('SubnatureService', () => {
-  let service: SubnatureService;
+describe.skip('PortfolioService', () => {
+  let service: PortfolioService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [SubnatureService],
+      providers: [PortfolioService],
     }).compile();
 
-    service = module.get<SubnatureService>(SubnatureService);
+    service = module.get<PortfolioService>(PortfolioService);
   });
 
   it('should be defined', () => {
