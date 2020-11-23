@@ -1,9 +1,7 @@
 import { isNumber, includes } from 'lodash';
 import { Logger, Injectable } from '@nestjs/common';
-import { Unit } from '../interfaces/common-interfaces';
+import { WorkloadStatus } from '../interfaces/common-interfaces';
 import { ConstantService } from '../constants/constants';
-import { Amount } from './amount.entity';
-
 @Injectable()
 export class AmountConverter {
   AMOUNT_UNITS = ['mandays', 'keuros', 'keurossales', 'klocalcurrency'];
@@ -131,7 +129,7 @@ export class AmountConverter {
 
     const amount = {};
     amount[unit] = value;
-
+    amount['status'] = WorkloadStatus.draft;
     Object.values(AMOUNT_UNITS).forEach(unitFromModel => {
       if (unitFromModel !== unit) {
         amount[unitFromModel] = this.convertFromUnitAToUnitB(value, unit, unitFromModel, rate, price, sellPrice);
