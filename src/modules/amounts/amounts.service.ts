@@ -3,7 +3,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { AmountRepository } from './amounts.repository';
 import { Amount as AmountEntity } from './amount.entity';
 import { RawAmount } from './../rawamounts/rawamount.entity';
-import { Amount } from './../interfaces/common-interfaces';
+import { WorkloadsService } from '../workloads/workloads.service';
+import { Amount, WorkloadStatus } from './../interfaces/common-interfaces';
 import { getConnection } from 'typeorm';
 
 @Injectable()
@@ -11,6 +12,7 @@ export class AmountsService {
   constructor(
     @InjectRepository(AmountRepository)
     private amountRepository: AmountRepository,
+    private readonly workloadsService: WorkloadsService,
   ) {}
 
   async save(entities: Amount, options: any = {}) {
@@ -20,7 +22,13 @@ export class AmountsService {
   async findOne(options: Record<string, any>): Promise<Amount | undefined> {
     return this.amountRepository.findOne(options);
   }
-
+  async selectStatusFromWorkloadOrExistingAmount(workloadId: number, periodId: number): Promise<string> {
+    const workload = await this.workloadsService.findOne({ id: workloadId });
+    if (workload) return workload.status;
+    const foundAmount = await this.findOne({ workloadId: workloadId, periodId: periodId });
+    if (foundAmount) return foundAmount.status;
+    return WorkloadStatus.draft;
+  }
   async synchronizeFromRawAmounts(source: string): Promise<void> {
     const queryRunner = getConnection().createQueryRunner();
     await queryRunner.startTransaction();

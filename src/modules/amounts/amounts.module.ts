@@ -5,9 +5,10 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AmountRepository } from './amounts.repository';
 import { AmountConverter } from './amounts.converter';
 import { ConstantsModule } from './../constants/constants.module';
+import { WorkloadsModule } from './../workloads/workloads.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([AmountRepository]), ConstantsModule],
+  imports: [TypeOrmModule.forFeature([AmountRepository]), ConstantsModule, WorkloadsModule],
   controllers: [AmountsController],
   providers: [AmountsService, AmountConverter],
   exports: [AmountsService, AmountConverter],
