@@ -223,7 +223,7 @@ export class CallbackPyramidParser {
           break;
         default: {
           const datalakePartner = await this.datalakeGpcPayorService.findOne({ payorname: line[fields.payor] });
-          partner = datalakePartner.datalakepartnername;
+          partner = datalakePartner.gpcpartnername;
           break;
         }
       }

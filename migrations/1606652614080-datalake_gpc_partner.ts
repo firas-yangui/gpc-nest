@@ -2,7 +2,7 @@ import { MigrationInterface, QueryRunner, Table } from 'typeorm';
 
 export class DatalakeGpcPartner1606652614080 implements MigrationInterface {
   partnerTable = new Table({
-    name: 'datalake_gpc_payor',
+    name: 'datalake_gpc_partner',
     columns: [
       {
         name: 'id',
