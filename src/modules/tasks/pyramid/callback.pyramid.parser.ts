@@ -20,6 +20,9 @@ import { ServicesService } from './../../services/services.service';
 import { PricesService } from './../../prices/prices.service';
 import { ConstantService } from './../../constants/constants';
 import { DatalakeGpcOrganizationService } from '../../datalakemapping/datalakegpcorganization.service';
+import { DatalakeGpcPartnerService } from '../../datalakemapping/datalakegpcpartner.service';
+import { DatalakeGpcPayorService } from '../../datalakemapping/datalakegpcpayor.service';
+
 import { PeriodType as PeriodTypeInterface } from './../../interfaces/common-interfaces';
 
 const actualsValideStaffType = ['internal', 'external', 'nearshore', 'offshore'];
@@ -100,6 +103,8 @@ export class CallbackPyramidParser {
     private readonly currencyRateService: CurrencyRateService,
     private readonly pricesService: PricesService,
     private readonly datalakeGpcOrganizationService: DatalakeGpcOrganizationService,
+    private readonly datalakeGpcPartnerService: DatalakeGpcPartnerService,
+    private readonly datalakeGpcPayorService: DatalakeGpcPayorService,
   ) {}
 
   isValidParams = (requiredFileds: Record<string, any>, line: any, isActual = false) => {
@@ -153,7 +158,7 @@ export class CallbackPyramidParser {
     });
   };
 
-  getThirdparty = async (line: string, fields: any, isActual: boolean): Promise<Thirdparty> => {
+  getThirdparty = async (line: Record<string, any>, fields: Record<string, any>, isActual: boolean): Promise<Thirdparty> => {
     //TODO mapping
 
     const thirdParty = await this.thirdpartiesService.findOne({ name: line[fields.csm] });
@@ -187,15 +192,49 @@ export class CallbackPyramidParser {
     });
   };
 
-  getAllocationsByThirdparty = async (
+  getAllocations = async (
     workloads: Workload[],
-    thirdparty: Record<string, any>,
+    line: Record<string, any>,
+    fields: Record<string, any>,
     periodAppSettings: Record<string, any>,
   ): Promise<SubsidiaryAllocation> => {
+    const partner = await this.getGpcDatalakePartner(line, fields);
+    if (!partner) {
+      return null;
+    }
     return this.subsidiaryallocationService.findOne({
-      where: { thirdparty: Equal(thirdparty.id), workload: In(workloads.map(workload => workload.id)), period: Equal(periodAppSettings.period.id) },
+      where: { thirdparty: Equal(partner.id), workload: In(workloads.map(workload => workload.id)), period: Equal(periodAppSettings.period.id) },
       relations: ['workload'],
     });
+  };
+
+  getGpcDatalakePartner = async (line: Record<string, any>, fields: Record<string, any>) => {
+    if (fields.partner.trim() === 'RESG/BSC') {
+      let partner: string;
+      switch (fields.portfolio.trim()) {
+        case 'Offres de Services BSC':
+          partner = 'BSC_OdS';
+          break;
+        case 'Activités transverses BSC':
+          partner = 'BSC_AC';
+          break;
+        case 'Transformation BSC':
+          partner = 'BSC_TRA';
+          break;
+        default: {
+          const datalakePartner = await this.datalakeGpcPayorService.findOne({ payorname: line[fields.payor] });
+          partner = datalakePartner.datalakepartnername;
+          break;
+        }
+      }
+      return this.thirdpartiesService.findOne({ trigram: partner });
+    } else {
+      const datalakePartner = await this.datalakeGpcPartnerService.findOne({ datalakename: line[fields.partner] });
+      if (datalakePartner) {
+        return this.thirdpartiesService.findOne({ trigram: datalakePartner.gpcname });
+      }
+      return null;
+    }
   };
 
   findWorkloadBySubserviceThirdpartySubnature = (
@@ -322,7 +361,7 @@ export class CallbackPyramidParser {
     workload = workloadsBySubserviceThirdpartySubnature[0];
 
     if (workloadsBySubserviceThirdpartySubnature.length > 1) {
-      const subsidiaryAllocation = await this.getAllocationsByThirdparty(workloadsBySubserviceThirdpartySubnature, thirdparty, periodAppSettings);
+      const subsidiaryAllocation = await this.getAllocations(workloadsBySubserviceThirdpartySubnature, line, fields, periodAppSettings);
       if (!subsidiaryAllocation) {
         Logger.error(`subsidiaryAllocation not found by subsidiary allocations`);
         throw new Error('subsidiaryAllocation not found by subsidiary allocations');
