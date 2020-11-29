@@ -19,6 +19,7 @@ import { SubnatureService } from './../../subnature/subnature.service';
 import { ServicesService } from './../../services/services.service';
 import { PricesService } from './../../prices/prices.service';
 import { ConstantService } from './../../constants/constants';
+import { DatalakeGpcOrganizationService } from '../../datalakemapping/datalakegpcorganization.service';
 import { PeriodType as PeriodTypeInterface } from './../../interfaces/common-interfaces';
 
 const actualsValideStaffType = ['internal', 'external', 'nearshore', 'offshore'];
@@ -98,6 +99,7 @@ export class CallbackPyramidParser {
     private readonly constantService: ConstantService,
     private readonly currencyRateService: CurrencyRateService,
     private readonly pricesService: PricesService,
+    private readonly datalakeGpcOrganizationService: DatalakeGpcOrganizationService,
   ) {}
 
   isValidParams = (requiredFileds: Record<string, any>, line: any, isActual = false) => {
@@ -109,7 +111,12 @@ export class CallbackPyramidParser {
   };
 
   isParseableLine = (line: any, fields: Record<string, any>): boolean => {
-    return fields.cds.trim() !== 'RISQ/DTO' && fields.payor.trim() !== '3000324000' && fields.activityType.trim() !== 'Absence';
+    return (
+      fields.cds.trim() !== 'RESG/TPS' &&
+      fields.cds.trim() !== 'RISQ/DTO' &&
+      fields.payor.trim() !== '3000324000' &&
+      fields.activityType.trim() !== 'Absence'
+    );
   };
 
   isChargeableLine = (line: any, fields: Record<string, any>): boolean => {
@@ -146,9 +153,21 @@ export class CallbackPyramidParser {
     });
   };
 
-  getThirdpartyByName = async (name: string): Promise<Thirdparty> => {
+  getThirdparty = async (line: string, fields: any, isActual: boolean): Promise<Thirdparty> => {
     //TODO mapping
-    return this.thirdpartiesService.findOne({ name: name });
+
+    const thirdParty = await this.thirdpartiesService.findOne({ name: line[fields.csm] });
+    if (!isActual && !thirdParty) {
+      let findOptions: any = { datalakename: line[fields.parentDescr] };
+      if (includes(['GSC/CRL/MGT/MGT', 'GSC/ARS/ARS/MGT', 'GSC/H2R/H2R/MGT', 'GSC/DAT/DAT/MGT'], line[fields.parentDescr])) {
+        findOptions = { ...findOptions, projectname: line[fields.ProjectName] };
+      }
+      const datalakeThirdParty = await this.datalakeGpcOrganizationService.findOne(findOptions);
+      if (datalakeThirdParty) {
+        return this.thirdpartiesService.findOne({ trigram: datalakeThirdParty.gpcname });
+      }
+    }
+    return thirdParty;
   };
 
   getPeriodAppSettings = async (type: string, isActual: boolean) => {
@@ -276,7 +295,7 @@ export class CallbackPyramidParser {
       throw new Error('subTypology not found');
     }
 
-    const thirdparty = await this.getThirdpartyByName(line[fields.csm]);
+    const thirdparty = await this.getThirdparty(line, fields, isActuals);
     if (!thirdparty) {
       Logger.error(`thirdparty not found`);
       throw new Error('thirdparty not found');

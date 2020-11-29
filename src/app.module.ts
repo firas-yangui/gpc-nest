@@ -20,6 +20,7 @@ import { TasksModule } from './modules/tasks/tasks-manager.module';
 import { SchedulerModule } from './modules/scheduler/scheduler.module';
 import { GlobalServicesModule } from './services/global-services.module';
 import { ConstantsModule } from './modules/constants/constants.module';
+import { DatalakeMappingModule } from './modules/datalakemapping/datalakemapping.module';
 
 import DbLoader from './loader';
 
@@ -53,6 +54,7 @@ const applicationModules = [
   SubtypologyAppSettingsModule,
   GlobalServicesModule,
   ScheduleModule.forRoot(),
+  DatalakeMappingModule,
 ];
 
 if (process.env.TASKS_MODULE_ENABLED) {
