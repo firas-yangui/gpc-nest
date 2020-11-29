@@ -16,12 +16,6 @@ export class DatalakeGpcPayor {
 
   @Column('text', {
     nullable: false,
-    name: 'datalakepartnername',
-  })
-  datalakepartnername: string;
-
-  @Column('text', {
-    nullable: false,
     name: 'gpcpartnername',
   })
   gpcpartnername: string;

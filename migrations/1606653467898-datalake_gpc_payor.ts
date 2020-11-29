@@ -16,10 +16,6 @@ export class DatalakeGpcPayor1606653467898 implements MigrationInterface {
         type: 'varchar',
       },
       {
-        name: 'datalakepartnername',
-        type: 'varchar',
-      },
-      {
         name: 'gpcpartnername',
         type: 'varchar',
       },
