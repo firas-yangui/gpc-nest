@@ -5,8 +5,8 @@ export class DatalakeGpcOrganizationDatas1606398396775 implements MigrationInter
     await queryRunner.query(`
     INSERT INTO datalake_gpc_organization (datalakename, gpcname, projectname)
     VALUES
-    ('GSC/H2R/RHP','/H2R/RHP',NULL),
-    ('GSC/H2R/RHG','/H2R/RHG',NULL),
+    ('GSC/H2R/RHP','H2R/RHP',NULL),
+    ('GSC/H2R/RHG','H2R/RHG',NULL),
     ('GSC/H2R/RHC','H2R/RHC',NULL),
     ('GSC/H2R/ICA','H2R/ICA',NULL),
     ('GSC/H2R/ESM','H2R/ESM',NULL),
@@ -120,12 +120,6 @@ export class DatalakeGpcOrganizationDatas1606398396775 implements MigrationInter
     ('GSC/ARS/ARS/MGT','ARS/CSD','Maille Contrat'),
     ('GSC/ARS/ARS/MGT','ARS/CRP','ANACREDIT SIMUT'),
     ('GSC/ARS/ARS/MGT','ARS/CRP','FINREP transformation'),
-    ('GSC/H2R/H2R/MGT','H2R/ESM',NULL),
-    ('GSC/H2R/H2R/MGT','H2R/RHG',NULL),
-    ('GSC/H2R/H2R/MGT','H2R/ICA',NULL),
-    ('GSC/H2R/H2R/MGT','H2R/RHP',NULL),
-    ('GSC/H2R/H2R/MGT','H2R/RHC',NULL),
-    ('GSC/H2R/H2R/MGT','H2R/COP',NULL),
     ('GSC/DAT/DAT/MGT','DAT/REF','A2254 - Change et RUN ODS 3D'),
     ('GSC/DAT/DAT/MGT','DAT/DEC','A2881 - DQLINK MEV DEC'),
     ('GSC/DAT/DAT/MGT','DAT/REF','Sakkarah Referential'),
@@ -152,7 +146,25 @@ export class DatalakeGpcOrganizationDatas1606398396775 implements MigrationInter
     ('GSC/DAT/DAT/MGT','DAT/TPA','Donnees financieres TIERS'),
     ('GSC/DAT/DAT/MGT','DAT/SOP','CORAL - Tiers'),
     ('GSC/DAT/DAT/MGT','DAT/INO','[INNOVATION] Animation Innovation'),
-    ('GSC/CRL/CDA/MGT','CRL/CDA',NULL);
+    ('GSC/CRL/CDA/MGT','CRL/CDA',''),
+    ('GSC/H2R/H2R/MGT','H2R/RHG','A2732 - COSY'),
+    ('GSC/H2R/H2R/MGT','H2R/RHP','R_RU_HRCO_GBI_Transversal'),
+    ('GSC/H2R/BLR/ML','H2R/COO','Paid Maternity Leaves'),
+    ('GSC/H2R/H2R/MGT','H2R/RHG','MEV-Formation'),
+    ('GSC/H2R/H2R/MGT','H2R/RHG','Run_Formation'),
+    ('GSC/H2R/H2R/MGT','H2R/ESM','ODS-ESM-JUMP-CHORUS-MEV'),
+    ('GSC/H2R/H2R/MGT','H2R/ICA','Pilotage IMM'),
+    ('GSC/H2R/H2R/MGT','H2R/RHG','Multi appli A2515 - Evaluation - A2531 Talent'),
+    ('GSC/H2R/H2R/MGT','H2R/RHG','A2585 - PSG'),
+    ('GSC/H2R/H2R/MGT','H2R/RHG','A2516 - HRE - RUN'),
+    ('GSC/H2R/H2R/MGT','H2R/RHG','A2736 - JOBatSG'),
+    ('GSC/H2R/BLR/ML','H2R/ESM','ODS-ESM-JUMP-CHORUS-RUN'),
+    ('GSC/H2R/CHE/ML','H2R/COO','Paid Maternity Leaves'),
+    ('GSC/H2R/H2R/MGT','H2R/RHG','Phoenix'),
+    ('GSC/H2R/H2R/MGT','H2R/COP','Corporate Platform - Employee Portal'),
+    ('GSC/H2R/H2R/MGT','H2R/RHC','Stream 0 - Transversal (Program HR For You)'),
+    ('GSC/H2R/H2R/MGT','H2R/RHC','Stream 3 - HR Data'),
+    ('GSC/H2R/H2R/MGT','H2R/COO','[SOURCING] Sourcing offshore');
     `);
   }
 
