@@ -26,7 +26,7 @@ import { DatalakeGpcPayorService } from '../../datalakemapping/datalakegpcpayor.
 import { PeriodType as PeriodTypeInterface } from './../../interfaces/common-interfaces';
 
 const actualsValideStaffType = ['internal', 'external', 'nearshore', 'offshore'];
-const eacValideStaffType = ['outsourcing consulting', 'outsourcing fixed price'];
+const eacValideStaffType = ['outsourcing - consulting', 'outsourcing - fixed-price contract'];
 
 const pyramidFields = {
   eac: {
