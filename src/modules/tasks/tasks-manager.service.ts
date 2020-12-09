@@ -38,7 +38,14 @@ export class TasksService implements OnModuleInit {
     const separator = this.constantService.GLOBAL_CONST.QUEUE.PYRAMID_QUEUE.ORIGIN_SEPARATOR;
     const regex = new RegExp(separator, 'g');
     const line = data.line.replace(regex, ';');
-    return this.pyramidParser.parsePramidLine(line, data.metadata, true);
+    try {
+      const parsedData = await this.pyramidParser.parsePramidLine(line, data.metadata, true);
+      const insertedData = await this.pyramidParser.pyramidCallback(parsedData, data.metadata, true);
+      return insertedData;
+    } catch (error) {
+      this.logger.error(error);
+      return;
+    }
   };
 
   handleNosicaMessage = async (message): Promise<any> => {
