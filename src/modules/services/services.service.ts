@@ -17,4 +17,11 @@ export class ServicesService {
   async findOne(options: object = {}): Promise<Service> {
     return await this.serviceRepository.findOne(options);
   }
+
+  async findByName(name: string): Promise<Service> {
+    return await this.serviceRepository
+      .createQueryBuilder()
+      .where('LOWER(name) = LOWER(:name)', { name })
+      .getOne();
+  }
 }

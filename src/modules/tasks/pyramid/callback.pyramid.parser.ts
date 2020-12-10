@@ -152,10 +152,7 @@ export class CallbackPyramidParser {
   };
 
   getServiceByPortfolioName = async (portfolioName: string) => {
-    //TODO mapping portfolio english & frensh
-    return this.servicesService.findOne({
-      where: { name: Like(portfolioName) },
-    });
+    return this.servicesService.findByName(portfolioName);
   };
 
   getThirdparty = async (line: Record<string, any>, fields: Record<string, any>, isActual: boolean): Promise<Thirdparty> => {
