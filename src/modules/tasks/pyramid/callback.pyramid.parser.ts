@@ -117,10 +117,12 @@ export class CallbackPyramidParser {
 
   isParseableLine = (line: any, fields: Record<string, any>): boolean => {
     return (
-      fields.cds.trim() !== 'RESG/TPS' &&
-      fields.cds.trim() !== 'RISQ/DTO' &&
-      fields.payor.trim() !== '3000324000' &&
-      fields.activityType.trim() !== 'Absence'
+      line[fields.cds].trim() !== 'RESG/TPS/API' &&
+      line[fields.cds].trim() !== 'RESG/TPS/GDO' &&
+      line[fields.cds].trim() !== 'RISQ/DTO' &&
+      line[fields.payor].trim() !== 'Global Solution Services SG GSC India (SSBU)' &&
+      line[fields.payor].trim() !== '3000324000' &&
+      line[fields.activityType].trim() !== 'Absence'
     );
   };
 
@@ -289,8 +291,7 @@ export class CallbackPyramidParser {
     if (!isActuals) requiredParams = requiredFileds.eac;
 
     if (!this.isValidParams(requiredParams, line, isActuals)) {
-      Logger.error('invalide line param');
-      return Promise.reject(new Error('invalide line param'));
+      throw new Error('invalid line param');
     }
 
     if (!this.isParseableLine(line, fields)) {
@@ -307,13 +308,6 @@ export class CallbackPyramidParser {
     const projectCode = line[fields.ProjectCode];
     const datasource = metadata.filename;
 
-    const periodAppSettings = await this.getPeriodAppSettings(periodType, isActuals);
-
-    if (!periodAppSettings) {
-      Logger.error('period not found');
-      throw new Error('period not found');
-    }
-
     if (!subnatureName.trim()) {
       Logger.error(`subnature name not defined for line: ${JSON.stringify(line)}`);
       throw new Error(`subnature name not defined for line: ${JSON.stringify(line)}`);
@@ -327,6 +321,13 @@ export class CallbackPyramidParser {
     if (!plan.trim()) {
       Logger.error(`Plan not defined for line: ${JSON.stringify(line)}`);
       throw new Error(`Plan not defined for line: ${JSON.stringify(line)}`);
+    }
+
+    const periodAppSettings = await this.getPeriodAppSettings(periodType, isActuals);
+
+    if (!periodAppSettings) {
+      Logger.error('period not found');
+      throw new Error('period not found');
     }
 
     if (!projectCode.trim()) {
