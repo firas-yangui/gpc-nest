@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { Like, In, Equal } from 'typeorm';
+import { In, Equal } from 'typeorm';
 import * as moment from 'moment';
 import { findKey, includes } from 'lodash';
 
@@ -295,11 +295,11 @@ export class CallbackPyramidParser {
     }
 
     if (!this.isParseableLine(line, fields)) {
-      throw new Error('line is not parseable');
+      throw new Error(`line is not parseable: ${JSON.stringify(line)}`);
     }
 
     if (!this.isChargeableLine(line, fields)) {
-      throw new Error('line is not chargeable');
+      throw new Error(`Unkown subnature for line: ${JSON.stringify(line)}`);
     }
 
     const subnatureName = line[fields.staffType];
@@ -309,84 +309,70 @@ export class CallbackPyramidParser {
     const datasource = metadata.filename;
 
     if (!subnatureName.trim()) {
-      Logger.error(`subnature name not defined for line: ${JSON.stringify(line)}`);
       throw new Error(`subnature name not defined for line: ${JSON.stringify(line)}`);
     }
 
     if (!portfolioName.trim()) {
-      Logger.error(`Service name not defined for line: ${JSON.stringify(line)}`);
       throw new Error(`Service name not defined for line: ${JSON.stringify(line)}`);
     }
 
     if (!plan.trim()) {
-      Logger.error(`Plan not defined for line: ${JSON.stringify(line)}`);
       throw new Error(`Plan not defined for line: ${JSON.stringify(line)}`);
     }
 
     const periodAppSettings = await this.getPeriodAppSettings(periodType, isActuals);
-
     if (!periodAppSettings) {
-      Logger.error('period not found');
       throw new Error('period not found');
     }
 
     if (!projectCode.trim()) {
-      Logger.error(`Project code not defined for line: ${JSON.stringify(line)}`);
       throw new Error(`Project code not defined for line: ${JSON.stringify(line)}`);
     }
 
     const service = await this.getServiceByPortfolioName(portfolioName);
     if (!service) {
-      Logger.error(`Service not found ${portfolioName}`);
       throw new Error(`Service not found ${portfolioName}`);
     }
 
     const planCode = this.getPlanCode(plan);
     if (!planCode) {
-      Logger.error(`Plan Code not found for plan ${plan}`);
       throw new Error(`Plan Code not found for plan ${plan}`);
     }
 
     const subtypology = await this.getSubtypologyByCode(planCode);
     if (!subtypology) {
-      Logger.error(`subTypology not found ${planCode}`);
       throw new Error(`subTypology not found ${planCode}`);
     }
 
     const thirdparty = await this.getThirdparty(line, fields, isActuals);
     if (!thirdparty) {
-      Logger.error(`thirdparty not found in line : ${JSON.stringify(line)}`);
       throw new Error(`thirdparty not found in line : ${JSON.stringify(line)}`);
     }
 
     const subservice = await this.findSubService(service, subtypology, projectCode);
     if (!subservice) {
-      Logger.error(`subservice not found for service "${service.name}" and subtypology "${subtypology.name}" and projectCode "${projectCode}"`);
       throw new Error(`subservice not found for service "${service.name}" and subtypology "${subtypology.name}" and projectCode "${projectCode}"`);
     }
 
     const subnature = await this.subnatureService.findOne({ where: { name: subnatureName } });
     if (!subnature) {
-      Logger.error(`subNature not found with name: "${subnatureName}"`);
       throw new Error(`subNature not found with name: "${subnatureName}"`);
     }
 
     const workloadsBySubserviceThirdpartySubnature = await this.findWorkloadBySubserviceThirdpartySubnature(subnature, subservice, thirdparty);
     if (!workloadsBySubserviceThirdpartySubnature.length) {
-      Logger.error(`workload not found  with subnature "${subnature.name}" and subservice "${subservice.code}" and thirdparty "${thirdparty.name}"`);
-      throw new Error('workload not found');
+      throw new Error(
+        `workload not found  with subnature "${subnature.name}" and subservice "${subservice.code}" and thirdparty "${thirdparty.name}"`,
+      );
     }
 
     workload = workloadsBySubserviceThirdpartySubnature[0];
-
     if (workloadsBySubserviceThirdpartySubnature.length > 1) {
       const subsidiaryAllocation = await this.getAllocations(workloadsBySubserviceThirdpartySubnature, line, fields, periodAppSettings);
       if (!subsidiaryAllocation) {
-        Logger.error(`subsidiaryAllocation not found by subsidiary allocations for line ${JSON.stringify(line)}`);
         throw new Error(`subsidiaryAllocation not found by subsidiary allocations for line ${JSON.stringify(line)}`);
       }
       if (!subsidiaryAllocation.workload) {
-        Logger.error(`workload not found by subsidiary allocations for line ${JSON.stringify(line)}`);
         throw new Error(`workload not found by subsidiary allocations for line ${JSON.stringify(line)}`);
       }
       workload = subsidiaryAllocation.workload;
@@ -398,7 +384,6 @@ export class CallbackPyramidParser {
     const rate = await this.currencyRateService.getCurrencyRateByCountryAndPeriod(thirdparty.countryid, actualPeriod.id);
 
     if (!prices) {
-      Logger.error(`Price not found for thirdparty ${thirdparty.name} and subnature ${subnature.name}`);
       throw new Error(`Price not found for thirdparty ${thirdparty.name} and subnature ${subnature.name}`);
     }
 
