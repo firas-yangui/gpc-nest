@@ -8,7 +8,15 @@ export class DatalakeGpcPayorService {
     @InjectRepository(DatalakeGpcPayorRepository)
     private datalakeGpcPayorRepository: DatalakeGpcPayorRepository,
   ) {}
+
   async findOne(options: object = {}): Promise<DatalakeGpcPayor> {
     return await this.datalakeGpcPayorRepository.findOne(options);
+  }
+
+  async findByPayorName(payorname: string): Promise<DatalakeGpcPayor> {
+    return await this.datalakeGpcPayorRepository
+      .createQueryBuilder()
+      .where('LOWER(payorname) = LOWER(:payorname)', { payorname })
+      .getOne();
   }
 }

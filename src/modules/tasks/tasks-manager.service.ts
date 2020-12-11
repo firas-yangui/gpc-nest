@@ -16,6 +16,7 @@ export class TasksService implements OnModuleInit {
   ) {}
 
   handlePyramidEACMessage = async (message: Record<string, any>) => {
+    if (!message || !message.content) return;
     const data = JSON.parse(message.content.toString('utf8'));
     const separator = this.constantService.GLOBAL_CONST.QUEUE.PYRAMID_QUEUE.ORIGIN_SEPARATOR;
     const regex = new RegExp(separator, 'g');

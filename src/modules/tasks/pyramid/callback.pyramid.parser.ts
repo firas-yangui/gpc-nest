@@ -50,7 +50,7 @@ const pyramidFields = {
     partner: 'partner',
     caPayor: 'Activity_Ca payor',
     caPayorLabel: 'Activity_Ca payor label',
-    payor: 'code_ca_payor',
+    payor: 'payor',
     clientEntity: 'Client_Entity',
     pyrTmpMonthMr: 'pyr_tmp_month_mr',
   },
@@ -64,6 +64,7 @@ const pyramidFields = {
     valideStaffType: actualsValideStaffType,
     portfolio: 'portfolio_sub_portfolio',
     ProjectCode: 'project_code',
+    ProjectName: 'schedule_name',
     payor: 'payor',
   },
 };
@@ -175,10 +176,11 @@ export class CallbackPyramidParser {
     return thirdParty;
   };
 
-  getPeriodAppSettings = async (type: string, isActual: boolean) => {
+  getPeriodAppSettings = async (type: string, isActual: boolean, previous: boolean) => {
     let month = moment(Date.now());
 
     if (isActual) month = month.subtract(1, 'month');
+    if (previous) month = month.subtract(1, 'month');
     return this.periodsService.findOneInAppSettings(this.constantService.GLOBAL_CONST.SCOPES.BSC, {
       type: type,
       year: moment(Date.now()).format('YYYY'),
@@ -209,9 +211,9 @@ export class CallbackPyramidParser {
   };
 
   getGpcDatalakePartner = async (line: Record<string, any>, fields: Record<string, any>) => {
-    if (fields.partner.trim() === 'RESG/BSC') {
-      let partner: string;
-      switch (fields.portfolio.trim()) {
+    let partner: string;
+    if (line[fields.partner].trim() === 'RESG/BSC') {
+      switch (line[fields.portfolio].trim()) {
         case 'Offres de Services BSC':
           partner = 'BSC_OdS';
           break;
@@ -222,19 +224,22 @@ export class CallbackPyramidParser {
           partner = 'BSC_TRA';
           break;
         default: {
-          const datalakePartner = await this.datalakeGpcPayorService.findOne({ payorname: line[fields.payor] });
-          partner = datalakePartner.gpcpartnername;
+          const datalakePartner = await this.datalakeGpcPayorService.findByPayorName(line[fields.payor].trim());
+          if (datalakePartner) {
+            partner = datalakePartner.gpcpartnername;
+          }
           break;
         }
       }
-      return this.thirdpartiesService.findOne({ trigram: partner });
     } else {
       const datalakePartner = await this.datalakeGpcPartnerService.findOne({ datalakename: line[fields.partner] });
       if (datalakePartner) {
-        return this.thirdpartiesService.findOne({ trigram: datalakePartner.gpcname });
+        partner = datalakePartner.gpcname;
       }
-      return null;
     }
+
+    if (partner) return this.thirdpartiesService.findOne({ trigram: partner });
+    return null;
   };
 
   findWorkloadBySubserviceThirdpartySubnature = (
@@ -320,7 +325,7 @@ export class CallbackPyramidParser {
       throw new Error(`Plan not defined for line: ${JSON.stringify(line)}`);
     }
 
-    const periodAppSettings = await this.getPeriodAppSettings(periodType, isActuals);
+    const periodAppSettings = await this.getPeriodAppSettings(periodType, isActuals, false);
     if (!periodAppSettings) {
       throw new Error('period not found');
     }
@@ -368,14 +373,17 @@ export class CallbackPyramidParser {
 
     workload = workloadsBySubserviceThirdpartySubnature[0];
     if (workloadsBySubserviceThirdpartySubnature.length > 1) {
-      const subsidiaryAllocation = await this.getAllocations(workloadsBySubserviceThirdpartySubnature, line, fields, periodAppSettings);
-      if (!subsidiaryAllocation) {
-        throw new Error(`subsidiaryAllocation not found by subsidiary allocations for line ${JSON.stringify(line)}`);
+      const previousPeriodAppSettings = await this.getPeriodAppSettings(periodType, isActuals, true);
+      if (previousPeriodAppSettings) {
+        const subsidiaryAllocation = await this.getAllocations(workloadsBySubserviceThirdpartySubnature, line, fields, previousPeriodAppSettings);
+        if (!subsidiaryAllocation) {
+          throw new Error(`subsidiaryAllocation not found by subsidiary allocations for line ${JSON.stringify(line)}`);
+        }
+        if (!subsidiaryAllocation.workload) {
+          throw new Error(`workload not found by subsidiary allocations for line ${JSON.stringify(line)}`);
+        }
+        workload = subsidiaryAllocation.workload;
       }
-      if (!subsidiaryAllocation.workload) {
-        throw new Error(`workload not found by subsidiary allocations for line ${JSON.stringify(line)}`);
-      }
-      workload = subsidiaryAllocation.workload;
     }
 
     const actualPeriod = periodAppSettings.period;
