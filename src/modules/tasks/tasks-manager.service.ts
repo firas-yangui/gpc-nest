@@ -31,7 +31,6 @@ export class TasksService implements OnModuleInit {
   };
 
   handlePyramidActualsMessage = async (message: Record<string, any>) => {
-    this.logger.debug(`get Pyramid Actuals Message ${message}`);
     const data = JSON.parse(message.content.toString('utf8'));
     const separator = this.constantService.GLOBAL_CONST.QUEUE.PYRAMID_QUEUE.ORIGIN_SEPARATOR;
     const regex = new RegExp(separator, 'g');
@@ -41,7 +40,7 @@ export class TasksService implements OnModuleInit {
       const insertedData = await this.pyramidParser.pyramidCallback(parsedData, data.metadata, true);
       return insertedData;
     } catch (error) {
-      this.logger.error(error);
+      this.logger.error(`Pyramid Actual error occurred: ${error}`);
       return;
     }
   };

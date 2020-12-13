@@ -21,8 +21,12 @@ export class PyramidParser {
   endPyramidCallback = () => this.callbackPyramidParser.end();
 
   parsePramidLine = async (data: string, metadata: Record<string, any>, isActuals = false): Promise<string> => {
-    const separator = this.constantService.GLOBAL_CONST.QUEUE.PYRAMID_QUEUE.SEPARATOR;
-    const header = this.constantService.GLOBAL_CONST.QUEUE.PYRAMID_QUEUE.HEADER;
+    let separator = this.constantService.GLOBAL_CONST.QUEUE.PYRAMID_QUEUE.SEPARATOR;
+    let header = this.constantService.GLOBAL_CONST.QUEUE.PYRAMID_QUEUE.HEADER;
+    if (isActuals) {
+      separator = this.constantService.GLOBAL_CONST.QUEUE.PYRAMIDACTUALS_QUEUE.SEPARATOR;
+      header = this.constantService.GLOBAL_CONST.QUEUE.PYRAMIDACTUALS_QUEUE.HEADER;
+    }
 
     const readable = stringToStream(data);
     return new Promise((resolve, reject) =>

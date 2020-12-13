@@ -66,6 +66,7 @@ const pyramidFields = {
     ProjectCode: 'project_code',
     ProjectName: 'schedule_name',
     payor: 'payor',
+    parentDescr: 'client_entity',
   },
 };
 
