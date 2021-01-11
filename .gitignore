@@ -31,3 +31,6 @@ lerna-debug.log*
 *.env
 
 # IDE - VSCode
+
+#Confif
+ormconfig.json

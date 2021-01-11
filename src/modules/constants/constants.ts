@@ -108,6 +108,7 @@ export class ConstantService {
           'free_text_3',
           'free_text_4',
           'free_text_5',
+          'ressource_name',
         ],
       }),
       NOSICA_QUEUE: Object.freeze({
