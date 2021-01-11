@@ -184,7 +184,7 @@ export class CallbackPyramidParser {
     if (previous) month = month.subtract(1, 'month');
     return this.periodsService.findOneInAppSettings(this.constantService.GLOBAL_CONST.SCOPES.BSC, {
       type: type,
-      year: moment(Date.now()).format('YYYY'),
+      year: month.format('YYYY'),
       month: month.format('MM'),
     });
   };
