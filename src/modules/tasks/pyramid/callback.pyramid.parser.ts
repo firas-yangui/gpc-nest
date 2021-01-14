@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { In, Equal } from 'typeorm';
 import * as moment from 'moment';
-import { findKey, includes } from 'lodash';
+import { findKey, includes, join, map } from 'lodash';
 
 import { RawAmountsService } from './../../rawamounts/rawamounts.service';
 import { AmountConverter } from './../../amounts/amounts.converter';
@@ -24,6 +24,7 @@ import { DatalakeGpcPartnerService } from '../../datalakemapping/datalakegpcpart
 import { DatalakeGpcPayorService } from '../../datalakemapping/datalakegpcpayor.service';
 
 import { PeriodType as PeriodTypeInterface } from './../../interfaces/common-interfaces';
+import { Subtypology } from 'src/modules/subtypologies/subtypology.entity';
 
 const actualsValideStaffType = ['internal', 'external', 'nearshore', 'offshore'];
 const eacValideStaffType = ['outsourcing - consulting', 'outsourcing - fixed-price contract'];
@@ -140,8 +141,8 @@ export class CallbackPyramidParser {
     return includes(eacValideStaffType, subnature.toLocaleLowerCase());
   };
 
-  getSubtypologyByCode = async (code: string) => {
-    return this.subtypologiesService.findOne({ code: code });
+  getSubtypologyByCode = async (codes: string[]) => {
+    return this.subtypologiesService.findByCodes(codes);
   };
 
   getPlanCode = (plan: string) => {
@@ -152,7 +153,8 @@ export class CallbackPyramidParser {
       P1: 'Project',
       13: 'Tech Plan',
     };
-    return findKey(plans, value => value === plan);
+    if (plan === 'Project') return ['P1', 'T1'];
+    return [findKey(plans, value => value === plan)];
   };
 
   getServiceByPortfolioName = async (portfolioName: string) => {
@@ -189,9 +191,9 @@ export class CallbackPyramidParser {
     });
   };
 
-  findSubService = async (service: Record<string, any>, subtypology: Record<string, any>, projectCode: string) => {
+  findSubService = async (service: Record<string, any>, subtypologies: Subtypology[], projectCode: string) => {
     return this.subservicesService.findOne({
-      where: { service: Equal(service.id), subtypology: Equal(subtypology.id), code: Equal(projectCode) },
+      where: { service: Equal(service.id), subtypology: In(map(subtypologies, 'id')), code: Equal(projectCode) },
     });
   };
 
@@ -317,6 +319,7 @@ export class CallbackPyramidParser {
     if (!subnatureName.trim()) {
       throw new Error(`subnature name not defined for line: ${JSON.stringify(line)}`);
     }
+    
 
     if (!portfolioName.trim()) {
       throw new Error(`Service name not defined for line: ${JSON.stringify(line)}`);
@@ -340,14 +343,14 @@ export class CallbackPyramidParser {
       throw new Error(`Service not found ${portfolioName}`);
     }
 
-    const planCode = this.getPlanCode(plan);
-    if (!planCode) {
+    const planCodes = this.getPlanCode(plan);
+    if (!planCodes) {
       throw new Error(`Plan Code not found for plan ${plan}`);
     }
 
-    const subtypology = await this.getSubtypologyByCode(planCode);
-    if (!subtypology) {
-      throw new Error(`subTypology not found ${planCode}`);
+    const subtypologies = await this.getSubtypologyByCode(planCodes);
+    if (!subtypologies || !subtypologies.length) {
+      throw new Error(`subTypology not found ${planCodes}`);
     }
 
     const thirdparty = await this.getThirdparty(line, fields, isActuals);
@@ -355,11 +358,10 @@ export class CallbackPyramidParser {
       throw new Error(`thirdparty not found in line : ${JSON.stringify(line)}`);
     }
 
-    const subservice = await this.findSubService(service, subtypology, projectCode);
+    const subservice = await this.findSubService(service, subtypologies, projectCode);
     if (!subservice) {
-      throw new Error(`subservice not found for service "${service.name}" and subtypology "${subtypology.name}" and projectCode "${projectCode}"`);
+      throw new Error(`subservice not found for service "${service.name}" and subtypology "${join(map(subtypologies, 'code'), ',')}" and projectCode "${projectCode}"`);
     }
-
     const subnature = await this.subnatureService.findOne({ where: { name: subnatureName } });
     if (!subnature) {
       throw new Error(`subNature not found with name: "${subnatureName}"`);

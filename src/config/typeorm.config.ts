@@ -11,9 +11,9 @@ export const typeOrmConfig: TypeOrmModuleOptions = {
   entities: [__dirname + '/../**/*.entity.{js,ts}'],
   synchronize: false,
   migrationsTableName: 'gpc_migrations',
-  migrations: ['migrations/*{.ts,.js}'],
+  migrations: [__dirname + 'migrations/*{.ts,.js}'],
   cli: {
-    migrationsDir: 'migrations/*{.ts,.js}',
+    migrationsDir: __dirname + 'migrations/*{.ts,.js}',
   },
 
 };

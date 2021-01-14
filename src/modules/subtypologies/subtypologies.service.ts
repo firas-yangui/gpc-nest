@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { In } from 'typeorm';
 import { SubtypologyRepository } from './subtypologies.repository';
 import { Subtypology } from './subtypology.entity';
 
@@ -12,5 +13,9 @@ export class SubtypologiesService {
 
   async findOne(options: object = {}): Promise<Subtypology> {
     return await this.subtypologyRepository.findOne(options);
+  }
+
+  async findByCodes(codes: string[]): Promise<Subtypology[]> {
+    return await this.subtypologyRepository.find({ where : { code: In(codes)} });
   }
 }
