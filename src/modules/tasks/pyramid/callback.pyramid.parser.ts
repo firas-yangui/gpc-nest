@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { In, Equal } from 'typeorm';
 import * as moment from 'moment';
-import { findKey, includes, join, map } from 'lodash';
+import { findKey, includes, join, map, startsWith } from 'lodash';
 
 import { RawAmountsService } from './../../rawamounts/rawamounts.service';
 import { AmountConverter } from './../../amounts/amounts.converter';
@@ -28,6 +28,7 @@ import { Subtypology } from 'src/modules/subtypologies/subtypology.entity';
 
 const actualsValideStaffType = ['internal', 'external', 'nearshore', 'offshore'];
 const eacValideStaffType = ['outsourcing - consulting', 'outsourcing - fixed-price contract'];
+const staffTypeWithEnvCost = ['outsourcing - consulting'];
 
 const pyramidFields = {
   eac: {
@@ -166,9 +167,18 @@ export class CallbackPyramidParser {
 
     const thirdParty = await this.thirdpartiesService.findOne({ name: line[fields.csm] });
     if (!thirdParty) {
-      const parendDescrFiled = line[fields.parentDescr].slice(0, 11);
+      const parendDescrFiled = line[fields.parentDescr];
       let findOptions: any = { datalakename: parendDescrFiled };
-      if (includes(['GSC/DAT/DAT', 'GSC/CRL/MGT', 'GSC/ARS/ARS', 'GSC/DAT/DAT', 'GSC/H2R/H2R'], parendDescrFiled)) {
+      
+
+      if (includes([
+        'GSC/CRL/MGT/MGT',
+        'GSC/ARS/ARS/MGT',
+        'GSC/DAT/DAT/MGT',
+        'GSC/H2R/H2R/MGT',
+        'GSC/H2R/BLR/ML',
+        'GSC/H2R/CHE/ML'
+      ], parendDescrFiled)) {
         findOptions = { ...findOptions, projectname: line[fields.ProjectName] };
       }
       const datalakeThirdParty = await this.datalakeGpcOrganizationService.findOne(findOptions);
@@ -266,7 +276,7 @@ export class CallbackPyramidParser {
           amount: line[pyramidFields.eac.eac],
           unit: this.constantService.GLOBAL_CONST.AMOUNT_UNITS.MD,
         };
-      if (this.isKLC(line[pyramidFields.eac.staffType]))
+      if (includes(staffTypeWithEnvCost, line[pyramidFields.eac.staffType]) && !startsWith(line[pyramidFields.eac.parentDescr], 'HRCO'))
         return {
           amount: line[pyramidFields.eac.eacKe] * 1.0626, // environment Coef
           unit: this.constantService.GLOBAL_CONST.AMOUNT_UNITS.KLC,
@@ -279,7 +289,7 @@ export class CallbackPyramidParser {
           amount: line[pyramidFields.actuals.amount],
           unit: this.constantService.GLOBAL_CONST.AMOUNT_UNITS.MD,
         };
-      if (this.isKLC(line[pyramidFields.actuals.staffType]))
+        if (includes(staffTypeWithEnvCost, line[pyramidFields.eac.staffType]) && !startsWith(line[pyramidFields.eac.parentDescr], 'HRCO'))
         return {
           amount: line[pyramidFields.actuals.amount] * 1.0626,
           unit: this.constantService.GLOBAL_CONST.AMOUNT_UNITS.KLC,
