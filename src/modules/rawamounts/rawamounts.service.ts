@@ -3,6 +3,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { RawAmountRepository } from './rawamounts.repository';
 import { RawAmount } from './../interfaces/common-interfaces';
 import { ConstantService } from '../constants/constants';
+import { Workload } from '../workloads/workload.entity';
+import { Period } from '../periods/period.entity';
 @Injectable()
 export class RawAmountsService {
   constructor(
@@ -11,8 +13,13 @@ export class RawAmountsService {
     private constantService: ConstantService,
   ) {}
 
-  async save(entities: RawAmount, options: any = {}) {
-    return this.rawAmountRepository.save(entities, options);
+  async save(amount: RawAmount, workload: Workload, period: Period) {
+    amount = { ...amount, workloadid: workload.id, periodid: period.id};
+    console.info('The subnature ...: ', workload.subnature);
+    console.info('The amount Before ...: ', amount);
+    if(!workload.subnature.isworkforce) amount.mandays = 0;
+    console.info('The amount After ...: ', amount);
+    return this.rawAmountRepository.save(amount);
   }
 
   async findOne(options: Record<string, any>): Promise<RawAmount | undefined> {

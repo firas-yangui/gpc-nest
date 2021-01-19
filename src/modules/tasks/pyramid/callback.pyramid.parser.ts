@@ -254,6 +254,7 @@ export class CallbackPyramidParser {
     orga: Record<string, any>,
   ): Promise<Workload[]> => {
     return this.workloadsService.find({
+      relations: ['subnature'],
       where: {
         subnature: subnature.id,
         subservice: subservice.id,
@@ -291,7 +292,7 @@ export class CallbackPyramidParser {
   };
 
   parse = async (line: any, metadata: Record<string, any>, isActuals = false) => {
-    let workload: Record<string, any>;
+    let workload: Workload;
     let fields: Record<string, any>;
     let requiredParams;
     if (isActuals) fields = pyramidFields.actuals;
@@ -408,9 +409,9 @@ export class CallbackPyramidParser {
 
     let createdAmount = this.amountConverter.createAmountEntity(parseFloat(amountData.amount), amountData.unit, rate.value, costPrice, salePrice);
 
-    createdAmount = { ...createdAmount, workloadid: workload.id, periodid: actualPeriod.id, datasource: datasource };
-
-    return this.rawAmountsService.save(createdAmount);
+    createdAmount = { ...createdAmount, datasource: datasource };
+    
+    return this.rawAmountsService.save(createdAmount, workload, actualPeriod);
   };
   end = () => {};
 }
