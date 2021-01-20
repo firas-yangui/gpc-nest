@@ -15,10 +15,7 @@ export class RawAmountsService {
 
   async save(amount: RawAmount, workload: Workload, period: Period) {
     amount = { ...amount, workloadid: workload.id, periodid: period.id};
-    console.info('The subnature ...: ', workload.subnature);
-    console.info('The amount Before ...: ', amount);
     if(!workload.subnature.isworkforce) amount.mandays = 0;
-    console.info('The amount After ...: ', amount);
     return this.rawAmountRepository.save(amount);
   }
 

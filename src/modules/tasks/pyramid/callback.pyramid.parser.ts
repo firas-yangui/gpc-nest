@@ -142,6 +142,11 @@ export class CallbackPyramidParser {
     return includes(eacValideStaffType, subnature.toLocaleLowerCase());
   };
 
+  isEnvCost = (subnature: string) => {
+    return includes(staffTypeWithEnvCost, subnature.toLocaleLowerCase());
+  };
+
+
   getSubtypologyByCode = async (codes: string[]) => {
     return this.subtypologiesService.findByCodes(codes);
   };
@@ -270,11 +275,18 @@ export class CallbackPyramidParser {
           amount: line[pyramidFields.eac.eac],
           unit: this.constantService.GLOBAL_CONST.AMOUNT_UNITS.MD,
         };
-      if (includes(staffTypeWithEnvCost, line[pyramidFields.eac.staffType]) && !startsWith(line[pyramidFields.eac.parentDescr], 'HRCO'))
+
+      if (this.isKLC(line[pyramidFields.eac.staffType])) {
+        let eacke = line[pyramidFields.eac.eacKe];
+        if (this.isEnvCost(line[pyramidFields.eac.staffType]) && !startsWith(line[pyramidFields.eac.parentDescr], 'HRCO'))
+          eacke = eacke * 1.0626; // environment Coef
+
         return {
-          amount: line[pyramidFields.eac.eacKe] * 1.0626, // environment Coef
+          amount: eacke,
           unit: this.constantService.GLOBAL_CONST.AMOUNT_UNITS.KLC,
         };
+      }
+      
     }
 
     if (isActuals) {
@@ -283,11 +295,16 @@ export class CallbackPyramidParser {
           amount: line[pyramidFields.actuals.amount],
           unit: this.constantService.GLOBAL_CONST.AMOUNT_UNITS.MD,
         };
-        if (includes(staffTypeWithEnvCost, line[pyramidFields.eac.staffType]) && !startsWith(line[pyramidFields.eac.parentDescr], 'HRCO'))
+      if (this.isKLC(line[pyramidFields.actuals.staffType])) {
+        let amount = line[pyramidFields.actuals.amount];
+        if (this.isEnvCost(line[pyramidFields.actuals.staffType]) && !startsWith(line[pyramidFields.actuals.parentDescr], 'HRCO'))
+          amount = amount * 1.0626;
         return {
-          amount: line[pyramidFields.actuals.amount] * 1.0626,
+          amount: amount,
           unit: this.constantService.GLOBAL_CONST.AMOUNT_UNITS.KLC,
         };
+
+      }
     }
   };
 
