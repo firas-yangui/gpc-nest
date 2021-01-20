@@ -16,29 +16,33 @@ export class TasksService implements OnModuleInit {
   ) {}
 
   handlePyramidEACMessage = async (message: Record<string, any>) => {
-    this.logger.debug(`get Pyramid EAC Message ${message}`);
+    if (!message || !message.content) return;
     const data = JSON.parse(message.content.toString('utf8'));
     const separator = this.constantService.GLOBAL_CONST.QUEUE.PYRAMID_QUEUE.ORIGIN_SEPARATOR;
     const regex = new RegExp(separator, 'g');
     const line = data.line.replace(regex, ';');
     try {
       const parsedData = await this.pyramidParser.parsePramidLine(line, data.metadata);
-      const insertedData = await this.pyramidParser.pyramidCallback(parsedData, data.metadata, false);
-      this.logger.debug('inserted pyramid data: ', JSON.stringify(insertedData));
-      return insertedData;
+      return await this.pyramidParser.pyramidCallback(parsedData, data.metadata, false);
     } catch (error) {
-      this.logger.error(error);
+      this.logger.error(`Pyramid EAC error occurred: ${error}`);
       return;
     }
   };
 
   handlePyramidActualsMessage = async (message: Record<string, any>) => {
-    this.logger.debug(`get Pyramid Actuals Message ${message}`);
     const data = JSON.parse(message.content.toString('utf8'));
     const separator = this.constantService.GLOBAL_CONST.QUEUE.PYRAMID_QUEUE.ORIGIN_SEPARATOR;
     const regex = new RegExp(separator, 'g');
     const line = data.line.replace(regex, ';');
-    return this.pyramidParser.parsePramidLine(line, data.metadata, true);
+    try {
+      const parsedData = await this.pyramidParser.parsePramidLine(line, data.metadata, true);
+      const insertedData = await this.pyramidParser.pyramidCallback(parsedData, data.metadata, true);
+      return insertedData;
+    } catch (error) {
+      this.logger.error(`Pyramid Actual error occurred: ${error}`);
+      return;
+    }
   };
 
   handleNosicaMessage = async (message): Promise<any> => {
@@ -65,7 +69,6 @@ export class TasksService implements OnModuleInit {
             .then(() =>
               channel.consume(this.constantService.GLOBAL_CONST.QUEUE.PYRAMID_QUEUE.NAME, async msg =>
                 this.handlePyramidEACMessage(msg).then(() => {
-                  this.logger.debug('ack ', JSON.stringify(msg));
                   return channel.ack(msg);
                 }),
               ),

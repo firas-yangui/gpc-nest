@@ -48,6 +48,14 @@ export enum PeriodType {
   forecast = 'forecast',
 }
 
+export enum WorkloadStatus {
+  running = 'RUNNING',
+  closed = 'CLOSED',
+  pending = 'PENDING',
+  draft = 'DRAFT',
+  arbitrated = 'ARBITRATED',
+}
+
 export interface Period {
   id: number;
   name: string;
@@ -72,6 +80,7 @@ export interface Amount extends UnitsAmount {
   id?: number;
   workload: any;
   period: any;
+  status?: string;
 }
 
 export interface RawAmount extends UnitsAmount {

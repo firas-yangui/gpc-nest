@@ -10,6 +10,12 @@ export const typeOrmConfig: TypeOrmModuleOptions = {
   schema: process.env.DATABASE_SCHEMA || process.env.TYPEORM_DATABASE_SCHEMA || 'public',
   entities: [__dirname + '/../**/*.entity.{js,ts}'],
   synchronize: false,
+  migrationsTableName: 'gpc_migrations',
+  migrations: [__dirname + 'migrations/*{.ts,.js}'],
+  cli: {
+    migrationsDir: __dirname + 'migrations/*{.ts,.js}',
+  },
+
 };
 
 export default typeOrmConfig;

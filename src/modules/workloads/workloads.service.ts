@@ -64,7 +64,7 @@ export class WorkloadsService {
     return await this.workloadRepository.findOne(options);
   }
 
-  async getNosicaWorkloadInSubserviceName(subserviceName: string, thirdpartyId: number, subnatureId: number) {
+  async getNosicaWorkloadInSubserviceName(subserviceName: string, thirdpartyId: number, subnatureId: number): Promise<Workload> {
     const service = await this.servicesService.findOne({ where: { name: Like(subserviceName) }, relations: ['subservices'] });
     if (!service) {
       Logger.error(`No service called "${subserviceName}" found in database`);
