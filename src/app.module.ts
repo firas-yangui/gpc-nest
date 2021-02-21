@@ -22,6 +22,7 @@ import { GlobalServicesModule } from './services/global-services.module';
 import { ConstantsModule } from './modules/constants/constants.module';
 import { DatalakeMappingModule } from './modules/datalakemapping/datalakemapping.module';
 import { HomeMessageModule } from './modules/homeMessage/homeMessage.module';
+import {ImportRejectionsHandlerModule} from './modules/import-rejections-handler/import-rejections-handler.module';
 
 import DbLoader from './loader';
 
@@ -57,6 +58,7 @@ const applicationModules = [
   ScheduleModule.forRoot(),
   DatalakeMappingModule,
   HomeMessageModule,
+  ImportRejectionsHandlerModule,
 ];
 
 if (process.env.TASKS_MODULE_ENABLED) {
