@@ -26,7 +26,9 @@ import { DatalakeGpcPayorService } from '../../datalakemapping/datalakegpcpayor.
 import { PeriodType as PeriodTypeInterface } from './../../interfaces/common-interfaces';
 import { Subtypology } from 'src/modules/subtypologies/subtypology.entity';
 
-const actualsValideStaffType = ['internal', 'external', 'nearshore', 'offshore'];
+const intExtStaffType: string[] = ['internal', 'external'];
+const onshoreStaffType = 'onshore';
+const actualsValideStaffType = [...intExtStaffType, onshoreStaffType, 'nearshore', 'offshore'];
 const eacValideStaffType = ['outsourcing - consulting', 'outsourcing - fixed-price contract'];
 const staffTypeWithEnvCost = ['outsourcing - consulting'];
 
@@ -69,6 +71,7 @@ const pyramidFields = {
     ProjectName: 'schedule_name',
     payor: 'payor',
     parentDescr: 'Client_Entity',
+    partner: 'Partner',
   },
 };
 
@@ -223,29 +226,33 @@ export class CallbackPyramidParser {
 
   getGpcDatalakePartner = async (line: Record<string, any>, fields: Record<string, any>) => {
     let partner: string;
-    if (line[fields.partner].trim() === 'RESG/BSC') {
-      switch (line[fields.portfolio].trim()) {
-        case 'Offres de Services BSC':
-          partner = 'BSC_OdS';
-          break;
-        case 'Activités transverses BSC':
-          partner = 'BSC_AC';
-          break;
-        case 'Transformation BSC':
-          partner = 'BSC_TRA';
-          break;
-        default: {
-          const datalakePartner = await this.datalakeGpcPayorService.findByPayorName(line[fields.payor].trim());
-          if (datalakePartner) {
-            partner = datalakePartner.gpcpartnername;
+    if (line[fields.partner]) {
+      if (line[fields.partner].trim() === 'RESG/BSC') {
+        if (line[fields.portfolio]){
+          switch (line[fields.portfolio].trim()) {
+            case 'Offres de Services BSC':
+              partner = 'BSC_OdS';
+              break;
+            case 'Activités transverses BSC':
+              partner = 'BSC_AC';
+              break;
+            case 'Transformation BSC':
+              partner = 'BSC_TRA';
+              break;
+            default: {
+              const datalakePartner = await this.datalakeGpcPayorService.findByPayorName(line[fields.payor].trim());
+              if (datalakePartner) {
+                partner = datalakePartner.gpcpartnername;
+              }
+              break;
+            }
           }
-          break;
         }
-      }
-    } else {
-      const datalakePartner = await this.datalakeGpcPartnerService.findOne({ datalakename: line[fields.partner] });
-      if (datalakePartner) {
-        partner = datalakePartner.gpcname;
+      } else {
+        const datalakePartner = await this.datalakeGpcPartnerService.findOne({ datalakename: line[fields.partner] });
+        if (datalakePartner) {
+          partner = datalakePartner.gpcname;
+        }
       }
     }
 
@@ -331,6 +338,10 @@ export class CallbackPyramidParser {
       throw new Error(`Unkown subnature for line: ${JSON.stringify(line)}`);
     }
 
+    if(includes(intExtStaffType, line[fields.staffType].toLocaleLowerCase())) {
+      line[fields.staffType] = onshoreStaffType;
+    }
+
     const subnatureName = line[fields.staffType];
     const portfolioName = line[fields.portfolio];
     const plan = line[fields.activityPlan];
@@ -383,7 +394,7 @@ export class CallbackPyramidParser {
     if (!subservice) {
       throw new Error(`subservice not found for service "${service.name}" and subtypology "${join(map(subtypologies, 'code'), ',')}" and projectCode "${projectCode}"`);
     }
-    const subnature = await this.subnatureService.findOne({ where: { name: subnatureName } });
+    const subnature = await this.subnatureService.findByName(subnatureName);
     if (!subnature) {
       throw new Error(`subNature not found with name: "${subnatureName}"`);
     }
