@@ -178,10 +178,10 @@ export class CallbackPyramidParser {
       const parendDescrFiled = line[fields.parentDescr].slice(0, 11);
       let findOptions: any = { datalakename: parendDescrFiled };
       
-
-      if (includes(['GSC/CRL/MGT', 'GSC/ARS/ARS', 'GSC/DAT/DAT', 'GSC/H2R/H2R', 'GSC/H2R/BLR', 'GSC/H2R/CHE'], parendDescrFiled)) {
-        findOptions = { ...findOptions, projectname: line[fields.ProjectCode] };
-      }
+      
+      // if (includes(['GSC/CRL/MGT', 'GSC/ARS/ARS', 'GSC/DAT/DAT', 'GSC/H2R/H2R', 'GSC/H2R/BLR', 'GSC/H2R/CHE'], parendDescrFiled)) {
+      //   findOptions = { ...findOptions, projectname: line[fields.ProjectCode] };
+      // }
       const datalakeThirdParty = await this.datalakeGpcOrganizationService.findOne(findOptions);
       if (datalakeThirdParty) {
         return this.thirdpartiesService.findOne({ trigram: datalakeThirdParty.gpcname });
