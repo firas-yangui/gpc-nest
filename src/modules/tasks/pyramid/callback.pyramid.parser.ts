@@ -171,9 +171,11 @@ export class CallbackPyramidParser {
   };
 
   getThirdparty = async (line: Record<string, any>, fields: Record<string, any>, isActual: boolean): Promise<Thirdparty> => {
-    //TODO mapping
-
-    const thirdParty = await this.thirdpartiesService.findOne({ name: line[fields.csm] });
+    let options : Record<string, any> = { name: line[fields.csm] };
+    if(isActual) {
+      options = { trigram: line[fields.parentDescr].slice(0, 7)};
+    }
+    const thirdParty = await this.thirdpartiesService.findOne(options);
     if (!thirdParty) {
       const parendDescrFiled = line[fields.parentDescr].slice(0, 11);
       let findOptions: any = { datalakename: parendDescrFiled };
