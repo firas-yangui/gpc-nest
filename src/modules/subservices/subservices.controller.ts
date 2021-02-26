@@ -1,4 +1,5 @@
 import { Controller, Get, HttpException, HttpStatus, Param } from '@nestjs/common';
+import { Workload } from '../workloads/workload.entity';
 import { SubService } from './subservice.entity';
 import { SubservicesService } from './subservices.service';
 
@@ -18,8 +19,8 @@ export class SubservicesController {
     });
   }
 
-  @Get(':id/getSubservices')
-  getSubServices(@Param('id') id: number): Promise<SubService[]> {
+  @Get(':id/getWorkloads')
+  getWorkloads(@Param('id') id: number): Promise<Workload[]> {
     return this.subservicesService.getWorkloads({ id }).catch(err => {
       throw new HttpException(err, HttpStatus.BAD_REQUEST);
     });
