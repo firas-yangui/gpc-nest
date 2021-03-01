@@ -221,7 +221,7 @@ export class CallbackPyramidParser {
     }
     return this.subsidiaryallocationService.findOne({
       where: { thirdparty: Equal(partner.id), workload: In(workloads.map(workload => workload.id)), period: Equal(periodAppSettings.period.id) },
-      relations: ['workload'],
+      relations: ['workload', 'workload.subnature'],
     });
   };
 
