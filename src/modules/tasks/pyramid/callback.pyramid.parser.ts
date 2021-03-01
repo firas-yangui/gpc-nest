@@ -69,7 +69,7 @@ const pyramidFields = {
     portfolio: 'portfolio_sub_portfolio',
     ProjectCode: 'Project_code',
     ProjectName: 'schedule_name',
-    payor: 'payor',
+    payor: 'Label_Payor',
     parentDescr: 'Client_Entity',
     partner: 'Partner',
   },
