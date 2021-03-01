@@ -171,22 +171,21 @@ export class CallbackPyramidParser {
   };
 
   getThirdparty = async (line: Record<string, any>, fields: Record<string, any>, isActual: boolean): Promise<Thirdparty> => {
-    let options : Record<string, any> = { name: line[fields.csm] };
-    if(isActual) {
-      options = { trigram: line[fields.parentDescr].slice(0, 7)};
-    }
+    const options: any = { name: line[fields.csm] };
+    
     const thirdParty = await this.thirdpartiesService.findOne(options);
     if (!thirdParty) {
       const parendDescrFiled = line[fields.parentDescr].slice(0, 11);
       let findOptions: any = { datalakename: parendDescrFiled };
-      
-      
+      if(isActual) {
+        findOptions = { gpcname: line[fields.parentDescr].slice(0, 7)};
+      }
       // if (includes(['GSC/CRL/MGT', 'GSC/ARS/ARS', 'GSC/DAT/DAT', 'GSC/H2R/H2R', 'GSC/H2R/BLR', 'GSC/H2R/CHE'], parendDescrFiled)) {
       //   findOptions = { ...findOptions, projectname: line[fields.ProjectCode] };
       // }
       const datalakeThirdParty = await this.datalakeGpcOrganizationService.findOne(findOptions);
       if (datalakeThirdParty) {
-        return this.thirdpartiesService.findOne({ trigram: datalakeThirdParty.gpcname });
+        return this.thirdpartiesService.findOne({ radical: datalakeThirdParty.dpg });
       }
     }
     return thirdParty;

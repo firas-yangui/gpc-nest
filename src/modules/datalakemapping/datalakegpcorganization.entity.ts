@@ -25,4 +25,10 @@ export class DatalakeGpcOrganization {
     name: 'projectname',
   })
   projectname: string;
+
+  @Column('text', {
+    nullable: false,
+    name: 'dpg',
+  })
+  dpg: string;
 }
