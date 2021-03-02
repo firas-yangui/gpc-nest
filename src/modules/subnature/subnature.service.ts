@@ -9,6 +9,10 @@ export class SubnatureService {
     private subNatureRepository: SubNatureRepository,
   ) {}
 
+  async find(options: object = {}): Promise<SubNature[]> {
+    return await this.subNatureRepository.find(options);
+  }
+
   async findOne(options: object = {}): Promise<SubNature> {
     return await this.subNatureRepository.findOne(options);
   }
