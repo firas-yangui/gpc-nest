@@ -74,7 +74,7 @@ export class TasksService implements OnModuleInit {
               ),
             ),
           channel.assertQueue(this.constantService.GLOBAL_CONST.QUEUE.PYRAMIDACTUALS_QUEUE.NAME).then(ok => {
-            channel.prefetch(50).then(() => {
+            channel.prefetch(10).then(() => {
               channel.consume(this.constantService.GLOBAL_CONST.QUEUE.PYRAMIDACTUALS_QUEUE.NAME, msg => {
                 if (msg !== null) {
                   return this.handlePyramidActualsMessage(msg).then(() => {
