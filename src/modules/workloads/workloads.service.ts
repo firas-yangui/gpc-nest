@@ -19,6 +19,7 @@ import { getConnection, Like } from 'typeorm';
 import { Workload } from './workload.entity';
 import { SubservicesService } from './../subservices/subservices.service';
 import { ServicesService } from './../services/services.service';
+import { SubsidiaryAllocation } from '../subsidiaryallocation/subsidiaryallocation.entity';
 
 @Injectable()
 export class WorkloadsService {
@@ -31,28 +32,32 @@ export class WorkloadsService {
     private readonly periodsService: PeriodsService,
   ) {}
 
-  async getTotalByPeriodTypesAndBusinessPlan(req: Request, thirdpartyRootId: number): Promise<MonthlyBusinessPlanAmount[]> {
+  async getTotalByPeriodTypesAndBusinessPlan(body: { [key: string]: number }, thirdpartyRootId: number): Promise<MonthlyBusinessPlanAmount[]> {
     const myThirdpartyRoot = await this.thirdpartiesService.getThirdPartyById(thirdpartyRootId);
     const thirdparties: ThirdpartyInterface[] = await this.thirdpartiesService.find();
     this.thirdpartiesService.buildTree(thirdparties, myThirdpartyRoot);
     const thirdpartyChilds = this.thirdpartiesService.getMyThirdPartiesChilds();
 
-    return await this.getTotalAmountsByMonth(thirdpartyChilds);
+    return await this.getTotalAmountsByMonth(body, thirdpartyChilds);
   }
 
-  async getTotalAmountsByMonth(thirdparties: Array<number>): Promise<MonthlyBusinessPlanAmount[]> {
+  async getTotalAmountsByMonth(body: { [key: string]: number }, thirdparties: Array<number>): Promise<MonthlyBusinessPlanAmount[]> {
     const promises = moment.months().map(async month => {
       const shortMonth = moment(month, 'MMMM').format('MM');
-      return { month: shortMonth, plans: await this.getBusinessPlanMonthlyTotalAmounts(shortMonth, thirdparties) };
+      return { month: shortMonth, plans: await this.getBusinessPlanMonthlyTotalAmounts(shortMonth, body, thirdparties) };
     });
 
     return await Promise.all(promises);
   }
 
-  async getBusinessPlanMonthlyTotalAmounts(month: string | null = null, thirdparties: number[]): Promise<BusinessPlanAmount> {
+  async getBusinessPlanMonthlyTotalAmounts(
+    month: string | null = null,
+    body: { [key: string]: number },
+    thirdparties: Array<number>,
+  ): Promise<BusinessPlanAmount> {
     return {
-      RTB: await this.getPeriodTypeMonthlyAmount(month, thirdparties, 'RTB'),
-      CTB: await this.getPeriodTypeMonthlyAmount(month, thirdparties, 'CTB'),
+      RTB: await this.getPeriodTypeMonthlyAmount(month, body, 'RTB', thirdparties),
+      CTB: await this.getPeriodTypeMonthlyAmount(month, body, 'CTB', thirdparties),
     };
   }
 
@@ -97,8 +102,13 @@ export class WorkloadsService {
     return await this.workloadRepository.update(criteria, partialEntity);
   }
 
-  async getPeriodTypeMonthlyAmount(month: string | null = null, thirdparties: number[], businessPlan: string): Promise<PeriodTypeAmount> {
-    const totals = await this.getRawMonthlyTotalAmountGroupedByPeriodType(month, thirdparties, businessPlan);
+  async getPeriodTypeMonthlyAmount(
+    month: string | null = null,
+    body: { [key: string]: number },
+    businessPlan: string,
+    thirdparties: Array<number>,
+  ): Promise<PeriodTypeAmount> {
+    const totals = await this.getRawMonthlyTotalAmountGroupedByPeriodType(month, body, businessPlan, thirdparties);
     const periodTypeAmount: PeriodTypeAmount = {};
     _.map(totals, total => {
       const { type, ...units } = total;
@@ -110,17 +120,20 @@ export class WorkloadsService {
 
   async getRawMonthlyTotalAmountGroupedByPeriodType(
     month: string | null = null,
-    thirdparties: number[],
+    body: any,
     businessPlan: string,
+    thirdparties: number[],
   ): Promise<SumAmountByPeriodTypeAndBusinessPlan[]> {
     try {
+      const { serviceId, subserviceId, organizationId, partnerId, subnatureId } = body;
+
       const periods = await this.periodsService.getPeriodsByYearAndMonth(null, month);
       const periodIds = _.map(periods, 'id');
       /**
        * @todo add relation with appSettings for connected user
        */
 
-      return await getConnection()
+      let query = getConnection()
         .createQueryBuilder()
         .from(Workload, 'workload')
         .select('period.type', 'type')
@@ -131,13 +144,24 @@ export class WorkloadsService {
 
         .leftJoin('workload.subservice', 'subservice')
         .leftJoin('subservice.subtypology', 'subtypology')
+        .leftJoin('subservice.service', 'service')
+        .leftJoin('workload.subsidiaryAllocations', 'partners')
+        .leftJoin('workload.subnature', 'subnature')
         .leftJoin('workload.amounts', 'amount')
         .leftJoin('amount.period', 'period')
+
         .where('workload.thirdpartyid IN (:...thirdparties)', { thirdparties: thirdparties })
-        .andWhere('amount.periodid IN (:...periodIds)', { periodIds: periodIds })
         .andWhere('subtypology.businesstype = :businessPlan', { businessPlan: businessPlan })
-        .groupBy('period.type')
-        .execute();
+        .andWhere('workload.periodid IN (:...periodIds)', { periodIds: periodIds })
+        .andWhere('amount.periodid IN (:...periodIds)', { periodIds: periodIds });
+
+      query = serviceId ? query.andWhere('service.id = :serviceId', { serviceId: serviceId }) : query;
+      query = subserviceId ? query.andWhere('subservice.id = :subserviceId', { subserviceId: subserviceId }) : query;
+      query = organizationId ? query.andWhere('workload.thirdpartyid = :organizationId', { organizationId: organizationId }) : query;
+      query = partnerId ? query.andWhere('workload.subnatureid = :subnatureId', { subnatureId: subnatureId }) : query;
+      query = subnatureId ? query.andWhere('partners.thirdpartyid = :partnerId', { partnerId: partnerId }) : query;
+
+      return await query.groupBy('period.type').execute();
     } catch (error) {
       Logger.error(error);
 
