@@ -115,6 +115,12 @@ export class ConstantService {
           'ytd_amount_eur_currency_wi_adjust_after_compl',
         ],
       }),
+      MYGTS_QUEUE: Object.freeze({
+        NAME: 'MYGTS',
+        ORIGIN_SEPARATOR: '\\|@\\|',
+        SEPARATOR: ';',
+        HEADER: ['ClientLongName', '€', 'Code NRG', 'Gamme', 'Sous-Gamme', 'Mois'],
+      }),
     }),
   });
 }
