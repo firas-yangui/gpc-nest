@@ -20,12 +20,17 @@ export class PyramidParser {
     await this.callbackPyramidParser.parse(data, metadata, isActuals, outsourcing);
   endPyramidCallback = () => this.callbackPyramidParser.end();
 
-  parsePramidLine = async (data: string, metadata: Record<string, any>, isActuals = false): Promise<string> => {
+  parsePramidLine = async (data: string, metadata: Record<string, any>, isActuals = false, outsourcing = false): Promise<string> => {
     let separator = this.constantService.GLOBAL_CONST.QUEUE.PYRAMID_QUEUE.SEPARATOR;
     let header = this.constantService.GLOBAL_CONST.QUEUE.PYRAMID_QUEUE.HEADER;
     if (isActuals) {
       separator = this.constantService.GLOBAL_CONST.QUEUE.PYRAMIDACTUALS_QUEUE.SEPARATOR;
       header = this.constantService.GLOBAL_CONST.QUEUE.PYRAMIDACTUALS_QUEUE.HEADER;
+    }
+
+    if (outsourcing) {
+      separator = this.constantService.GLOBAL_CONST.QUEUE.PYRAMIDACTUALS_OUTSOURCING_QUEUE.SEPARATOR;
+      header = this.constantService.GLOBAL_CONST.QUEUE.PYRAMIDACTUALS_OUTSOURCING_QUEUE.HEADER;
     }
 
     const readable = stringToStream(data);

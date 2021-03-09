@@ -56,7 +56,7 @@ export class TasksService implements OnModuleInit {
     const regex = new RegExp(separator, 'g');
     const line = data.line.replace(regex, ';');
     try {
-      const parsedData = await this.pyramidParser.parsePramidLine(line, data.metadata, true);
+      const parsedData = await this.pyramidParser.parsePramidLine(line, data.metadata, false, true);
       const insertedData = await this.pyramidParser.pyramidCallback(parsedData, data.metadata, false, true);
       return insertedData;
     } catch (error) {

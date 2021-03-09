@@ -190,7 +190,11 @@ export class CallbackPyramidParser {
     if (!thirdParty) {
       const parendDescrFiled = line[fields.parentDescr].slice(0, 11);
       let findOptions: any = { datalakename: parendDescrFiled };
-      if(isActual) {
+      if(
+        isActual &&
+        !startsWith(line[pyramidFields.eac.parentDescr], 'GSC/') &&
+        !startsWith(line[pyramidFields.eac.parentDescr], 'EBS/')
+      ) {
         findOptions = { gpcname: line[fields.parentDescr].slice(0, 7)};
       }
       // if (includes(['GSC/CRL/MGT', 'GSC/ARS/ARS', 'GSC/DAT/DAT', 'GSC/H2R/H2R', 'GSC/H2R/BLR', 'GSC/H2R/CHE'], parendDescrFiled)) {
