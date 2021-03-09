@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ServicesService } from './services.service';
 import { ServiceRepository } from './services.repository';
+import { ServicesController } from './services.controller';
 
 describe('ServicesService', () => {
   let servicesService: ServicesService;
@@ -12,6 +13,7 @@ describe('ServicesService', () => {
       find: findMock,
     });
     const module: TestingModule = await Test.createTestingModule({
+      controllers: [ServicesController],
       providers: [
         ServicesService,
         {

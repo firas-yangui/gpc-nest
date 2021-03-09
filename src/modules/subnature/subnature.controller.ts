@@ -1,4 +1,12 @@
-import { Controller } from '@nestjs/common';
+import { Controller, Get } from '@nestjs/common';
+import { SubNature } from './subnature.entity';
+import { SubnatureService } from './subnature.service';
 
-@Controller('subnature')
-export class SubnatureController {}
+@Controller('subnatures')
+export class SubnatureController {
+  constructor(private subnaturesService: SubnatureService) {}
+  @Get()
+  findAll(): Promise<SubNature[]> {
+    return this.subnaturesService.find({});
+  }
+}

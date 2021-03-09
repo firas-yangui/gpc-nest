@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { SubService } from '../subservices/subservice.entity';
 import { ServiceRepository } from './../services/services.repository';
 import { Service } from './services.entity';
 
@@ -16,6 +17,10 @@ export class ServicesService {
 
   async findOne(options: object = {}): Promise<Service> {
     return await this.serviceRepository.findOne(options);
+  }
+
+  async getSubservices(options: { id: number }): Promise<SubService[]> {
+    return await (await this.serviceRepository.findOne({ where: { id: options.id }, relations: ['subservices'] })).subservices;
   }
 
   async findByName(name: string): Promise<Service> {

@@ -1,6 +1,7 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { NosicaParser } from './nosica/nosica.parser';
 import { PyramidParser } from './pyramid/pyramid.parser';
+import { MyGTSParser } from './myGTS/myGTS.parser';
 import { Connection, Channel } from 'amqplib';
 import { ConstantService } from '../constants/constants';
 import { AmqplibService } from './../amqplibWrapper/amqplib-wrapper.service';
@@ -13,6 +14,7 @@ export class TasksService implements OnModuleInit {
     private nosicaParser: NosicaParser,
     private pyramidParser: PyramidParser,
     private constantService: ConstantService,
+    private myGTSParser: MyGTSParser,
   ) {}
   
 
@@ -63,6 +65,20 @@ export class TasksService implements OnModuleInit {
     }
   };
 
+  handleMyGTSMessage = async (message: Record<string, any>) => {
+    const data = JSON.parse(message.content.toString('utf8'));
+    const separator = this.constantService.GLOBAL_CONST.QUEUE.MYGTS_QUEUE.ORIGIN_SEPARATOR;
+    const regex = new RegExp(separator, 'g');
+    const line = data.line.replace(regex, ';');
+    try {
+      const parsedData = await this.myGTSParser.parseMyGTSLine(line, data.metadata);
+      const insertedData = await this.myGTSParser.myGTSCallback(parsedData, data.metadata);
+      return insertedData;
+    } catch (error) {
+      this.logger.error(`myGTS error occurred: ${error}`);
+      return;
+    }
+  };
 
   handleNosicaMessage = async (message): Promise<any> => {
     if (!message || !message.content) return;
@@ -83,6 +99,16 @@ export class TasksService implements OnModuleInit {
       })
       .then((channel: Channel) => {
         Promise.all([
+          channel
+            .assertQueue(this.constantService.GLOBAL_CONST.QUEUE.MYGTS_QUEUE.NAME)
+            .then(ok => channel.prefetch(10))
+            .then(() =>
+              channel.consume(this.constantService.GLOBAL_CONST.QUEUE.MYGTS_QUEUE.NAME, async msg =>
+                this.handleMyGTSMessage(msg).then(() => {
+                  return channel.ack(msg);
+                }),
+              ),
+            ),
           channel
             .assertQueue(this.constantService.GLOBAL_CONST.QUEUE.PYRAMID_QUEUE.NAME)
             .then(ok => channel.prefetch(10))
