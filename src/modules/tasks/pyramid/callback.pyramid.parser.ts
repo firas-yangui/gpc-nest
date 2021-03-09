@@ -208,10 +208,9 @@ export class CallbackPyramidParser {
     return thirdParty;
   };
 
-  getPeriodAppSettings = async (type: string, isActual: boolean, previous: boolean) => {
+  getPeriodAppSettings = async (type: string, isActual: boolean, outsourcing: boolean, previous: boolean) => {
     let month = moment(Date.now());
-
-    if (isActual) month = month.subtract(1, 'month');
+    if (isActual || outsourcing) month = month.subtract(1, 'month');
     if (previous) month = month.subtract(1, 'month');
     return this.periodsService.findOneInAppSettings(this.constantService.GLOBAL_CONST.SCOPES.BSC, {
       type: type,
@@ -339,7 +338,7 @@ export class CallbackPyramidParser {
     let requiredParams;
     if (isActuals) fields = pyramidFields.actuals;
     if (outsourcing) fields = pyramidFields.pmd;
-    const periodType: string = isActuals ? PeriodTypeInterface.actual : PeriodTypeInterface.forecast;
+    const periodType: string = (isActuals || outsourcing) ? PeriodTypeInterface.actual : PeriodTypeInterface.forecast;
 
     if (isActuals) requiredParams = requiredFileds.actuals;
     if (!isActuals) requiredParams = requiredFileds.eac;
@@ -379,7 +378,7 @@ export class CallbackPyramidParser {
       throw new Error(`Plan not defined for line: ${JSON.stringify(line)}`);
     }
 
-    const periodAppSettings = await this.getPeriodAppSettings(periodType, isActuals, false);
+    const periodAppSettings = await this.getPeriodAppSettings(periodType, isActuals, outsourcing, false);
     if (!periodAppSettings) {
       throw new Error('period not found');
     }
@@ -426,7 +425,7 @@ export class CallbackPyramidParser {
 
     workload = workloadsBySubserviceThirdpartySubnature[0];
     if (workloadsBySubserviceThirdpartySubnature.length > 1) {
-      const previousPeriodAppSettings = await this.getPeriodAppSettings(periodType, isActuals, true);
+      const previousPeriodAppSettings = await this.getPeriodAppSettings(periodType, isActuals, outsourcing, true);
       if (previousPeriodAppSettings) {
         const subsidiaryAllocation = await this.getAllocations(workloadsBySubserviceThirdpartySubnature, line, fields, previousPeriodAppSettings);
         if (!subsidiaryAllocation) {

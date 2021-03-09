@@ -14,10 +14,8 @@ export class RawAmountsService {
   ) {}
 
   async save(amount: RawAmount, workload: Workload, period: Period) {
-    Logger.log(`The workload:: ${JSON.stringify(workload)}`);
     amount = { ...amount, workloadid: workload.id, periodid: period.id};
     if(!workload.subnature.isworkforce) amount.mandays = 0;
-    Logger.log(`The amount:: ${JSON.stringify(amount)}`);
     return this.rawAmountRepository.save(amount);
   }
 
