@@ -14,6 +14,7 @@ export class TasksService implements OnModuleInit {
     private pyramidParser: PyramidParser,
     private constantService: ConstantService,
   ) {}
+  
 
   handlePyramidEACMessage = async (message: Record<string, any>) => {
     if (!message || !message.content) return;
@@ -23,7 +24,7 @@ export class TasksService implements OnModuleInit {
     const line = data.line.replace(regex, ';');
     try {
       const parsedData = await this.pyramidParser.parsePramidLine(line, data.metadata);
-      return await this.pyramidParser.pyramidCallback(parsedData, data.metadata, false);
+      return await this.pyramidParser.pyramidCallback(parsedData, data.metadata);
     } catch (error) {
       this.logger.error(`Pyramid EAC error occurred: ${error}`);
       return;
@@ -31,8 +32,9 @@ export class TasksService implements OnModuleInit {
   };
 
   handlePyramidActualsMessage = async (message: Record<string, any>) => {
+    if (!message || !message.content) return;
     const data = JSON.parse(message.content.toString('utf8'));
-    const separator = this.constantService.GLOBAL_CONST.QUEUE.PYRAMID_QUEUE.ORIGIN_SEPARATOR;
+    const separator = this.constantService.GLOBAL_CONST.QUEUE.PYRAMIDACTUALS_QUEUE.ORIGIN_SEPARATOR;
     const regex = new RegExp(separator, 'g');
     const line = data.line.replace(regex, ';');
     try {
@@ -45,7 +47,25 @@ export class TasksService implements OnModuleInit {
     }
   };
 
+  handlePyramidActualsOutsourcingMessage = async (message: Record<string, any>) => {
+    if (!message || !message.content) return;
+    const data = JSON.parse(message.content.toString('utf8'));
+    const separator = this.constantService.GLOBAL_CONST.QUEUE.PYRAMIDACTUALS_OUTSOURCING_QUEUE.ORIGIN_SEPARATOR;
+    const regex = new RegExp(separator, 'g');
+    const line = data.line.replace(regex, ';');
+    try {
+      const parsedData = await this.pyramidParser.parsePramidLine(line, data.metadata, true);
+      const insertedData = await this.pyramidParser.pyramidCallback(parsedData, data.metadata, false, true);
+      return insertedData;
+    } catch (error) {
+      this.logger.error(`Pyramid Actual Outsourcing error occurred: ${error}`);
+      return;
+    }
+  };
+
+
   handleNosicaMessage = async (message): Promise<any> => {
+    if (!message || !message.content) return;
     const data = JSON.parse(message.content.toString('utf8'));
     const separator = this.constantService.GLOBAL_CONST.QUEUE.NOSICA_QUEUE.ORIGIN_SEPARATOR;
     const regex = new RegExp(separator, 'g');
@@ -74,10 +94,21 @@ export class TasksService implements OnModuleInit {
               ),
             ),
           channel.assertQueue(this.constantService.GLOBAL_CONST.QUEUE.PYRAMIDACTUALS_QUEUE.NAME).then(ok => {
-            channel.prefetch(1).then(() => {
+            channel.prefetch(10).then(() => {
               channel.consume(this.constantService.GLOBAL_CONST.QUEUE.PYRAMIDACTUALS_QUEUE.NAME, msg => {
                 if (msg !== null) {
                   return this.handlePyramidActualsMessage(msg).then(() => {
+                    channel.ack(msg);
+                  });
+                }
+              });
+            });
+          }),
+          channel.assertQueue(this.constantService.GLOBAL_CONST.QUEUE.PYRAMIDACTUALS_OUTSOURCING_QUEUE.NAME).then(ok => {
+            channel.prefetch(10).then(() => {
+              channel.consume(this.constantService.GLOBAL_CONST.QUEUE.PYRAMIDACTUALS_OUTSOURCING_QUEUE.NAME, msg => {
+                if (msg !== null) {
+                  return this.handlePyramidActualsOutsourcingMessage(msg).then(() => {
                     channel.ack(msg);
                   });
                 }

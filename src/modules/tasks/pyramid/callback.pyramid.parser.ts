@@ -31,32 +31,38 @@ const onshoreStaffType = 'onshore';
 const actualsValideStaffType = [...intExtStaffType, onshoreStaffType, 'nearshore', 'offshore'];
 const eacValideStaffType = ['outsourcing - consulting', 'outsourcing - fixed-price contract'];
 const staffTypeWithEnvCost = ['outsourcing - consulting'];
-
+const eacFields  = {
+  ProjectCode: 'Project_Code',
+  ProjectName: 'Project_Name',
+  activityApplication: 'Activity_Application',
+  activityApplicationLabel: 'Activity_Application_Label',
+  curveType: 'curve_type',
+  eac: 'eac',
+  eacKe: 'eac_ke',
+  actualMd: 'actuals_md',
+  cds: 'CDS',
+  csm: 'CSM',
+  parentDescr: 'PARENT_DESCR',
+  staffType: 'staff_type',
+  activityPlan: 'activity_plan',
+  activityType: 'activity_type',
+  portfolio: 'portfolio',
+  subPortfolio: 'sub_portfolio',
+  partner: 'partner',
+  caPayor: 'Activity_Ca payor',
+  caPayorLabel: 'Activity_Ca payor label',
+  payor: 'payor',
+  clientEntity: 'Client_Entity',
+    pyrTmpMonthMr: 'pyr_tmp_month_mr',
+}
 const pyramidFields = {
   eac: {
-    ProjectCode: 'Project_Code',
-    ProjectName: 'Project_Name',
-    activityApplication: 'Activity_Application',
-    activityApplicationLabel: 'Activity_Application_Label',
-    curveType: 'curve_type',
-    eac: 'eac',
-    eacKe: 'eac_ke',
-    actualMd: 'actuals_md',
-    cds: 'CDS',
-    csm: 'CSM',
-    parentDescr: 'PARENT_DESCR',
-    staffType: 'staff_type',
+    ...eacFields,
     valideStaffType: [...actualsValideStaffType, ...eacValideStaffType],
-    activityPlan: 'activity_plan',
-    activityType: 'activity_type',
-    portfolio: 'portfolio',
-    subPortfolio: 'sub_portfolio',
-    partner: 'partner',
-    caPayor: 'Activity_Ca payor',
-    caPayorLabel: 'Activity_Ca payor label',
-    payor: 'payor',
-    clientEntity: 'Client_Entity',
-    pyrTmpMonthMr: 'pyr_tmp_month_mr',
+  },
+  pmd: {
+    ...eacFields,
+    valideStaffType: [...eacValideStaffType],
   },
   actuals: {
     amount: 'standard_actuals_integrated_md',
@@ -122,8 +128,8 @@ export class CallbackPyramidParser {
     return true;
   };
 
-  isParseableLine = (line: any, fields: Record<string, any>): boolean => {
-    return (
+  isParseableLine = (line: any, fields: Record<string, any>, outsourcing: boolean): boolean => {
+    let isParseable: boolean = (
       line[fields.cds].trim() !== 'RESG/TPS/API' &&
       line[fields.cds].trim() !== 'RESG/TPS/GDO' &&
       line[fields.cds].trim() !== 'RISQ/DTO' &&
@@ -131,6 +137,13 @@ export class CallbackPyramidParser {
       line[fields.payor].trim() !== '3000324000' &&
       line[fields.activityType].trim() !== 'Absence'
     );
+    if (outsourcing) {
+      isParseable = (
+        isParseable &&
+        line[fields.curveType].trim().toLocaleLowerCase() === 'actuals'
+      );
+    }
+    return isParseable;
   };
 
   isChargeableLine = (line: any, fields: Record<string, any>): boolean => {
@@ -276,7 +289,7 @@ export class CallbackPyramidParser {
     });
   };
 
-  getAmountData = (line, isActuals = false) => {
+  getAmountData = (line, isActuals: boolean) => {
     if (!isActuals) {
       if (this.isJH(line[pyramidFields.eac.staffType]))
         return {
@@ -316,12 +329,12 @@ export class CallbackPyramidParser {
     }
   };
 
-  parse = async (line: any, metadata: Record<string, any>, isActuals = false) => {
+  parse = async (line: any, metadata: Record<string, any>, isActuals = false, outsourcing = false) => {
     let workload: Workload;
-    let fields: Record<string, any>;
+    let fields: Record<string, any> = pyramidFields.eac;;
     let requiredParams;
     if (isActuals) fields = pyramidFields.actuals;
-    if (!isActuals) fields = pyramidFields.eac;
+    if (outsourcing) fields = pyramidFields.pmd;
     const periodType: string = isActuals ? PeriodTypeInterface.actual : PeriodTypeInterface.forecast;
 
     if (isActuals) requiredParams = requiredFileds.actuals;
@@ -331,7 +344,7 @@ export class CallbackPyramidParser {
       throw new Error('invalid line param');
     }
 
-    if (!this.isParseableLine(line, fields)) {
+    if (!this.isParseableLine(line, fields, outsourcing)) {
       throw new Error(`line is not parseable: ${JSON.stringify(line)}`);
     }
 

@@ -16,8 +16,8 @@ export class PyramidParser {
     private readonly helpers: Helpers,
   ) {}
 
-  pyramidCallback = async (data: string, metadata: Record<string, any>, isActuals = false) =>
-    await this.callbackPyramidParser.parse(data, metadata, isActuals);
+  pyramidCallback = async (data: string, metadata: Record<string, any>, isActuals = false, outsourcing = false) =>
+    await this.callbackPyramidParser.parse(data, metadata, isActuals, outsourcing);
   endPyramidCallback = () => this.callbackPyramidParser.end();
 
   parsePramidLine = async (data: string, metadata: Record<string, any>, isActuals = false): Promise<string> => {

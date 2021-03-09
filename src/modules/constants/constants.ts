@@ -16,7 +16,34 @@ export class ConstantService {
     CRON_INTERVAL: '10 minutes', // 10 minutes
     QUEUE: Object.freeze({
       PYRAMID_QUEUE: Object.freeze({
-        NAME: 'PYRAMID',
+        NAME: 'EAC',
+        ORIGIN_SEPARATOR: '\\|@\\|',
+        SEPARATOR: ';',
+        HEADER: [
+          'Project_Code',
+          'Project_Name',
+          'Activity_Application',
+          'Activity_Application_Label',
+          'curve_type',
+          'eac',
+          'eac_ke',
+          'CDS',
+          'CSM',
+          'PARENT_DESCR',
+          'staff_type',
+          'activity_plan',
+          'activity_type',
+          'portfolio',
+          'sub_portfolio',
+          'partner',
+          'code_ca_payor',
+          'payor',
+          'Client_Entity',
+          'pyr_tmp_month_mr',
+        ],
+      }),
+      PYRAMIDACTUALS_OUTSOURCING_QUEUE: Object.freeze({
+        NAME: 'PMD',
         ORIGIN_SEPARATOR: '\\|@\\|',
         SEPARATOR: ';',
         HEADER: [
@@ -43,7 +70,7 @@ export class ConstantService {
         ],
       }),
       PYRAMIDACTUALS_QUEUE: Object.freeze({
-        NAME: 'PYRAMIDACTUALS',
+        NAME: 'TM',
         ORIGIN_SEPARATOR: '\\|@\\|',
         SEPARATOR: ';',
         HEADER: [
