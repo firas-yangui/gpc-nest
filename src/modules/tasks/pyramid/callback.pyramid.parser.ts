@@ -188,15 +188,16 @@ export class CallbackPyramidParser {
     
     const thirdParty = await this.thirdpartiesService.findOne(options);
     if (!thirdParty) {
-      const parendDescrFiled = line[fields.parentDescr].slice(0, 11);
-      let findOptions: any = { datalakename: parendDescrFiled };
+      let  parendDescrFiled = line[fields.parentDescr].slice(0, 11);
+      
       if(
         isActual &&
-        !startsWith(line[pyramidFields.eac.parentDescr], 'GSC/') &&
-        !startsWith(line[pyramidFields.eac.parentDescr], 'EBS/')
+        !startsWith(line[fields.parentDescr], 'GSC/') &&
+        !startsWith(line[fields.parentDescr], 'EBS/')
       ) {
-        findOptions = { gpcname: line[fields.parentDescr].slice(0, 7)};
+        parendDescrFiled = line[fields.parentDescr].slice(0, 7);
       }
+      const findOptions: any = { datalakename: parendDescrFiled };
       // if (includes(['GSC/CRL/MGT', 'GSC/ARS/ARS', 'GSC/DAT/DAT', 'GSC/H2R/H2R', 'GSC/H2R/BLR', 'GSC/H2R/CHE'], parendDescrFiled)) {
       //   findOptions = { ...findOptions, projectname: line[fields.ProjectCode] };
       // }
