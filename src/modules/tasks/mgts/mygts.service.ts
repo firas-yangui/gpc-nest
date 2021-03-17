@@ -2,30 +2,30 @@ import { createWriteStream } from 'fs';
 import { Injectable, Logger } from '@nestjs/common';
 import { Like, In, Equal } from 'typeorm';
 import { chain } from 'lodash';
-import { Thirdparty, PeriodType } from './../../../modules/interfaces/common-interfaces';
-import { ConstantService } from './../../constants/constants';
+import { Thirdparty, PeriodType } from '../../interfaces/common-interfaces';
+import { ConstantService } from '../../constants/constants';
 import { AmountConverter } from '../../amounts/amounts.converter';
-import { ThirdpartiesService } from './../../../modules/thirdparties/thirdparties.service';
-import { WorkloadsService } from './../../../modules/workloads/workloads.service';
-import { PeriodsService } from './../../../modules/periods/periods.service';
-import { SubservicesService } from './../../subservices/subservices.service';
-import { ServicesService } from './../../services/services.service';
-import { RawAmountsService } from './../../../modules/rawamounts/rawamounts.service';
-import { PricesService } from './../../prices/prices.service';
-import { CurrencyRateService } from './../../currency-rate/currency-rate.service';
-import { SubnatureService } from '../../../modules/subnature/subnature.service';
-import { Workload } from '../../../modules/workloads/workload.entity';
-import { Period } from '../../../modules/periods/period.entity';
-import { Price } from '../../../modules/prices/prices.entity';
-import { SubService } from '../../../modules/subservices/subservice.entity';
-import { Service } from '../../../modules/services/services.entity';
-import { SubNature } from '../../../modules/subnature/subnature.entity';
+import { ThirdpartiesService } from '../../thirdparties/thirdparties.service';
+import { WorkloadsService } from '../../workloads/workloads.service';
+import { PeriodsService } from '../../periods/periods.service';
+import { SubservicesService } from '../../subservices/subservices.service';
+import { ServicesService } from '../../services/services.service';
+import { RawAmountsService } from '../../rawamounts/rawamounts.service';
+import { PricesService } from '../../prices/prices.service';
+import { CurrencyRateService } from '../../currency-rate/currency-rate.service';
+import { SubnatureService } from '../../subnature/subnature.service';
+import { Workload } from '../../workloads/workload.entity';
+import { Period } from '../../periods/period.entity';
+import { Price } from '../../prices/prices.entity';
+import { SubService } from '../../subservices/subservice.entity';
+import { Service } from '../../services/services.entity';
+import { SubNature } from '../../subnature/subnature.entity';
 
 const REJECTED_FILENAME = `myGTS-rejected-preparedLines-${Date.now()}.csv`;
 const writeStream = createWriteStream(`/tmp/${REJECTED_FILENAME}`);
 
 @Injectable()
-export class CallbackMyGTSParser {
+export class MyGtsService {
   constructor(
     private readonly thirdpartiesService: ThirdpartiesService,
     private readonly workloadsService: WorkloadsService,
@@ -49,7 +49,7 @@ export class CallbackMyGTSParser {
    * @param line
    */
   prepareLine = (line: Record<string, any>): any => {
-    const headers = this.constantService.GLOBAL_CONST.QUEUE.MYGTS_QUEUE.HEADER;
+    const headers = this.constantService.GLOBAL_CONST.QUEUE.MYGTS.HEADER;
     const CLIENT_PROJET = 'CLIENT PROJECT';
     const GTS_CLIENT_PROJECT = 'GTS - Client Projects';
     const GTS_HOSTING = 'GTS - Hosting + Client Request';
@@ -176,13 +176,12 @@ export class CallbackMyGTSParser {
     return this.amountConverter.createAmountEntity(amount, unit, rate?.value, prices?.price, prices?.saleprice);
   };
 
-  parse = async (line: Record<string, any>, metadata: Record<string, any>): Promise<Record<string, any>> => {
+  import = async (line: Record<string, any>): Promise<Record<string, any>> => {
     try {
       const { year, month, amount, thirdPartyName, subnatureName } = this.prepareLine(line);
       const period = await this.getPeriod(year, month);
       const workload = await this.getWorkload(thirdPartyName, subnatureName);
       const createdAmount = await this.createAmount(amount, workload, period);
-      createdAmount.datasource = metadata.filename;
       Logger.log(`amount saved with success for workload "${workload.code}" and period "${period.code}"`);
       Logger.log(`The created amount ... ${JSON.stringify(createdAmount)}`);
       return this.rawAmountsService.save(createdAmount, workload, period);

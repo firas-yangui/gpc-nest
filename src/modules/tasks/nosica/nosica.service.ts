@@ -2,15 +2,15 @@ import { createWriteStream } from 'fs';
 import { Injectable, Logger } from '@nestjs/common';
 import { Like } from 'typeorm';
 
-import { ThirdpartiesService } from './../../../modules/thirdparties/thirdparties.service';
-import { WorkloadsService } from './../../../modules/workloads/workloads.service';
-import { SubnatureappsettingsService } from './../../../modules/subnatureappsettings/subnatureappsettings.service';
-import { PeriodsService } from './../../../modules/periods/periods.service';
-import { Thirdparty, PeriodType } from './../../../modules/interfaces/common-interfaces';
-import { RawAmountsService } from './../../../modules/rawamounts/rawamounts.service';
-import { PricesService } from './../../prices/prices.service';
-import { CurrencyRateService } from './../../currency-rate/currency-rate.service';
-import { ConstantService } from './../../constants/constants';
+import { ThirdpartiesService } from '../../thirdparties/thirdparties.service';
+import { WorkloadsService } from '../../workloads/workloads.service';
+import { SubnatureappsettingsService } from '../../subnatureappsettings/subnatureappsettings.service';
+import { PeriodsService } from '../../periods/periods.service';
+import { Thirdparty, PeriodType } from '../../interfaces/common-interfaces';
+import { RawAmountsService } from '../../rawamounts/rawamounts.service';
+import { PricesService } from '../../prices/prices.service';
+import { CurrencyRateService } from '../../currency-rate/currency-rate.service';
+import { ConstantService } from '../../constants/constants';
 import { AmountConverter } from '../../amounts/amounts.converter';
 
 const nosicaField = {
@@ -33,7 +33,7 @@ const serviceName = '%Activités Transverses BSC%';
 const rejectedFileName = `nosica-rejected-lines-${Date.now()}.csv`;
 const writeStream = createWriteStream(`/tmp/${rejectedFileName}`);
 @Injectable()
-export class CallbackNosicaParser {
+export class NosicaService {
   constructor(
     private readonly thirdpartiesService: ThirdpartiesService,
     private readonly subnatureappsettingsService: SubnatureappsettingsService,
@@ -63,16 +63,12 @@ export class CallbackNosicaParser {
     }
   };
 
-  private writeInRejectedFile = (line: string, separator: string, error: string) => {
-    writeStream.write(line.concat(separator, error));
-  };
 
-  nosicaCallback = async (line: Record<string, any>, separator: string, metadata: Record<string, any>): Promise<Record<string, any>> => {
+  import = async (line: Record<string, any>): Promise<Record<string, any>> => {
     const receivedTrigram = this.cdsToCsm(line[nosicaField.trigram].trim());
     const receivedYear = line[nosicaField.year].trim();
     const receivedNRGCode = line[nosicaField.NRG].trim();
     const receivedMonth = line[nosicaField.period].trim();
-    const datasource = metadata.filename;
     let amount = line[nosicaField.amount].trim();
     let error = '';
 
@@ -81,48 +77,33 @@ export class CallbackNosicaParser {
       month: receivedMonth,
       type: PeriodType.actual,
     });
-    if (!actualPeriodAppSettings) {
-      error = `No Period found with year  ${receivedYear} and month ${receivedMonth} and type ${PeriodType.actual}`;
-      Logger.error(error);
-      // reject all lines and exit
-      return;
-    }
+    if (!actualPeriodAppSettings)
+      throw new Error(`No Period found with year  ${receivedYear} and month ${receivedMonth} and type ${PeriodType.actual}`);
 
     const actualPeriod = actualPeriodAppSettings.period;
 
-    if (!amount || !Number(amount)) {
-      error = `No amount defined for this line :${JSON.stringify(line)}`;
-      Logger.error(error);
-      // reject line
-      return;
-    }
+    if (!amount || !Number(amount)) 
+      throw new Error(`No amount defined for this line :${JSON.stringify(line)}`);
+     
 
     amount = (amount * -1) / 1000;
 
     const thirdparty: Thirdparty = await this.thirdpartiesService.findOne({ name: Like(receivedTrigram) });
-    if (!thirdparty) {
-      error = `No Thirdparty found for Trigram Code : ${receivedTrigram}`;
-      Logger.error(error);
-      // this.writeInRejectedFile(line, separator, error);
-      return;
-    }
+    if (!thirdparty)
+      throw new Error(`No Thirdparty found for Trigram Code : ${receivedTrigram}`);
+    
 
     const subnatureappsetting = await this.subnatureappsettingsService.findOne({
       where: { nrgcode: Like(`%${receivedNRGCode}%`), gpcappsettingsid: this.constantService.GLOBAL_CONST.SCOPES.BSC },
       relations: ['subnature'],
     });
-    if (!subnatureappsetting) {
-      error = `No Subnature found with NRG Code : ${receivedNRGCode}`;
-      Logger.error(error);
-      return;
-    }
+    if (!subnatureappsetting)
+      throw new Error(`No Subnature found with NRG Code : ${receivedNRGCode}`);
 
     const workload = await this.workloadsService.getNosicaWorkloadInSubserviceName(serviceName, thirdparty.id, subnatureappsetting.subnature.id);
-    if (!workload) {
-      error = `No workload match with subnature ID ${subnatureappsetting.subnature.id} - nrgCode "${subnatureappsetting.nrgcode}" and thirdparty ID ${thirdparty.id} - Thirdparty Name "${thirdparty.name}"`;
-      Logger.error(error);
-      return;
-    }
+    if (!workload) 
+      throw new Error(`No workload match with subnature ID ${subnatureappsetting.subnature.id} - nrgCode "${subnatureappsetting.nrgcode}" and thirdparty ID ${thirdparty.id} - Thirdparty Name "${thirdparty.name}"`);
+      
     Logger.log(
       `Workload found with subnature ID ${subnatureappsetting.subnature.id} - nrgCode "${subnatureappsetting.nrgcode}" and thirdparty ID ${
         thirdparty.id
@@ -142,7 +123,7 @@ export class CallbackNosicaParser {
     }
 
     let createdAmount = this.amountConverter.createAmountEntity(parseFloat(amount), GLOBAL_CONST.AMOUNT_UNITS.KLC, rate.value, costPrice, salePrice);
-    createdAmount = { ...createdAmount, datasource: datasource };
+    createdAmount = { ...createdAmount };
     Logger.log(`amount saved with success for workload "${workload.code}" and period "${actualPeriod.code}"`);
     Logger.log(`The created amount ... ${JSON.stringify(createdAmount)}`);
     return this.rawAmountsService.save(createdAmount, workload, actualPeriod);

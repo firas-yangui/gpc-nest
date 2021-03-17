@@ -3,27 +3,27 @@ import { In, Equal } from 'typeorm';
 import * as moment from 'moment';
 import { findKey, includes, join, map, startsWith } from 'lodash';
 
-import { RawAmountsService } from './../../rawamounts/rawamounts.service';
-import { AmountConverter } from './../../amounts/amounts.converter';
-import { CurrencyRateService } from './../../currency-rate/currency-rate.service';
-import { WorkloadsService } from './../../../modules/workloads/workloads.service';
-import { PeriodsService } from './../../periods/periods.service';
-import { SubservicesService } from './../../subservices/subservices.service';
-import { Workload } from './../../workloads/workload.entity';
-import { ThirdpartiesService } from './../../thirdparties/thirdparties.service';
-import { Thirdparty } from './../../thirdparties/thirdparty.entity';
-import { SubsidiaryAllocation } from './../../subsidiaryallocation/subsidiaryallocation.entity';
-import { SubsidiaryallocationService } from './../../subsidiaryallocation/subsidiaryallocation.service';
-import { SubtypologiesService } from './../../subtypologies/subtypologies.service';
-import { SubnatureService } from './../../subnature/subnature.service';
-import { ServicesService } from './../../services/services.service';
-import { PricesService } from './../../prices/prices.service';
-import { ConstantService } from './../../constants/constants';
+import { RawAmountsService } from '../../rawamounts/rawamounts.service';
+import { AmountConverter } from '../../amounts/amounts.converter';
+import { CurrencyRateService } from '../../currency-rate/currency-rate.service';
+import { WorkloadsService } from '../../workloads/workloads.service';
+import { PeriodsService } from '../../periods/periods.service';
+import { SubservicesService } from '../../subservices/subservices.service';
+import { Workload } from '../../workloads/workload.entity';
+import { ThirdpartiesService } from '../../thirdparties/thirdparties.service';
+import { Thirdparty } from '../../thirdparties/thirdparty.entity';
+import { SubsidiaryAllocation } from '../../subsidiaryallocation/subsidiaryallocation.entity';
+import { SubsidiaryallocationService } from '../../subsidiaryallocation/subsidiaryallocation.service';
+import { SubtypologiesService } from '../../subtypologies/subtypologies.service';
+import { SubnatureService } from '../../subnature/subnature.service';
+import { ServicesService } from '../../services/services.service';
+import { PricesService } from '../../prices/prices.service';
+import { ConstantService } from '../../constants/constants';
 import { DatalakeGpcOrganizationService } from '../../datalakemapping/datalakegpcorganization.service';
 import { DatalakeGpcPartnerService } from '../../datalakemapping/datalakegpcpartner.service';
 import { DatalakeGpcPayorService } from '../../datalakemapping/datalakegpcpayor.service';
 
-import { PeriodType as PeriodTypeInterface } from './../../interfaces/common-interfaces';
+import { PeriodType as PeriodTypeInterface } from '../../interfaces/common-interfaces';
 import { Subtypology } from 'src/modules/subtypologies/subtypology.entity';
 
 const intExtStaffType: string[] = ['internal', 'external'];
@@ -100,7 +100,7 @@ const requiredFileds = {
 };
 
 @Injectable()
-export class CallbackPyramidParser {
+export class PyramidService {
   constructor(
     private readonly rawAmountsService: RawAmountsService,
     private readonly amountConverter: AmountConverter,
@@ -335,7 +335,7 @@ export class CallbackPyramidParser {
     }
   };
 
-  parse = async (line: any, metadata: Record<string, any>, isActuals = false, outsourcing = false) => {
+  import = async (line: any, isActuals = false, outsourcing = false) => {
     let workload: Workload;
     let fields: Record<string, any> = pyramidFields.eac;;
     let requiredParams;
@@ -366,7 +366,6 @@ export class CallbackPyramidParser {
     const portfolioName = line[fields.portfolio];
     const plan = line[fields.activityPlan];
     const projectCode = line[fields.ProjectCode];
-    const datasource = metadata.filename;
 
     if (!subnatureName.trim()) {
       throw new Error(`subnature name not defined for line: ${JSON.stringify(line)}`);
@@ -457,7 +456,7 @@ export class CallbackPyramidParser {
 
     let createdAmount = this.amountConverter.createAmountEntity(parseFloat(amountData.amount), amountData.unit, rate.value, costPrice, salePrice);
 
-    createdAmount = { ...createdAmount, datasource: datasource };
+    createdAmount = { ...createdAmount };
     
     return this.rawAmountsService.save(createdAmount, workload, actualPeriod);
   };
