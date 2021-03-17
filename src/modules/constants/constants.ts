@@ -15,9 +15,9 @@ export class ConstantService {
     }),
     CRON_INTERVAL: '10 minutes', // 10 minutes
     QUEUE: Object.freeze({
-      PYRAMID_QUEUE: Object.freeze({
+      EAC: Object.freeze({
         NAME: 'EAC',
-        ORIGIN_SEPARATOR: '\\|@\\|',
+        ORIGIN_SEPARATOR: '|@|',
         SEPARATOR: ';',
         HEADER: [
           'Project_Code',
@@ -42,9 +42,9 @@ export class ConstantService {
           'pyr_tmp_month_mr',
         ],
       }),
-      PYRAMIDACTUALS_OUTSOURCING_QUEUE: Object.freeze({
+      PMD: Object.freeze({
         NAME: 'PMD',
-        ORIGIN_SEPARATOR: '\\|@\\|',
+        ORIGIN_SEPARATOR: '|@|',
         SEPARATOR: ';',
         HEADER: [
           'Project_Code',
@@ -69,9 +69,9 @@ export class ConstantService {
           'pyr_tmp_month_mr',
         ],
       }),
-      PYRAMIDACTUALS_QUEUE: Object.freeze({
+      TM: Object.freeze({
         NAME: 'TM',
-        ORIGIN_SEPARATOR: '\\|@\\|',
+        ORIGIN_SEPARATOR: '|@|',
         SEPARATOR: ';',
         HEADER: [
           'resource_igg',
@@ -117,9 +117,9 @@ export class ConstantService {
           'immo',
         ],
       }),
-      NOSICA_QUEUE: Object.freeze({
+      NOSICA: Object.freeze({
         NAME: 'NOSICA',
-        ORIGIN_SEPARATOR: '\\|@\\|',
+        ORIGIN_SEPARATOR: '|@|',
         SEPARATOR: ';',
         HEADER: [
           'fiscal_year',
@@ -142,12 +142,13 @@ export class ConstantService {
           'ytd_amount_eur_currency_wi_adjust_after_compl',
         ],
       }),
-      MYGTS_QUEUE: Object.freeze({
+      MYGTS: Object.freeze({
         NAME: 'MYGTS',
-        ORIGIN_SEPARATOR: '\\|@\\|',
+        ORIGIN_SEPARATOR: '|@|',
         SEPARATOR: ';',
         HEADER: ['ClientLongName', '€', 'Code NRG', 'Gamme', 'Sous-Gamme', 'Mois'],
       }),
     }),
+    S3_BUCKET: 'bsc-fin-fpm-gpc-a2870-'
   });
 }
