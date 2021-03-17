@@ -1,159 +1,79 @@
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import { NosicaParser } from './nosica/nosica.parser';
-import { PyramidParser } from './pyramid/pyramid.parser';
-import { MyGTSParser } from './myGTS/myGTS.parser';
-import { Connection, Channel } from 'amqplib';
+import { Injectable, Logger } from '@nestjs/common';
+import { NosicaService} from './nosica/nosica.service';
+import { PyramidService } from './pyramid/pyramid.service';
+import { MyGtsService } from './mgts/mygts.service';
 import { ConstantService } from '../constants/constants';
-import { AmqplibService } from './../amqplibWrapper/amqplib-wrapper.service';
+import { Cron, CronExpression } from '@nestjs/schedule';
+import AWS  = require('aws-sdk');
+import * as csvParser from 'csv-parser';
+import { map } from 'lodash';
+import * as stringToStream from 'string-to-stream';
 
 @Injectable()
-export class TasksService implements OnModuleInit {
+export class TasksService  {
   private readonly logger = new Logger(TasksService.name);
+  private S3 = new AWS.S3({apiVersion: '2006-03-01'});
   constructor(
-    private readonly amqplibService: AmqplibService,
-    private nosicaParser: NosicaParser,
-    private pyramidParser: PyramidParser,
+    private nosicaService: NosicaService,
+    private pyramidService: PyramidService,
     private constantService: ConstantService,
-    private myGTSParser: MyGTSParser,
-  ) {}
-  
+    private myGtsService: MyGtsService,
+  ) {} 
 
-  handlePyramidEACMessage = async (message: Record<string, any>) => {
-    if (!message || !message.content) return;
-    const data = JSON.parse(message.content.toString('utf8'));
-    const separator = this.constantService.GLOBAL_CONST.QUEUE.PYRAMID_QUEUE.ORIGIN_SEPARATOR;
-    const regex = new RegExp(separator, 'g');
-    const line = data.line.replace(regex, ';');
-    try {
-      const parsedData = await this.pyramidParser.parsePramidLine(line, data.metadata);
-      return await this.pyramidParser.pyramidCallback(parsedData, data.metadata);
-    } catch (error) {
-      this.logger.error(`Pyramid EAC error occurred: ${error}`);
+  getFlowType(flow: string): string {
+    const datas  = flow.split('.');
+    if (datas.length !== 5 )  return undefined
+    return datas[3];
+  }
+
+  importLine(flow, line) {
+    switch (flow) {
+      case this.constantService.GLOBAL_CONST.QUEUE.EAC.NAME:
+        return this.pyramidService.import(line);
+      case this.constantService.GLOBAL_CONST.QUEUE.PMD.NAME:
+        return this.pyramidService.import(line, false, true);
+      case this.constantService.GLOBAL_CONST.QUEUE.TM.NAME:
+        return this.pyramidService.import(line, true);
+      case this.constantService.GLOBAL_CONST.QUEUE.NOSICA.NAME:
+        return this.nosicaService.import(line);
+      case this.constantService.GLOBAL_CONST.QUEUE.MYGTS.NAME:
+        return this.myGtsService.import(line);
+    }
+  }
+
+  // @Cron(CronExpression.EVERY_10_SECONDS)
+  async importFromS3() {
+    const params: any = {
+      Bucket: this.constantService.GLOBAL_CONST.S3_BUCKET.concat(process.env.NODE_ENV)
+    };
+
+    const objects: any = await this.S3.listObjects(params).promise();
+    if(!objects || !objects.Contents.length) {
+      this.logger.log(`No file found in S3 GPC bucket`); 
       return;
     }
-  };
 
-  handlePyramidActualsMessage = async (message: Record<string, any>) => {
-    if (!message || !message.content) return;
-    const data = JSON.parse(message.content.toString('utf8'));
-    const separator = this.constantService.GLOBAL_CONST.QUEUE.PYRAMIDACTUALS_QUEUE.ORIGIN_SEPARATOR;
-    const regex = new RegExp(separator, 'g');
-    const line = data.line.replace(regex, ';');
-    try {
-      const parsedData = await this.pyramidParser.parsePramidLine(line, data.metadata, true);
-      const insertedData = await this.pyramidParser.pyramidCallback(parsedData, data.metadata, true);
-      return insertedData;
-    } catch (error) {
-      this.logger.error(`Pyramid Actual error occurred: ${error}`);
-      return;
-    }
-  };
-
-  handlePyramidActualsOutsourcingMessage = async (message: Record<string, any>) => {
-    if (!message || !message.content) return;
-    const data = JSON.parse(message.content.toString('utf8'));
-    const separator = this.constantService.GLOBAL_CONST.QUEUE.PYRAMIDACTUALS_OUTSOURCING_QUEUE.ORIGIN_SEPARATOR;
-    const regex = new RegExp(separator, 'g');
-    const line = data.line.replace(regex, ';');
-    try {
-      const parsedData = await this.pyramidParser.parsePramidLine(line, data.metadata, false, true);
-      const insertedData = await this.pyramidParser.pyramidCallback(parsedData, data.metadata, false, true);
-      return insertedData;
-    } catch (error) {
-      this.logger.error(`Pyramid Actual Outsourcing error occurred: ${error}`);
-      return;
-    }
-  };
-
-  handleMyGTSMessage = async (message: Record<string, any>) => {
-    const data = JSON.parse(message.content.toString('utf8'));
-    const separator = this.constantService.GLOBAL_CONST.QUEUE.MYGTS_QUEUE.ORIGIN_SEPARATOR;
-    const regex = new RegExp(separator, 'g');
-    const line = data.line.replace(regex, ';');
-    try {
-      const parsedData = await this.myGTSParser.parseMyGTSLine(line, data.metadata);
-      const insertedData = await this.myGTSParser.myGTSCallback(parsedData, data.metadata);
-      return insertedData;
-    } catch (error) {
-      this.logger.error(`myGTS error occurred: ${error}`);
-      return;
-    }
-  };
-
-  handleNosicaMessage = async (message): Promise<any> => {
-    if (!message || !message.content) return;
-    const data = JSON.parse(message.content.toString('utf8'));
-    const separator = this.constantService.GLOBAL_CONST.QUEUE.NOSICA_QUEUE.ORIGIN_SEPARATOR;
-    const regex = new RegExp(separator, 'g');
-    const line = data.line.replace(regex, ';');
-    const parsed = await this.nosicaParser.parseNosicaLine(line, data.metadata);
-    return this.nosicaParser.nosicaCallback(parsed, separator, data.metadata);
-  };
-
-  public onModuleInit() {
-    this.amqplibService
-      .connect()
-      .then((connection: Connection) => {
-        this.logger.debug('rabbitmq-server connected');
-        return connection.createChannel();
+    map(objects.Contents, async file => {
+      const flow = file.Key;
+      const flowType = this.getFlowType(flow);
+      if(!flowType) return;
+      if(!this.constantService.GLOBAL_CONST.QUEUE[flowType]) return;
+      
+      const s3object = (await this.S3.getObject({ Bucket: 'bsc-fin-fpm-gpc-a2870-development', Key: flow }).promise());
+      const readable = stringToStream(s3object.Body.toString());
+      const separator = this.constantService.GLOBAL_CONST.QUEUE[flowType].ORIGIN_SEPARATOR;  
+      const _this = this;
+      readable
+      .pipe(csvParser({ separator: separator }))
+      .on('data', async function(parsed) {
+        _this.importLine(flowType, parsed)
+        .catch((error) => _this.logger.error(`Pyramid EAC error occurred: ${error}`));
+        
       })
-      .then((channel: Channel) => {
-        Promise.all([
-          channel
-            .assertQueue(this.constantService.GLOBAL_CONST.QUEUE.MYGTS_QUEUE.NAME)
-            .then(ok => channel.prefetch(10))
-            .then(() =>
-              channel.consume(this.constantService.GLOBAL_CONST.QUEUE.MYGTS_QUEUE.NAME, async msg =>
-                this.handleMyGTSMessage(msg).then(() => {
-                  return channel.ack(msg);
-                }),
-              ),
-            ),
-          channel
-            .assertQueue(this.constantService.GLOBAL_CONST.QUEUE.PYRAMID_QUEUE.NAME)
-            .then(ok => channel.prefetch(10))
-            .then(() =>
-              channel.consume(this.constantService.GLOBAL_CONST.QUEUE.PYRAMID_QUEUE.NAME, async msg =>
-                this.handlePyramidEACMessage(msg).then(() => {
-                  return channel.ack(msg);
-                }),
-              ),
-            ),
-          channel.assertQueue(this.constantService.GLOBAL_CONST.QUEUE.PYRAMIDACTUALS_QUEUE.NAME).then(ok => {
-            channel.prefetch(10).then(() => {
-              channel.consume(this.constantService.GLOBAL_CONST.QUEUE.PYRAMIDACTUALS_QUEUE.NAME, msg => {
-                if (msg !== null) {
-                  return this.handlePyramidActualsMessage(msg).then(() => {
-                    channel.ack(msg);
-                  });
-                }
-              });
-            });
-          }),
-          channel.assertQueue(this.constantService.GLOBAL_CONST.QUEUE.PYRAMIDACTUALS_OUTSOURCING_QUEUE.NAME).then(ok => {
-            channel.prefetch(10).then(() => {
-              channel.consume(this.constantService.GLOBAL_CONST.QUEUE.PYRAMIDACTUALS_OUTSOURCING_QUEUE.NAME, msg => {
-                if (msg !== null) {
-                  return this.handlePyramidActualsOutsourcingMessage(msg).then(() => {
-                    channel.ack(msg);
-                  });
-                }
-              });
-            });
-          }),
-          channel.assertQueue(this.constantService.GLOBAL_CONST.QUEUE.NOSICA_QUEUE.NAME).then(ok =>
-            channel.prefetch(10).then(() => {
-              channel.consume(this.constantService.GLOBAL_CONST.QUEUE.NOSICA_QUEUE.NAME, msg => {
-                if (msg !== null) {
-                  this.handleNosicaMessage(msg).then(() => channel.ack(msg));
-                }
-              });
-            }),
-          ),
-        ]);
+      .on('end', async function(){
+        // @todo: remove file from S3
+        _this.logger.log('END');
       })
-      .catch(error => {
-        this.logger.error(error);
-      });
+    });
   }
 }
