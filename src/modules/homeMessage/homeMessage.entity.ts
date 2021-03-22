@@ -1,5 +1,5 @@
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
-import { Gpcappsettings } from './gpcappsettings';
+import { GpcAppSettings } from '../gpcappsettings/gpcappsettings.entity';
 
 @Entity('homemessage', { schema: 'public' })
 export class HomeMessage {
@@ -17,10 +17,10 @@ export class HomeMessage {
   message: string;
 
   @ManyToOne(
-    () => Gpcappsettings,
-    (gpcappsettings: Gpcappsettings) => gpcappsettings.homemessages,
+    () => GpcAppSettings,
+    (gpcappsettings: GpcAppSettings) => gpcappsettings.homeMessages,
     {},
   )
   @JoinColumn({ name: 'gpcappsettingsid' })
-  gpcappsettings: gpcappsettings | null;
+  gpcappsettings: GpcAppSettings | null;
 }

@@ -1,6 +1,7 @@
 import { Column, Entity, Index, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { User as GpcUser } from './../user/user.entity';
 import { Thirdpartyappsettings } from './../thirdparties/thirdpartyappsettings/thirdpartyappsettings.entity';
+import { HomeMessage } from './../homeMessage/homeMessage.entity';
 import { SubNatureAppSettings } from './../subnatureappsettings/subnatureappsettings.entity';
 import { PortfolioAppSettings } from './../portfolioAppSettings/portfolioappsettings.entity';
 import { SubTypologyAppSettings } from './../subTypologyAppSettings/subtypologyappsettings.entity';
@@ -50,4 +51,10 @@ export class GpcAppSettings {
     (subTypologyAppSettings: SubTypologyAppSettings) => subTypologyAppSettings.gpcappsettings,
   )
   subTypologyAppSettings: SubTypologyAppSettings[];
+
+  @OneToMany(
+    () => HomeMessage,
+    (homeMessages: HomeMessage) => homeMessages.gpcappsettings,
+  )
+  homeMessages: HomeMessage[];
 }
