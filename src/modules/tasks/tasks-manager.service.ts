@@ -45,22 +45,26 @@ export class TasksService  {
     }
   }
 
-  parseFile(buffer, filename) {
+  parseFile(buffer, filename): Promise<boolean> {
     const readable = stringToStream(buffer.toString());
     const flowType = this.getFlowType(filename);
     const separator = this.constantService.GLOBAL_CONST.QUEUE[flowType].ORIGIN_SEPARATOR;  
     const _this = this;
-    readable
-    .pipe(csvParser({ separator: separator }))
-    .on('data', async function(parsed) {
-      _this.importLine(flowType, parsed)
-      .catch((error) => _this.logger.error(`${filename} error occurred: ${error}`));
-      
-    })
-    .on('end', async function() {
-      // @todo: remove file from S3
-      _this.logger.log('END');
-    })
+    return new Promise((resolve, reject) =>{
+      readable
+        .pipe(csvParser({ separator: separator }))
+        .on('data', async function(parsed) {
+          _this.importLine(flowType, parsed)
+          .catch((error) => _this.logger.error(`${filename} error occurred: ${error}`));
+          
+        })
+        .on('end', async function() {
+          return resolve(true);
+        })
+        .on('error', async function() {
+          return reject(false);
+        })
+    });
   }
 
   /**
@@ -71,8 +75,8 @@ export class TasksService  {
     if(!includes(secureEnvs,process.env.NODE_ENV))
       return false;
 
-    const params: any = {
-      Bucket: this.constantService.GLOBAL_CONST.S3_BUCKET.concat(process.env.NODE_ENV)
+    let params: any = {
+      Bucket: `${process.env.AWS_BUCKET_PREFIX}gpc-set`,
     };
 
     const objects: any = await this.S3.listObjects(params).promise();
@@ -84,11 +88,16 @@ export class TasksService  {
     map(objects.Contents, async file => {
       const flow = file.Key;
       const flowType = this.getFlowType(flow);
+      params = {...params,  Key: flow }
+      
       if(!flowType) return;
       if(!this.constantService.GLOBAL_CONST.QUEUE[flowType]) return;
       
-      const s3object = (await this.S3.getObject({ Bucket: `${process.env.AWS_BUCKET_PREFIX}gpc-set`, Key: flow }).promise());
-      this.parseFile(s3object.Body, flow);
+      const s3object = (await this.S3.getObject(params).promise());
+      const parsed = await this.parseFile(s3object.Body, flow);
+      if(parsed) {
+        this.S3.deleteObject(params).promise();
+      }
     });
   }
 
