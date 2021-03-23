@@ -69,6 +69,17 @@ export class WorkloadsService {
     return await this.workloadRepository.findOne(options);
   }
 
+  async save(workload): Promise<Workload> {
+    return await this.workloadRepository.save(workload);
+  }
+
+  async generateCode() {
+    const workload = await this.workloadRepository.findOne({
+      order: { id: 'DESC' }
+    });
+    return `Z${ workload.id + 1  }`;
+  }
+
   async getNosicaWorkloadInSubserviceName(subserviceName: string, thirdpartyId: number, subnatureId: number): Promise<Workload> {
     const service = await this.servicesService.findOne({ where: { name: Like(subserviceName) }, relations: ['subservices'] });
     if (!service) {

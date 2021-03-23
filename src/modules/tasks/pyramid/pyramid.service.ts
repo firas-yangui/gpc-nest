@@ -313,7 +313,6 @@ export class PyramidService {
           unit: this.constantService.GLOBAL_CONST.AMOUNT_UNITS.KLC,
         };
       }
-      
     }
 
     if (isActuals) {
@@ -335,7 +334,7 @@ export class PyramidService {
     }
   };
 
-  import = async (line: any, isActuals = false, outsourcing = false) => {
+  import = async (line: any, isActuals = false, outsourcing = false): Promise<any> => {
     let workload: Workload;
     let fields: Record<string, any> = pyramidFields.eac;;
     let requiredParams;
@@ -409,9 +408,18 @@ export class PyramidService {
       throw new Error(`thirdparty not found in line : ${JSON.stringify(line)}`);
     }
 
-    const subservice = await this.findSubService(service, subtypologies, projectCode);
+    let subservice: any = await this.findSubService(service, subtypologies, projectCode);
     if (!subservice) {
-      throw new Error(`subservice not found for service "${service.name}" and subtypology "${join(map(subtypologies, 'code'), ',')}" and projectCode "${projectCode}"`);
+      Logger.warn(`subservice not found for service "${service.name}" and subtypology "${join(map(subtypologies, 'code'), ',')}" and projectCode "${projectCode}"`);
+      subservice = await this.subservicesService.save(
+        {
+          code: projectCode,
+          name: line[fields.ProjectName],
+          service,
+          thirdpPartyId: thirdparty.id,
+          subtypology: subtypologies[0]
+        }
+      );
     }
     const subnature = await this.subnatureService.findByName(subnatureName);
     if (!subnature) {
@@ -419,10 +427,28 @@ export class PyramidService {
     }
 
     const workloadsBySubserviceThirdpartySubnature = await this.findWorkloadBySubserviceThirdpartySubnature(subnature, subservice, thirdparty);
+    
     if (!workloadsBySubserviceThirdpartySubnature.length) {
-      throw new Error(
-        `workload not found  with subnature "${subnature.name}" and subservice "${subservice.code}" and thirdparty "${thirdparty.name}"`,
-      );
+      Logger.warn(`workload not found  with subnature "${subnature.name}" and subservice "${subservice.code}" and thirdparty "${thirdparty.name}"`);
+      const codeWorkload = await this.workloadsService.generateCode();
+      const workload = await this.workloadsService.save({
+        code: codeWorkload,
+        description: codeWorkload,
+        status: 'DRAFT',
+        thirdparty: thirdparty,
+        subnature: subnature,
+        subservice: subservice
+      });
+      const partner = await this.getGpcDatalakePartner(line, fields);
+      if(partner) {
+        this.subsidiaryallocationService.save({
+          thirdparty: partner,
+          weight: 1,
+          workload,
+          period: periodAppSettings.period
+        });
+      }
+      workloadsBySubserviceThirdpartySubnature.push(workload);
     }
 
     workload = workloadsBySubserviceThirdpartySubnature[0];
@@ -460,5 +486,4 @@ export class PyramidService {
     
     return this.rawAmountsService.save(createdAmount, workload, actualPeriod);
   };
-  end = () => {};
 }
