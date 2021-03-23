@@ -63,7 +63,7 @@ export class NosicaService {
     }
   };
 
-  import = async (line: Record<string, any>): Promise<Record<string, any>> => {
+  import = async (filename, line: Record<string, any>): Promise<Record<string, any>> => {
     const receivedTrigram = this.cdsToCsm(line[nosicaField.trigram].trim());
     const receivedYear = line[nosicaField.year].trim();
     const receivedNRGCode = line[nosicaField.NRG].trim();
@@ -116,7 +116,7 @@ export class NosicaService {
     }
 
     let createdAmount = this.amountConverter.createAmountEntity(parseFloat(amount), GLOBAL_CONST.AMOUNT_UNITS.KLC, rate.value, costPrice, salePrice);
-    createdAmount = { ...createdAmount };
+    createdAmount = { ...createdAmount, datasource: filename };
     Logger.log(`amount saved with success for workload "${workload.code}" and period "${actualPeriod.code}"`);
     Logger.log(`The created amount ... ${JSON.stringify(createdAmount)}`);
     return this.rawAmountsService.save(createdAmount, workload, actualPeriod);

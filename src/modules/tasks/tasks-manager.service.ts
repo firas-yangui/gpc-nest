@@ -30,18 +30,18 @@ export class TasksService {
     return datas[3];
   }
 
-  importLine(flow, line) {
+  importLine(filename, flow, line) {
     switch (flow) {
       case this.constantService.GLOBAL_CONST.QUEUE.EAC.NAME:
-        return this.pyramidService.import(line);
+        return this.pyramidService.import(filename, line);
       case this.constantService.GLOBAL_CONST.QUEUE.PMD.NAME:
-        return this.pyramidService.import(line, false, true);
+        return this.pyramidService.import(filename, line, false, true);
       case this.constantService.GLOBAL_CONST.QUEUE.TM.NAME:
-        return this.pyramidService.import(line, true);
+        return this.pyramidService.import(filename, line, true);
       case this.constantService.GLOBAL_CONST.QUEUE.NOSICA.NAME:
-        return this.nosicaService.import(line);
+        return this.nosicaService.import(filename, line);
       case this.constantService.GLOBAL_CONST.QUEUE.MYGTS.NAME:
-        return this.myGtsService.import(line);
+        return this.myGtsService.import(filename, line);
     }
   }
 
@@ -55,7 +55,7 @@ export class TasksService {
       stream
         .on('data', async parsed => {
           stream.pause();
-          await this.importLine(flowType, parsed).catch(error => this.logger.error(`${filename} error occurred: ${error}`));
+          await this.importLine(filename, flowType, parsed).catch(error => this.logger.error(`${filename} error occurred: ${error}`));
           stream.resume();
         })
         .on('end', () => resolve('end'))

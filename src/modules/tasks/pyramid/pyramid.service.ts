@@ -327,7 +327,7 @@ export class PyramidService {
     }
   };
 
-  import = async (line: any, isActuals = false, outsourcing = false): Promise<any> => {
+  import = async (filename, line: any, isActuals = false, outsourcing = false): Promise<any> => {
     let workload: Workload;
     let fields: Record<string, any> = pyramidFields.eac;
     let requiredParams;
@@ -467,7 +467,7 @@ export class PyramidService {
 
     let createdAmount = this.amountConverter.createAmountEntity(parseFloat(amountData.amount), amountData.unit, rate.value, costPrice, salePrice);
 
-    createdAmount = { ...createdAmount };
+    createdAmount = { ...createdAmount, datasource: filename };
 
     return this.rawAmountsService.save(createdAmount, workload, actualPeriod);
   };

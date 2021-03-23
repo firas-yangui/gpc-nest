@@ -176,12 +176,13 @@ export class MyGtsService {
     return this.amountConverter.createAmountEntity(amount, unit, rate?.value, prices?.price, prices?.saleprice);
   };
 
-  import = async (line: Record<string, any>): Promise<Record<string, any>> => {
+  import = async (filename: string, line: Record<string, any>): Promise<Record<string, any>> => {
     try {
       const { year, month, amount, thirdPartyName, subnatureName } = this.prepareLine(line);
       const period = await this.getPeriod(year, month);
       const workload = await this.getWorkload(thirdPartyName, subnatureName);
-      const createdAmount = await this.createAmount(amount, workload, period);
+      let createdAmount = await this.createAmount(amount, workload, period);
+      createdAmount = { ...createdAmount, datasource: filename };
       Logger.log(`amount saved with success for workload "${workload.code}" and period "${period.code}"`);
       Logger.log(`The created amount ... ${JSON.stringify(createdAmount)}`);
       return this.rawAmountsService.save(createdAmount, workload, period);
