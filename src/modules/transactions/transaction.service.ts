@@ -11,4 +11,13 @@ export class TransactionService {
       relations: ['subService', 'sender', 'receiver', 'targetThirdParty', 'transactionWorkloads', 'transactionWorkloads.workload'],
     });
   }
+
+  public async getLatestTransactions(count = 6) {
+    return await this.transactionRepository.find({
+      order: {
+        id: 'DESC',
+      },
+      take: count,
+    });
+  }
 }
