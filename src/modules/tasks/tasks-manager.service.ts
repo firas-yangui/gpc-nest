@@ -31,7 +31,7 @@ export class TasksService  {
   }
 
   importLine(flow, line) {
-    switch (flow) {
+    switch(flow) {
       case this.constantService.GLOBAL_CONST.QUEUE.EAC.NAME:
         return this.pyramidService.import(line);
       case this.constantService.GLOBAL_CONST.QUEUE.PMD.NAME:
@@ -45,32 +45,33 @@ export class TasksService  {
     }
   }
 
-  parseFile(buffer, filename): Promise<boolean> {
+  parseFile(buffer, filename): Promise<string> {
     const readable = stringToStream(buffer.toString());
     const flowType = this.getFlowType(filename);
     const separator = this.constantService.GLOBAL_CONST.QUEUE[flowType].ORIGIN_SEPARATOR;  
     const _this = this;
-    return new Promise((resolve, reject) =>{
-      readable
-        .pipe(csvParser({ separator: separator }))
-        .on('data', async function(parsed) {
-          _this.importLine(flowType, parsed)
-          .catch((error) => _this.logger.error(`${filename} error occurred: ${error}`));
-          
-        })
-        .on('end', async function() {
-          return resolve(true);
-        })
-        .on('error', async function() {
-          return reject(false);
-        })
+    const stream = readable.pipe (csvParser({ separator: separator }));
+
+    return new Promise((resolve, reject) => {
+      stream.on('data', async (parsed) => {
+        stream.pause();
+        await _this.importLine(flowType, parsed)
+        .catch((error) => _this.logger.error(`${filename} error occurred: ${error}`));
+        stream.resume();
+      })
+      .on('end', () => {
+        resolve('end');
+      })
+      .on('error', (err) => {
+        reject(err);
+      })
     });
   }
 
   /**
    * This cron will be executed in a secure environment [HML, PRD]
    */
-  @Cron(CronExpression.EVERY_10_SECONDS)
+  @Cron(CronExpression.EVERY_HOUR)
   async importFromS3() {
     if(!includes(secureEnvs,process.env.NODE_ENV))
       return false;
@@ -118,9 +119,9 @@ export class TasksService  {
       return;
     }
 
-    map(files, (file) => {
+    map(files, async(file) => {
       const lines = readFileSync(path.join(receptiondir, file.name));
-      this.parseFile(lines, file.name);
+      const parsed = await this.parseFile(lines, file.name);
     });    
   }
 
