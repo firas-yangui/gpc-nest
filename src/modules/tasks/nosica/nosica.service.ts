@@ -63,14 +63,12 @@ export class NosicaService {
     }
   };
 
-
   import = async (line: Record<string, any>): Promise<Record<string, any>> => {
     const receivedTrigram = this.cdsToCsm(line[nosicaField.trigram].trim());
     const receivedYear = line[nosicaField.year].trim();
     const receivedNRGCode = line[nosicaField.NRG].trim();
     const receivedMonth = line[nosicaField.period].trim();
     let amount = line[nosicaField.amount].trim();
-    let error = '';
 
     const actualPeriodAppSettings = await this.periodsService.findOneInAppSettings(this.constantService.GLOBAL_CONST.SCOPES.BSC, {
       year: receivedYear,
@@ -82,28 +80,23 @@ export class NosicaService {
 
     const actualPeriod = actualPeriodAppSettings.period;
 
-    if (!amount || !Number(amount)) 
-      throw new Error(`No amount defined for this line :${JSON.stringify(line)}`);
-     
-
+    if (!amount || !Number(amount)) throw new Error(`No amount defined for this line :${JSON.stringify(line)}`);
     amount = (amount * -1) / 1000;
 
     const thirdparty: Thirdparty = await this.thirdpartiesService.findOne({ name: Like(receivedTrigram) });
-    if (!thirdparty)
-      throw new Error(`No Thirdparty found for Trigram Code : ${receivedTrigram}`);
-    
+    if (!thirdparty) throw new Error(`No Thirdparty found for Trigram Code : ${receivedTrigram}`);
 
     const subnatureappsetting = await this.subnatureappsettingsService.findOne({
       where: { nrgcode: Like(`%${receivedNRGCode}%`), gpcappsettingsid: this.constantService.GLOBAL_CONST.SCOPES.BSC },
       relations: ['subnature'],
     });
-    if (!subnatureappsetting)
-      throw new Error(`No Subnature found with NRG Code : ${receivedNRGCode}`);
+    if (!subnatureappsetting) throw new Error(`No Subnature found with NRG Code : ${receivedNRGCode}`);
 
     const workload = await this.workloadsService.getNosicaWorkloadInSubserviceName(serviceName, thirdparty.id, subnatureappsetting.subnature.id);
-    if (!workload) 
-      throw new Error(`No workload match with subnature ID ${subnatureappsetting.subnature.id} - nrgCode "${subnatureappsetting.nrgcode}" and thirdparty ID ${thirdparty.id} - Thirdparty Name "${thirdparty.name}"`);
-      
+    if (!workload)
+      throw new Error(
+        `No workload match with subnature ID ${subnatureappsetting.subnature.id} - nrgCode "${subnatureappsetting.nrgcode}" and thirdparty ID ${thirdparty.id} - Thirdparty Name "${thirdparty.name}"`,
+      );
     Logger.log(
       `Workload found with subnature ID ${subnatureappsetting.subnature.id} - nrgCode "${subnatureappsetting.nrgcode}" and thirdparty ID ${
         thirdparty.id

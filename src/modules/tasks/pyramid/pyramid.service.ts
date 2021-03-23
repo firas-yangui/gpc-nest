@@ -31,7 +31,7 @@ const onshoreStaffType = 'onshore';
 const actualsValideStaffType = [...intExtStaffType, onshoreStaffType, 'nearshore', 'offshore'];
 const eacValideStaffType = ['outsourcing - consulting', 'outsourcing - fixed-price contract'];
 const staffTypeWithEnvCost = ['outsourcing - consulting'];
-const eacFields  = {
+const eacFields = {
   ProjectCode: 'Project_Code',
   ProjectName: 'Project_Name',
   activityApplication: 'Activity_Application',
@@ -53,8 +53,8 @@ const eacFields  = {
   caPayorLabel: 'Activity_Ca payor label',
   payor: 'payor',
   clientEntity: 'Client_Entity',
-    pyrTmpMonthMr: 'pyr_tmp_month_mr',
-}
+  pyrTmpMonthMr: 'pyr_tmp_month_mr',
+};
 const pyramidFields = {
   eac: {
     ...eacFields,
@@ -129,19 +129,16 @@ export class PyramidService {
   };
 
   isParseableLine = (line: any, fields: Record<string, any>, outsourcing: boolean): boolean => {
-    let isParseable: boolean = (
+    let isParseable: boolean =
       line[fields.cds].trim() !== 'RESG/TPS/API' &&
       line[fields.cds].trim() !== 'RESG/TPS/GDO' &&
       line[fields.cds].trim() !== 'RISQ/DTO' &&
       line[fields.payor].trim() !== 'Global Solution Services SG GSC India (SSBU)' &&
       line[fields.payor].trim() !== '3000324000' &&
-      line[fields.activityType].trim() !== 'Absence'
-    );
+      line[fields.activityType].trim() !== 'Absence';
+
     if (outsourcing) {
-      isParseable = (
-        isParseable &&
-        line[fields.curveType].trim().toLocaleLowerCase() === 'actuals'
-      );
+      isParseable = isParseable && line[fields.curveType].trim().toLocaleLowerCase() === 'actuals';
     }
     return isParseable;
   };
@@ -161,7 +158,6 @@ export class PyramidService {
   isEnvCost = (subnature: string) => {
     return includes(staffTypeWithEnvCost, subnature.toLocaleLowerCase());
   };
-
 
   getSubtypologyByCode = async (codes: string[]) => {
     return this.subtypologiesService.findByCodes(codes);
@@ -185,29 +181,28 @@ export class PyramidService {
 
   getThirdparty = async (line: Record<string, any>, fields: Record<string, any>, isActual: boolean): Promise<Thirdparty> => {
     const options: any = { name: line[fields.csm] };
-    
     const thirdParty = await this.thirdpartiesService.findOne(options);
     if (!thirdParty) {
-      let  parendDescrFiled = line[fields.parentDescr];
+      let parendDescrFiled = line[fields.parentDescr];
 
-      if(!startsWith(line[fields.parentDescr], 'HRCO/')) {
+      if (!startsWith(line[fields.parentDescr], 'HRCO/')) {
         parendDescrFiled = line[fields.parentDescr].slice(0, 11);
       }
 
       let findOptions: any = { datalakename: parendDescrFiled };
       let datalakeThirdParty = await this.datalakeGpcOrganizationService.findOne(findOptions);
-      
-      if(!datalakeThirdParty) {
+
+      if (!datalakeThirdParty) {
         parendDescrFiled = line[fields.parentDescr].slice(0, 7);
         findOptions = { datalakename: parendDescrFiled };
         datalakeThirdParty = await this.datalakeGpcOrganizationService.findOne(findOptions);
       }
-      
+
       if (datalakeThirdParty) {
         return this.thirdpartiesService.findOne({ radical: datalakeThirdParty.dpg });
       }
     }
-    
+
     return thirdParty;
   };
 
@@ -248,7 +243,7 @@ export class PyramidService {
     let partner: string;
     if (line[fields.partner]) {
       if (line[fields.partner].trim() === 'RESG/BSC') {
-        if (line[fields.portfolio]){
+        if (line[fields.portfolio]) {
           switch (line[fields.portfolio].trim()) {
             case 'Offres de Services BSC':
               partner = 'BSC_OdS';
@@ -305,8 +300,7 @@ export class PyramidService {
 
       if (this.isKLC(line[pyramidFields.eac.staffType])) {
         let eacke = line[pyramidFields.eac.eacKe];
-        if (this.isEnvCost(line[pyramidFields.eac.staffType]) && !startsWith(line[pyramidFields.eac.parentDescr], 'HRCO'))
-          eacke = eacke * 1.0626; // environment Coef
+        if (this.isEnvCost(line[pyramidFields.eac.staffType]) && !startsWith(line[pyramidFields.eac.parentDescr], 'HRCO')) eacke = eacke * 1.0626; // environment Coef
 
         return {
           amount: eacke,
@@ -329,18 +323,17 @@ export class PyramidService {
           amount: amount,
           unit: this.constantService.GLOBAL_CONST.AMOUNT_UNITS.KLC,
         };
-
       }
     }
   };
 
   import = async (line: any, isActuals = false, outsourcing = false): Promise<any> => {
     let workload: Workload;
-    let fields: Record<string, any> = pyramidFields.eac;;
+    let fields: Record<string, any> = pyramidFields.eac;
     let requiredParams;
     if (isActuals) fields = pyramidFields.actuals;
     if (outsourcing) fields = pyramidFields.pmd;
-    const periodType: string = (isActuals || outsourcing) ? PeriodTypeInterface.actual : PeriodTypeInterface.forecast;
+    const periodType: string = isActuals || outsourcing ? PeriodTypeInterface.actual : PeriodTypeInterface.forecast;
 
     if (isActuals) requiredParams = requiredFileds.actuals;
     if (!isActuals) requiredParams = requiredFileds.eac;
@@ -357,7 +350,7 @@ export class PyramidService {
       throw new Error(`Unkown subnature for line: ${JSON.stringify(line)}`);
     }
 
-    if(includes(intExtStaffType, line[fields.staffType].toLocaleLowerCase())) {
+    if (includes(intExtStaffType, line[fields.staffType].toLocaleLowerCase())) {
       line[fields.staffType] = onshoreStaffType;
     }
 
@@ -366,18 +359,9 @@ export class PyramidService {
     const plan = line[fields.activityPlan];
     const projectCode = line[fields.ProjectCode];
 
-    if (!subnatureName.trim()) {
-      throw new Error(`subnature name not defined for line: ${JSON.stringify(line)}`);
-    }
-    
-
-    if (!portfolioName.trim()) {
-      throw new Error(`Service name not defined for line: ${JSON.stringify(line)}`);
-    }
-
-    if (!plan.trim()) {
-      throw new Error(`Plan not defined for line: ${JSON.stringify(line)}`);
-    }
+    if (!subnatureName.trim()) throw new Error(`subnature name not defined for line: ${JSON.stringify(line)}`);
+    if (!portfolioName.trim()) throw new Error(`Service name not defined for line: ${JSON.stringify(line)}`);
+    if (!plan.trim()) throw new Error(`Plan not defined for line: ${JSON.stringify(line)}`);
 
     const periodAppSettings = await this.getPeriodAppSettings(periodType, isActuals, outsourcing, false);
     if (!periodAppSettings) {
@@ -410,16 +394,17 @@ export class PyramidService {
 
     let subservice: any = await this.findSubService(service, subtypologies, projectCode);
     if (!subservice) {
-      Logger.warn(`subservice not found for service "${service.name}" and subtypology "${join(map(subtypologies, 'code'), ',')}" and projectCode "${projectCode}"`);
-      subservice = await this.subservicesService.save(
-        {
-          code: projectCode,
-          name: line[fields.ProjectName],
-          service,
-          thirdpPartyId: thirdparty.id,
-          subtypology: subtypologies[0]
-        }
+      const subtypologiesCodes = map(subtypologies, 'code');
+      Logger.warn(
+        `subservice not found for service "${service.name}" and subtypology "${join(subtypologiesCodes, ',')}" and projectCode "${projectCode}"`,
       );
+      subservice = await this.subservicesService.save({
+        code: projectCode,
+        name: line[fields.ProjectName],
+        service,
+        thirdpPartyId: thirdparty.id,
+        subtypology: subtypologies[0],
+      });
     }
     const subnature = await this.subnatureService.findByName(subnatureName);
     if (!subnature) {
@@ -427,7 +412,7 @@ export class PyramidService {
     }
 
     const workloadsBySubserviceThirdpartySubnature = await this.findWorkloadBySubserviceThirdpartySubnature(subnature, subservice, thirdparty);
-    
+
     if (!workloadsBySubserviceThirdpartySubnature.length) {
       Logger.warn(`workload not found  with subnature "${subnature.name}" and subservice "${subservice.code}" and thirdparty "${thirdparty.name}"`);
       const codeWorkload = await this.workloadsService.generateCode();
@@ -437,15 +422,15 @@ export class PyramidService {
         status: 'DRAFT',
         thirdparty: thirdparty,
         subnature: subnature,
-        subservice: subservice
+        subservice: subservice,
       });
       const partner = await this.getGpcDatalakePartner(line, fields);
-      if(partner) {
+      if (partner) {
         this.subsidiaryallocationService.save({
           thirdparty: partner,
           weight: 1,
           workload,
-          period: periodAppSettings.period
+          period: periodAppSettings.period,
         });
       }
       workloadsBySubserviceThirdpartySubnature.push(workload);
@@ -483,7 +468,7 @@ export class PyramidService {
     let createdAmount = this.amountConverter.createAmountEntity(parseFloat(amountData.amount), amountData.unit, rate.value, costPrice, salePrice);
 
     createdAmount = { ...createdAmount };
-    
+
     return this.rawAmountsService.save(createdAmount, workload, actualPeriod);
   };
 }

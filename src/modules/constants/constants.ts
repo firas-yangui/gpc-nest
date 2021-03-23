@@ -149,6 +149,6 @@ export class ConstantService {
         HEADER: ['ClientLongName', '€', 'Code NRG', 'Gamme', 'Sous-Gamme', 'Mois'],
       }),
     }),
-    S3_BUCKET: 'bsc-fin-fpm-gpc-a2870-'
+    S3_BUCKET: 'bsc-fin-fpm-gpc-a2870-',
   });
 }

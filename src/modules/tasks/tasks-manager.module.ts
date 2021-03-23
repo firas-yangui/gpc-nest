@@ -7,14 +7,7 @@ import { ConstantsModule } from '../constants/constants.module';
 import { AmountsModule } from '../amounts/amounts.module';
 import { RawAmountsModule } from '../rawamounts/rawamounts.module';
 @Module({
-  imports: [
-    NosicaModule,
-    MyGTSModule,
-    PyramidModule,
-    AmountsModule,
-    RawAmountsModule,
-    ConstantsModule,
-  ],
+  imports: [NosicaModule, MyGTSModule, PyramidModule, AmountsModule, RawAmountsModule, ConstantsModule],
   providers: [TasksService],
   exports: [TasksService],
 })

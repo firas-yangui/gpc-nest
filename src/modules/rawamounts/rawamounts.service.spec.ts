@@ -13,7 +13,6 @@ const rawamountRepositoryMock = () => ({
 describe('AmountsService', () => {
   let rawamountsService: RawAmountsService;
   let rawamountRepository: RawAmountRepository;
-  
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
