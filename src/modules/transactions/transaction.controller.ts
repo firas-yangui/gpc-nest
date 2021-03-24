@@ -46,6 +46,42 @@ export class TransactionController {
     return await this.transactionService.getAll();
   }
 
+  @Get('/userId/:id')
+  @Header('Cache-Control', 'none')
+  @Header('Content-Type', 'application/json')
+  @Header('Accept-Charset', 'utf-8')
+  // @ApiImplicitHeader({ name: 'X-BSC-SOA-CONSUMER-APP-CODE', description: 'Consumer App Code' })
+  // @ApiImplicitHeader({ name: 'X-BSC-SOA-CONSUMER-APP-NAME', description: 'Consumer App Name' })
+  // @ApiImplicitHeader({ name: 'X-BSC-SOA-CONSUMER-CODE', description: 'Consumer Code' })
+  // @ApiImplicitHeader({ name: 'X-BSC-SOA-CONSUMER-NAME', description: 'Consumer Name' })
+  // @ApiImplicitHeader({ name: 'X-BSC-SOA-CONSUMER-ORG', description: 'Consumer Organization' })
+  @ApiOperation({
+    description: 'Get all transactions',
+    title: 'Get all',
+    operationId: 'GET /transaction',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Return all transactions',
+    type: TransactionEntity,
+    isArray: true,
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized',
+    type: ErrorModel,
+    isArray: false,
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'Internal server error',
+    type: ErrorModel,
+    isArray: false,
+  })
+  private async getAllWithUserId(@Param('id') userId) {
+    return await this.transactionService.getAllWithUserId(userId);
+  }
+
   // Get all transactions
   @Get('/latest/:id')
   @Header('Cache-Control', 'none')
@@ -79,7 +115,7 @@ export class TransactionController {
     type: ErrorModel,
     isArray: false,
   })
-  private async getLatestTransactions(@Param('count') count = 6) {
+  private async getLatestTransactions(@Param('count') count) {
     try {
       Logger.log(`Get latest ${count} transactions`, 'TransactionController');
       return await this.transactionService.getLatestTransactions(count);

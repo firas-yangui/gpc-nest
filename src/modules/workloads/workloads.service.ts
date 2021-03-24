@@ -20,6 +20,7 @@ import { Workload } from './workload.entity';
 import { SubservicesService } from './../subservices/subservices.service';
 import { ServicesService } from './../services/services.service';
 import { SubsidiaryAllocation } from '../subsidiaryallocation/subsidiaryallocation.entity';
+import { isNull, isUndefined } from 'lodash';
 
 @Injectable()
 export class WorkloadsService {
@@ -144,26 +145,31 @@ export class WorkloadsService {
 
         .leftJoin('workload.subservice', 'subservice')
         .leftJoin('subservice.subtypology', 'subtypology')
-        .leftJoin('subservice.service', 'service')
+        .innerJoin('subservice.service', 'service')
         .leftJoin('workload.subsidiaryAllocations', 'partners')
         .leftJoin('workload.subnature', 'subnature')
         .leftJoin('workload.amounts', 'amount')
         .leftJoin('amount.period', 'period')
 
-        .where('workload.thirdpartyid IN (:...thirdparties)', { thirdparties: thirdparties })
+        // .where('workload.thirdpartyid IN (:...thirdparties)', { thirdparties: thirdparties })
         .andWhere('subtypology.businesstype = :businessPlan', { businessPlan: businessPlan })
-        .andWhere('workload.periodid IN (:...periodIds)', { periodIds: periodIds })
         .andWhere('amount.periodid IN (:...periodIds)', { periodIds: periodIds });
 
-      query = serviceId ? query.andWhere('service.id = :serviceId', { serviceId: serviceId }) : query;
-      query = subserviceId ? query.andWhere('subservice.id = :subserviceId', { subserviceId: subserviceId }) : query;
-      query = organizationId ? query.andWhere('workload.thirdpartyid = :organizationId', { organizationId: organizationId }) : query;
-      query = partnerId ? query.andWhere('workload.subnatureid = :subnatureId', { subnatureId: subnatureId }) : query;
-      query = subnatureId ? query.andWhere('partners.thirdpartyid = :partnerId', { partnerId: partnerId }) : query;
+      query = !isUndefined(serviceId) && !isNull(serviceId) ? query.andWhere('service.id = :serviceId', { serviceId: serviceId }) : query;
+      query =
+        !isUndefined(subserviceId) && !isNull(subserviceId) ? query.andWhere('subservice.id = :subserviceId', { subserviceId: subserviceId }) : query;
+      query =
+        !isUndefined(organizationId) && !isNull(organizationId)
+          ? query.andWhere('workload.thirdpartyid = :organizationId', { organizationId: organizationId })
+          : query;
+      query =
+        !isUndefined(partnerId) && !isNull(partnerId) ? query.andWhere('workload.subnatureid = :subnatureId', { subnatureId: subnatureId }) : query;
+      query =
+        !isUndefined(subnatureId) && !isNull(subnatureId) ? query.andWhere('partners.thirdpartyid = :partnerId', { partnerId: partnerId }) : query;
 
       return await query.groupBy('period.type').execute();
     } catch (error) {
-      Logger.error(error);
+      // Logger.error(error);
 
       return [];
     }
