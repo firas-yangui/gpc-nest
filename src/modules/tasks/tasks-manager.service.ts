@@ -12,6 +12,7 @@ import * as stringToStream from 'string-to-stream';
 import path = require('path');
 
 const secureEnvs = ['homologation', 'production'];
+process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
 
 @Injectable()
 export class TasksService {
@@ -66,7 +67,7 @@ export class TasksService {
   /**
    * This cron will be executed in a secure environment [HML, PRD]
    */
-  @Cron(CronExpression.EVERY_HOUR)
+  @Cron(CronExpression.EVERY_MINUTE)
   async importFromS3() {
     if (!includes(secureEnvs, process.env.NODE_ENV)) return false;
 
