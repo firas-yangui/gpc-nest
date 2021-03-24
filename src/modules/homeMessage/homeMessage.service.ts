@@ -2,13 +2,13 @@ import { Injectable, NotFoundException, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { HomeMessageRepository } from './homeMessage.repository';
 import { HomeMessageDto } from './homeMessage.dto';
-import { HomeMessage } from './homeMessage.entity';
+import { HomeMessageEntity } from './homeMessage.entity';
 
 @Injectable()
 export class HomeMessageService {
   constructor(@InjectRepository(HomeMessageRepository) private readonly homeMessageRepository: HomeMessageRepository) {}
 
-  async getLatest(perimeter: number): Promise<HomeMessage> {
+  async getLatest(perimeter: number): Promise<HomeMessageEntity> {
     try {
       const homeMessage = await this.homeMessageRepository.find({
         where: {
@@ -32,7 +32,7 @@ export class HomeMessageService {
     }
   }
 
-  async create(homeMessageDto: HomeMessageDto): Promise<HomeMessage> {
+  async create(homeMessageDto: HomeMessageDto): Promise<HomeMessageEntity> {
     const data = { message: homeMessageDto.message, gpcappsettings: { id: homeMessageDto.perimeterId } };
     const newMessage = await this.homeMessageRepository.save(data);
     return newMessage;

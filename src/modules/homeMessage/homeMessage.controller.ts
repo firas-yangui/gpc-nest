@@ -2,7 +2,7 @@ import { Controller, Post, Get, Header, Logger, Param, HttpCode, Body } from '@n
 import { ApiResponse, ApiImplicitParam, ApiImplicitBody, ApiOperation, ApiForbiddenResponse } from '@nestjs/swagger';
 
 import { ErrorModel } from '../exceptions-handler/error-model';
-import { HomeMessage } from './homeMessage.entity';
+import { HomeMessageEntity } from './homeMessage.entity';
 import { HomeMessageDto } from './homeMessage.dto';
 import { HomeMessageService } from './homeMessage.service';
 
@@ -19,7 +19,7 @@ export class HomeMessageController {
   @ApiResponse({
     status: 200,
     description: 'Returns HomeMessage',
-    type: HomeMessage,
+    type: HomeMessageEntity,
     isArray: true,
   })
   @ApiResponse({
@@ -34,7 +34,7 @@ export class HomeMessageController {
     type: ErrorModel,
     isArray: false,
   })
-  async getLatest(@Param('perimeterId') perimeterId): Promise<HomeMessage> {
+  async getLatest(@Param('perimeterId') perimeterId): Promise<HomeMessageEntity> {
     Logger.log('Get homepage message', 'HomeMessageController');
     return await this.homeMessageService.getLatest(perimeterId);
   }
@@ -55,14 +55,14 @@ export class HomeMessageController {
   @ApiResponse({
     status: 201,
     description: 'Create Home Message',
-    type: HomeMessage,
+    type: HomeMessageEntity,
     isArray: false,
   })
   @ApiResponse({ status: 400, description: 'Bad request', type: ErrorModel, isArray: false })
   @ApiResponse({ status: 401, description: 'Unauthorized', type: ErrorModel, isArray: false })
   @ApiResponse({ status: 500, description: 'Internal server error', type: ErrorModel, isArray: false })
   @ApiForbiddenResponse({ description: 'Forbidden' })
-  async create(@Body() homeMessageDto: HomeMessageDto): Promise<HomeMessage> {
+  async create(@Body() homeMessageDto: HomeMessageDto): Promise<HomeMessageEntity> {
     Logger.log('Create HomeMessage', 'HomeMessageController');
     const newMessage = await this.homeMessageService.create(homeMessageDto);
     return newMessage;
