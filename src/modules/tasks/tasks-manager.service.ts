@@ -10,6 +10,7 @@ import * as csvParser from 'csv-parser';
 import { map, includes } from 'lodash';
 import * as stringToStream from 'string-to-stream';
 import path = require('path');
+import { on } from 'process';
 
 const secureEnvs = ['homologation', 'production'];
 process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
@@ -31,7 +32,7 @@ export class TasksService {
     return datas[3];
   }
 
-  importLine(filename, flow, line) {
+  importLine(filename, flow, line): Promise<any> {
     switch (flow) {
       case this.constantService.GLOBAL_CONST.QUEUE.EAC.NAME:
         return this.pyramidService.import(filename, line);
@@ -55,11 +56,17 @@ export class TasksService {
     return new Promise((resolve, reject) => {
       stream
         .on('data', async parsed => {
-          stream.pause();
-          await this.importLine(filename, flowType, parsed).catch(error => this.logger.error(`${filename} error occurred: ${error}`));
-          stream.resume();
+          try {
+            stream.pause();
+            await this.importLine(filename, flowType, parsed);
+            stream.resume();
+          } catch (error) {
+            this.logger.error(`${filename} error occurred: ${error}`);
+            stream.resume();
+          }
         })
         .on('end', () => resolve('end'))
+        .on('finish', () => resolve('finish'))
         .on('error', err => reject(err));
     });
   }
