@@ -1,14 +1,13 @@
 import { Module } from '@nestjs/common';
 import { AmountsModule } from './../../amounts/amounts.module';
 import { RawAmountsModule } from './../../rawamounts/rawamounts.module';
-import { CallbackPyramidParser } from './callback.pyramid.parser';
+import { PyramidService } from './pyramid.service';
 import { ConstantsModule } from './../../constants/constants.module';
 import { CurrencyRateModule } from './../../currency-rate/currency-rate.module';
 import { NosicaModule } from '../nosica/nosica.module';
 import { ServicesModule } from './../../../modules/services/services.module';
 import { SubservicesModule } from './../../../modules/subservices/subservices.module';
 import { PeriodsModule } from './../../../modules/periods/periods.module';
-import { PyramidParser } from './pyramid.parser';
 import { PricesModule } from './../../prices/prices.module';
 import { WorkloadsModule } from './../../../modules/workloads/workloads.module';
 import { ThirdpartiesModule } from './../../../modules/thirdparties/thirdparties.module';
@@ -38,7 +37,7 @@ import { DatalakeMappingModule } from '../../datalakemapping/datalakemapping.mod
     WorkloadsModule,
     DatalakeMappingModule,
   ],
-  providers: [CallbackPyramidParser, PyramidParser],
-  exports: [CallbackPyramidParser, PyramidParser],
+  providers: [PyramidService],
+  exports: [PyramidService],
 })
 export class PyramidModule {}

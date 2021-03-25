@@ -15,7 +15,6 @@ export const typeOrmConfig: TypeOrmModuleOptions = {
   cli: {
     migrationsDir: __dirname + 'migrations/*{.ts,.js}',
   },
-
 };
 
 export default typeOrmConfig;

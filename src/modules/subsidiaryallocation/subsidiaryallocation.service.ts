@@ -17,4 +17,8 @@ export class SubsidiaryallocationService {
   async find(options: object = {}): Promise<SubsidiaryAllocation[]> {
     return await this.subsidiaryAllocationRepository.find(options);
   }
+
+  async save(allocation): Promise<SubsidiaryAllocation[]> {
+    return await this.subsidiaryAllocationRepository.save(allocation);
+  }
 }

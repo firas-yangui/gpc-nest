@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { RawAmountRepository } from './rawamounts.repository';
 import { RawAmount } from './../interfaces/common-interfaces';
@@ -14,8 +14,8 @@ export class RawAmountsService {
   ) {}
 
   async save(amount: RawAmount, workload: Workload, period: Period) {
-    amount = { ...amount, workloadid: workload.id, periodid: period.id};
-    if(!workload.subnature.isworkforce) amount.mandays = 0;
+    amount = { ...amount, workloadid: workload.id, periodid: period.id };
+    if (!workload.subnature.isworkforce) amount.mandays = 0;
     return this.rawAmountRepository.save(amount);
   }
 

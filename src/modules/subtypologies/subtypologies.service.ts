@@ -16,6 +16,6 @@ export class SubtypologiesService {
   }
 
   async findByCodes(codes: string[]): Promise<Subtypology[]> {
-    return await this.subtypologyRepository.find({ where : { code: In(codes)} });
+    return await this.subtypologyRepository.find({ where: { code: In(codes) } });
   }
 }

@@ -1,9 +1,6 @@
 import { Module } from '@nestjs/common';
 
-import { CallbackNosicaParser } from './callback.nosica.parser';
-import { NosicaParser } from './nosica.parser';
-import { ResourceManager } from './resource-store';
-
+import { NosicaService } from './nosica.service';
 import { ServicesModule } from './../../../modules/services/services.module';
 import { SubservicesModule } from './../../../modules/subservices/subservices.module';
 import { SubnatureappsettingsModule } from './../../../modules/subnatureappsettings/subnatureappsettings.module';
@@ -30,7 +27,7 @@ import { PricesModule } from './../../prices/prices.module';
     SubnatureappsettingsModule,
     WorkloadsModule,
   ],
-  providers: [ResourceManager, NosicaParser, CallbackNosicaParser],
-  exports: [ResourceManager, NosicaParser, CallbackNosicaParser],
+  providers: [NosicaService],
+  exports: [NosicaService],
 })
 export class NosicaModule {}

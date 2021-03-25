@@ -22,4 +22,8 @@ export class SubservicesService {
   async getWorkloads(options: { id: number }): Promise<Workload[]> {
     return await (await this.subServiceRepository.findOne({ where: { id: options.id }, relations: ['workloads'] })).workloads;
   }
+
+  async save(subService): Promise<SubService> {
+    return await this.subServiceRepository.save(subService);
+  }
 }
