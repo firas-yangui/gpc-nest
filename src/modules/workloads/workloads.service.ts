@@ -109,14 +109,19 @@ export class WorkloadsService {
     businessPlan: string,
     thirdparties: Array<number>,
   ): Promise<PeriodTypeAmount> {
-    const totals = await this.getRawMonthlyTotalAmountGroupedByPeriodType(month, body, businessPlan, thirdparties);
-    const periodTypeAmount: PeriodTypeAmount = {};
-    _.map(totals, total => {
-      const { type, ...units } = total;
-      periodTypeAmount[type] = units;
-    });
+    const currentMonth = moment().format('MM');
+    if (month <= currentMonth) {
+      const totals = await this.getRawMonthlyTotalAmountGroupedByPeriodType(month, body, businessPlan, thirdparties);
+      const periodTypeAmount: PeriodTypeAmount = {};
+      _.map(totals, total => {
+        const { type, ...units } = total;
+        periodTypeAmount[type] = units;
+      });
 
-    return periodTypeAmount;
+      return periodTypeAmount;
+    } else {
+      return {};
+    }
   }
 
   async getRawMonthlyTotalAmountGroupedByPeriodType(
