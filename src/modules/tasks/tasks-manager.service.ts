@@ -8,9 +8,9 @@ import { readFileSync, readdirSync } from 'fs';
 import AWS = require('aws-sdk');
 import * as csvParser from 'csv-parser';
 import { map, includes } from 'lodash';
+import { MailerService } from '@nestjs-modules/mailer';
 import * as stringToStream from 'string-to-stream';
 import path = require('path');
-import { on } from 'process';
 
 const secureEnvs = ['homologation', 'production'];
 process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
@@ -24,6 +24,7 @@ export class TasksService {
     private pyramidService: PyramidService,
     private constantService: ConstantService,
     private myGtsService: MyGtsService,
+    private readonly mailerService: MailerService,
   ) {}
 
   getFlowType(flow: string): string {
@@ -76,6 +77,22 @@ export class TasksService {
    */
   @Cron(CronExpression.EVERY_MINUTE)
   async importFromS3() {
+    // this.mailerService
+    //   .sendMail({
+    //     to: 'anouer.hammami-ext@socgen.com',
+    //     subject: 'Reject file',
+    //     html: '<b>welcome!!</b>',
+    //     // template: 'rejected-lines',
+    //     // attachments: [
+    //     //   {
+    //     //     filename: rejectedFile,
+    //     //     path: rejectedFilePath,
+    //     //     contentType: 'csv',
+    //     //   }
+    //     // ]
+    //   })
+    //   .then(() => Logger.log('rejected lines was sent by email'))
+    //   .catch(err => Logger.error(`Faild to send email with rejected line: ${err}`));
     if (!includes(secureEnvs, process.env.NODE_ENV)) return false;
 
     let params: any = {

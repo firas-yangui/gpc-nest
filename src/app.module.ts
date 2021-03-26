@@ -22,13 +22,31 @@ import { GlobalServicesModule } from './services/global-services.module';
 import { ConstantsModule } from './modules/constants/constants.module';
 import { DatalakeMappingModule } from './modules/datalakemapping/datalakemapping.module';
 import { HomeMessageModule } from './modules/homeMessage/homeMessage.module';
-import {ImportRejectionsHandlerModule} from './modules/import-rejections-handler/import-rejections-handler.module';
+import { ImportRejectionsHandlerModule } from './modules/import-rejections-handler/import-rejections-handler.module';
+import { MailerModule, MailerOptions } from '@nestjs-modules/mailer';
 
 import DbLoader from './loader';
 
 const options: SgConnectOptions = {
   sgConnectUrl: process.env.SG_CONNECT_ENDPOINT,
   debug: false,
+};
+
+const mailerOptions: MailerOptions = {
+  transport: {
+    host: process.env.MAILER_HOST,
+    port: process.env.MAILER_PORT,
+    ignoreTLS: true,
+  },
+  defaults: {
+    from: '"noreply" <noreply@nestjs.com>',
+  },
+  template: {
+    dir: __dirname + '/templates',
+    options: {
+      strict: true,
+    },
+  },
 };
 
 /**
@@ -59,6 +77,7 @@ const applicationModules = [
   DatalakeMappingModule,
   HomeMessageModule,
   ImportRejectionsHandlerModule,
+  MailerModule.forRoot(mailerOptions),
 ];
 
 if (process.env.TASKS_MODULE_ENABLED) {
