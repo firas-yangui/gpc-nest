@@ -20,6 +20,7 @@ import { Workload } from './workload.entity';
 import { SubservicesService } from './../subservices/subservices.service';
 import { ServicesService } from './../services/services.service';
 import { SubsidiaryAllocation } from '../subsidiaryallocation/subsidiaryallocation.entity';
+import { isNull, isUndefined } from 'lodash';
 
 @Injectable()
 export class WorkloadsService {
@@ -119,14 +120,19 @@ export class WorkloadsService {
     businessPlan: string,
     thirdparties: Array<number>,
   ): Promise<PeriodTypeAmount> {
-    const totals = await this.getRawMonthlyTotalAmountGroupedByPeriodType(month, body, businessPlan, thirdparties);
-    const periodTypeAmount: PeriodTypeAmount = {};
-    _.map(totals, total => {
-      const { type, ...units } = total;
-      periodTypeAmount[type] = units;
-    });
+    const currentMonth = moment().format('MM');
+    if (month <= currentMonth) {
+      const totals = await this.getRawMonthlyTotalAmountGroupedByPeriodType(month, body, businessPlan, thirdparties);
+      const periodTypeAmount: PeriodTypeAmount = {};
+      _.map(totals, total => {
+        const { type, ...units } = total;
+        periodTypeAmount[type] = units;
+      });
 
-    return periodTypeAmount;
+      return periodTypeAmount;
+    } else {
+      return {};
+    }
   }
 
   async getRawMonthlyTotalAmountGroupedByPeriodType(
@@ -144,7 +150,7 @@ export class WorkloadsService {
        * @todo add relation with appSettings for connected user
        */
 
-      let query = getConnection()
+      const query = getConnection()
         .createQueryBuilder()
         .from(Workload, 'workload')
         .select('period.type', 'type')
@@ -155,26 +161,26 @@ export class WorkloadsService {
 
         .leftJoin('workload.subservice', 'subservice')
         .leftJoin('subservice.subtypology', 'subtypology')
-        .leftJoin('subservice.service', 'service')
+        .innerJoin('subservice.service', 'service')
         .leftJoin('workload.subsidiaryAllocations', 'partners')
         .leftJoin('workload.subnature', 'subnature')
         .leftJoin('workload.amounts', 'amount')
         .leftJoin('amount.period', 'period')
 
         .where('workload.thirdpartyid IN (:...thirdparties)', { thirdparties: thirdparties })
-        .andWhere('subtypology.businesstype = :businessPlan', { businessPlan: businessPlan })
-        .andWhere('workload.periodid IN (:...periodIds)', { periodIds: periodIds })
+        .where('subtypology.businesstype = :businessPlan', { businessPlan: businessPlan })
         .andWhere('amount.periodid IN (:...periodIds)', { periodIds: periodIds });
 
-      query = serviceId ? query.andWhere('service.id = :serviceId', { serviceId: serviceId }) : query;
-      query = subserviceId ? query.andWhere('subservice.id = :subserviceId', { subserviceId: subserviceId }) : query;
-      query = organizationId ? query.andWhere('workload.thirdpartyid = :organizationId', { organizationId: organizationId }) : query;
-      query = partnerId ? query.andWhere('workload.subnatureid = :subnatureId', { subnatureId: subnatureId }) : query;
-      query = subnatureId ? query.andWhere('partners.thirdpartyid = :partnerId', { partnerId: partnerId }) : query;
+      if (!isNull(serviceId) && !isUndefined(serviceId)) query.andWhere('service.id = :serviceId', { serviceId: serviceId });
+      if (!isNull(subserviceId) && !isUndefined(subserviceId)) query.andWhere('subservice.id = :subserviceId', { subserviceId: subserviceId });
+      if (!isNull(organizationId) && !isUndefined(organizationId))
+        query.andWhere('workload.thirdpartyid = :organizationId', { organizationId: organizationId });
+      if (!isNull(subnatureId) && !isUndefined(subnatureId)) query.andWhere('workload.subnatureid = :subnatureId', { subnatureId: subnatureId });
+      if (!isNull(partnerId) && !isUndefined(partnerId)) query.andWhere('partners.thirdpartyid = :partnerId', { partnerId: partnerId });
 
       return await query.groupBy('period.type').execute();
     } catch (error) {
-      Logger.error(error);
+      // Logger.error(error);
 
       return [];
     }
