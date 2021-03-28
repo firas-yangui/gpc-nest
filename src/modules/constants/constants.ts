@@ -2,6 +2,7 @@ import { Global } from '@nestjs/common';
 
 @Global()
 export class ConstantService {
+  private defaultEmailTo: string[] = ['anouer.hammami-ext@socgen.com', 'emilie.nuon@socgen.com'];
   public GLOBAL_CONST = Object.freeze({
     AMOUNT_UNITS: Object.freeze({
       KLC: 'klocalcurrency',
@@ -19,6 +20,13 @@ export class ConstantService {
         NAME: 'EAC',
         ORIGIN_SEPARATOR: '|@|',
         SEPARATOR: ';',
+        EMAIL_TO: [...this.defaultEmailTo],
+        EMAIL_SUBJECT: 'Lignes rejetées suite à votre import automatique EAC',
+        EMAIL_BODY: `Bonjour,<br > Suite à votre import automatique,
+        vous trouverez un export des lignes rejetées.
+        La cause de rejet est ajoutée au bout chaque ligne(la colonne <b>error</b>).
+        <br > Cordialement,
+        <br > L'equipe GPC.`,
         HEADER: [
           'Project_Code',
           'Project_Name',
@@ -46,6 +54,13 @@ export class ConstantService {
         NAME: 'PMD',
         ORIGIN_SEPARATOR: '|@|',
         SEPARATOR: ';',
+        EMAIL_TO: [...this.defaultEmailTo],
+        EMAIL_SUBJECT: 'Lignes rejetées suite à votre import automatique EAC pour les outsourcings',
+        EMAIL_BODY: `Bonjour,<br > Suite à votre import automatique,
+        vous trouverez un export des lignes rejetées.
+        La cause de rejet est ajoutée au bout chaque ligne(la colonne <b>error</b>).
+        <br > Cordialement,
+        <br > L'equipe GPC.`,
         HEADER: [
           'Project_Code',
           'Project_Name',
@@ -73,6 +88,13 @@ export class ConstantService {
         NAME: 'TM',
         ORIGIN_SEPARATOR: '|@|',
         SEPARATOR: ';',
+        EMAIL_TO: [...this.defaultEmailTo],
+        EMAIL_SUBJECT: 'Lignes rejetées suite à votre import automatique de réalisés',
+        EMAIL_BODY: `Bonjour,<br > Suite à votre import automatique,
+        vous trouverez un export des lignes rejetées.
+        La cause de rejet est ajoutée au bout chaque ligne(la colonne <b>error</b>).
+        <br > Cordialement,
+        <br > L'equipe GPC.`,
         HEADER: [
           'resource_igg',
           'resource_first_name',
@@ -121,6 +143,13 @@ export class ConstantService {
         NAME: 'NOSICA',
         ORIGIN_SEPARATOR: '|@|',
         SEPARATOR: ';',
+        EMAIL_TO: [...this.defaultEmailTo],
+        EMAIL_SUBJECT: 'Lignes rejetées suite à votre import automatique Nosica',
+        EMAIL_BODY: `Bonjour,<br > Suite à votre import automatique,
+        vous trouverez un export des lignes rejetées.
+        La cause de rejet est ajoutée au bout chaque ligne(la colonne <b>error</b>).
+        <br > Cordialement,
+        <br > L'equipe GPC.`,
         HEADER: [
           'fiscal_year',
           'accounting_period',
@@ -146,6 +175,13 @@ export class ConstantService {
         NAME: 'MYGTS',
         ORIGIN_SEPARATOR: '|@|',
         SEPARATOR: ';',
+        EMAIL_TO: [...this.defaultEmailTo],
+        EMAIL_SUBJECT: 'Lignes rejetées suite à votre import automatique MYGTS',
+        EMAIL_BODY: `Bonjour,<br > Suite à votre import automatique,
+        vous trouverez un export des lignes rejetées.
+        La cause de rejet est ajoutée au bout chaque ligne(la colonne <b>error</b>).
+        <br > Cordialement,
+        <br > L'equipe GPC.`,
         HEADER: ['ClientLongName', '€', 'Code NRG', 'Gamme', 'Sous-Gamme', 'Mois'],
       }),
     }),
