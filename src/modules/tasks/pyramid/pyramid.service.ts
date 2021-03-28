@@ -338,17 +338,11 @@ export class PyramidService {
     if (isActuals) requiredParams = requiredFileds.actuals;
     if (!isActuals) requiredParams = requiredFileds.eac;
 
-    if (!this.isValidParams(requiredParams, line, isActuals)) {
-      throw new Error('invalid line param');
-    }
+    if (!this.isValidParams(requiredParams, line, isActuals)) throw new Error('invalid line param');
 
-    if (!this.isParseableLine(line, fields, outsourcing)) {
-      throw new Error(`line is not parseable: ${JSON.stringify(line)}`);
-    }
+    if (!this.isParseableLine(line, fields, outsourcing)) throw new Error('line is not parseable');
 
-    if (!this.isChargeableLine(line, fields)) {
-      throw new Error(`Unkown subnature for line: ${JSON.stringify(line)}`);
-    }
+    if (!this.isChargeableLine(line, fields)) throw 'Unkown subnature for line';
 
     if (includes(intExtStaffType, line[fields.staffType].toLocaleLowerCase())) {
       line[fields.staffType] = onshoreStaffType;
@@ -359,37 +353,29 @@ export class PyramidService {
     const plan = line[fields.activityPlan];
     const projectCode = line[fields.ProjectCode];
 
-    if (!subnatureName.trim()) throw new Error(`subnature name not defined for line: ${JSON.stringify(line)}`);
-    if (!portfolioName.trim()) throw new Error(`Service name not defined for line: ${JSON.stringify(line)}`);
-    if (!plan.trim()) throw new Error(`Plan not defined for line: ${JSON.stringify(line)}`);
+    if (!subnatureName.trim()) throw 'subnature name not defined';
+    if (!portfolioName.trim()) throw 'Service name not defined';
+    if (!plan.trim()) throw 'Plan not defined';
 
     const periodAppSettings = await this.getPeriodAppSettings(periodType, isActuals, outsourcing, false);
-    if (!periodAppSettings) {
-      throw new Error('period not found');
-    }
+    if (!periodAppSettings) throw 'period not found';
 
-    if (!projectCode.trim()) {
-      throw new Error(`Project code not defined for line: ${JSON.stringify(line)}`);
-    }
+    if (!projectCode.trim()) throw 'Project code not defined';
 
     const service = await this.getServiceByPortfolioName(portfolioName);
-    if (!service) {
-      throw new Error(`Service not found ${portfolioName}`);
-    }
+    if (!service) `Service not found ${portfolioName}`;
 
     const planCodes = this.getPlanCode(plan);
-    if (!planCodes) {
-      throw new Error(`Plan Code not found for plan ${plan}`);
-    }
+    if (!planCodes) throw `Plan Code not found for plan ${plan}`;
 
     const subtypologies = await this.getSubtypologyByCode(planCodes);
     if (!subtypologies || !subtypologies.length) {
-      throw new Error(`subTypology not found ${planCodes}`);
+      throw `subTypology not found ${JSON.stringify(planCodes)}`;
     }
 
     const thirdparty = await this.getThirdparty(line, fields, isActuals);
     if (!thirdparty) {
-      throw new Error(`thirdparty not found in line : ${JSON.stringify(line)}`);
+      throw `thirdparty not found in line`;
     }
 
     let subservice: any = await this.findSubService(service, subtypologies, projectCode);
@@ -407,9 +393,7 @@ export class PyramidService {
       });
     }
     const subnature = await this.subnatureService.findByName(subnatureName);
-    if (!subnature) {
-      throw new Error(`subNature not found with name: "${subnatureName}"`);
-    }
+    if (!subnature) throw `subNature not found with name: "${subnatureName}"`;
 
     const workloadsBySubserviceThirdpartySubnature = await this.findWorkloadBySubserviceThirdpartySubnature(subnature, subservice, thirdparty);
 
@@ -441,12 +425,8 @@ export class PyramidService {
       const previousPeriodAppSettings = await this.getPeriodAppSettings(periodType, isActuals, outsourcing, true);
       if (previousPeriodAppSettings) {
         const subsidiaryAllocation = await this.getAllocations(workloadsBySubserviceThirdpartySubnature, line, fields, previousPeriodAppSettings);
-        if (!subsidiaryAllocation) {
-          throw new Error(`subsidiaryAllocation not found by subsidiary allocations for line ${JSON.stringify(line)}`);
-        }
-        if (!subsidiaryAllocation.workload) {
-          throw new Error(`workload not found by subsidiary allocations for line ${JSON.stringify(line)}`);
-        }
+        if (!subsidiaryAllocation) throw 'subsidiaryAllocation not found by subsidiary allocations';
+        if (!subsidiaryAllocation.workload) throw 'workload not found by subsidiary allocations';
         workload = subsidiaryAllocation.workload;
       }
     }
@@ -456,9 +436,7 @@ export class PyramidService {
     const prices = await this.pricesService.findOne({ where: { thirdparty: thirdparty.id, subnature: subnature.id, periodtype: actualPeriod.type } });
     const rate = await this.currencyRateService.getCurrencyRateByCountryAndPeriod(thirdparty.countryid, actualPeriod.id);
 
-    if (!prices) {
-      throw new Error(`Price not found for thirdparty ${thirdparty.name} and subnature ${subnature.name}`);
-    }
+    if (!prices) throw `Price not found for thirdparty ${thirdparty.name} and subnature ${subnature.name}`;
 
     const costPrice = prices.price;
     const salePrice = prices.saleprice;
