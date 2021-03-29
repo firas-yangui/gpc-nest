@@ -25,7 +25,7 @@ export class Audit {
     name: 'methodname',
     length: 6,
   })
-  methodName: string;
+  methodName: 'create' | 'update' | 'delete';
 
   @ApiModelProperty()
   @CreateDateColumn({
