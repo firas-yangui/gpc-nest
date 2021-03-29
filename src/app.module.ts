@@ -22,6 +22,7 @@ import { GlobalServicesModule } from './services/global-services.module';
 import { ConstantsModule } from './modules/constants/constants.module';
 import { DatalakeMappingModule } from './modules/datalakemapping/datalakemapping.module';
 import { HomeMessageModule } from './modules/homeMessage/homeMessage.module';
+import { AuditModule } from './modules/audit/audit.module';
 
 import DbLoader from './loader';
 
@@ -36,6 +37,7 @@ const options: SgConnectOptions = {
 
 const applicationModules = [
   TypeOrmModule.forRoot(DbLoader),
+  AuditModule,
   ConfigurationModule,
   ConstantsModule,
   SgConnectModule.register(options),
