@@ -74,11 +74,12 @@ export class WorkloadsService {
     return await this.workloadRepository.save(workload);
   }
 
-  async generateCode() {
+  async generateCode(prefix: string = null) {
     const workload = await this.workloadRepository.findOne({
       order: { id: 'DESC' },
     });
-    return `Z${workload.id + 1}`;
+    if (!prefix) prefix = 'Z';
+    return `${prefix}_${workload.id + 1}`;
   }
 
   async getNosicaWorkloadInSubserviceName(subserviceName: string, thirdpartyId: number, subnatureId: number): Promise<Workload> {

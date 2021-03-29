@@ -342,7 +342,7 @@ export class PyramidService {
 
     if (!this.isParseableLine(line, fields, outsourcing)) throw new Error('line is not parseable');
 
-    if (!this.isChargeableLine(line, fields)) throw 'Unkown subnature for line';
+    if (!this.isChargeableLine(line, fields)) throw new Error('Unkown subnature for line');
 
     if (includes(intExtStaffType, line[fields.staffType].toLocaleLowerCase())) {
       line[fields.staffType] = onshoreStaffType;
@@ -384,13 +384,17 @@ export class PyramidService {
       Logger.warn(
         `subservice not found for service "${service.name}" and subtypology "${join(subtypologiesCodes, ',')}" and projectCode "${projectCode}"`,
       );
+      const owner = await this.thirdpartiesService.findOne({ name: 'RESG/BSC' });
+      if (!owner) throw 'subservice owner "RESG/BSC" not found';
+
       subservice = await this.subservicesService.save({
         code: projectCode,
         name: line[fields.ProjectName],
         service,
-        thirdpPartyId: thirdparty.id,
+        thirdpPartyId: owner.id,
         subtypology: subtypologies[0],
       });
+      if (!subservice) throw 'subservice could not be created';
     }
     const subnature = await this.subnatureService.findByName(subnatureName);
     if (!subnature) throw `subNature not found with name: "${subnatureName}"`;
@@ -399,7 +403,7 @@ export class PyramidService {
 
     if (!workloadsBySubserviceThirdpartySubnature.length) {
       Logger.warn(`workload not found  with subnature "${subnature.name}" and subservice "${subservice.code}" and thirdparty "${thirdparty.name}"`);
-      const codeWorkload = await this.workloadsService.generateCode();
+      const codeWorkload = await this.workloadsService.generateCode('AUTO');
       const workload = await this.workloadsService.save({
         code: codeWorkload,
         description: codeWorkload,
@@ -425,9 +429,21 @@ export class PyramidService {
       const previousPeriodAppSettings = await this.getPeriodAppSettings(periodType, isActuals, outsourcing, true);
       if (previousPeriodAppSettings) {
         const subsidiaryAllocation = await this.getAllocations(workloadsBySubserviceThirdpartySubnature, line, fields, previousPeriodAppSettings);
-        if (!subsidiaryAllocation) throw 'subsidiaryAllocation not found by subsidiary allocations';
-        if (!subsidiaryAllocation.workload) throw 'workload not found by subsidiary allocations';
-        workload = subsidiaryAllocation.workload;
+        if (subsidiaryAllocation && subsidiaryAllocation.workload) {
+          workload = subsidiaryAllocation.workload;
+        } else {
+          const partner = await this.getGpcDatalakePartner(line, fields);
+          if (!partner) throw 'Partner not found';
+          const tmpWorkload = { ...workload };
+          delete tmpWorkload.id;
+          workload = await this.workloadsService.save(tmpWorkload);
+          this.subsidiaryallocationService.save({
+            thirdparty: partner,
+            weight: 1,
+            workload,
+            period: periodAppSettings.period,
+          });
+        }
       }
     }
 

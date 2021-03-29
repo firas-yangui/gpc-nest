@@ -24,7 +24,7 @@ export class ConstantService {
         EMAIL_SUBJECT: 'Lignes rejetées suite à votre import automatique EAC',
         EMAIL_BODY: `Bonjour,<br > Suite à votre import automatique,
         vous trouverez un export des lignes rejetées.
-        La cause de rejet est ajoutée au bout chaque ligne(la colonne <b>error</b>).
+        La cause de rejet est ajoutée au bout de chaque ligne(la colonne <b>error</b>).
         <br > Cordialement,
         <br > L'equipe GPC.`,
         HEADER: [
@@ -58,7 +58,7 @@ export class ConstantService {
         EMAIL_SUBJECT: 'Lignes rejetées suite à votre import automatique EAC pour les outsourcings',
         EMAIL_BODY: `Bonjour,<br > Suite à votre import automatique,
         vous trouverez un export des lignes rejetées.
-        La cause de rejet est ajoutée au bout chaque ligne(la colonne <b>error</b>).
+        La cause de rejet est ajoutée au bout de chaque ligne(la colonne <b>error</b>).
         <br > Cordialement,
         <br > L'equipe GPC.`,
         HEADER: [
@@ -92,7 +92,7 @@ export class ConstantService {
         EMAIL_SUBJECT: 'Lignes rejetées suite à votre import automatique de réalisés',
         EMAIL_BODY: `Bonjour,<br > Suite à votre import automatique,
         vous trouverez un export des lignes rejetées.
-        La cause de rejet est ajoutée au bout chaque ligne(la colonne <b>error</b>).
+        La cause de rejet est ajoutée au bout de chaque ligne(la colonne <b>error</b>).
         <br > Cordialement,
         <br > L'equipe GPC.`,
         HEADER: [
@@ -147,7 +147,7 @@ export class ConstantService {
         EMAIL_SUBJECT: 'Lignes rejetées suite à votre import automatique Nosica',
         EMAIL_BODY: `Bonjour,<br > Suite à votre import automatique,
         vous trouverez un export des lignes rejetées.
-        La cause de rejet est ajoutée au bout chaque ligne(la colonne <b>error</b>).
+        La cause de rejet est ajoutée au bout de chaque ligne(la colonne <b>error</b>).
         <br > Cordialement,
         <br > L'equipe GPC.`,
         HEADER: [
@@ -179,7 +179,7 @@ export class ConstantService {
         EMAIL_SUBJECT: 'Lignes rejetées suite à votre import automatique MYGTS',
         EMAIL_BODY: `Bonjour,<br > Suite à votre import automatique,
         vous trouverez un export des lignes rejetées.
-        La cause de rejet est ajoutée au bout chaque ligne(la colonne <b>error</b>).
+        La cause de rejet est ajoutée au bout de chaque ligne(la colonne <b>error</b>).
         <br > Cordialement,
         <br > L'equipe GPC.`,
         HEADER: ['ClientLongName', '€', 'Code NRG', 'Gamme', 'Sous-Gamme', 'Mois'],
