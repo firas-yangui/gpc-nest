@@ -34,7 +34,7 @@ export class HomeMessageService {
 
   async create(homeMessageDto: HomeMessageDto): Promise<HomeMessageEntity> {
     const data = { message: homeMessageDto.message, gpcappsettings: { id: homeMessageDto.perimeterId } };
-    const newMessage = await this.homeMessageRepository.save(data);
+    const newMessage = await this.homeMessageRepository.save(data, { data: { userId: 244 } });
     return newMessage;
   }
 }

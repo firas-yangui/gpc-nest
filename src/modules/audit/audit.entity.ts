@@ -1,4 +1,4 @@
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { ApiModelProperty } from '@nestjs/swagger';
 import { User } from '../user/user.entity';
 
@@ -28,7 +28,7 @@ export class Audit {
   methodName: string;
 
   @ApiModelProperty()
-  @Column('date', {
+  @CreateDateColumn({
     nullable: true,
     name: 'date',
   })
@@ -37,6 +37,7 @@ export class Audit {
   @ApiModelProperty()
   @Column('text', {
     nullable: true,
+    default: null,
     name: 'oldobject',
   })
   oldObject: object;
@@ -44,6 +45,7 @@ export class Audit {
   @ApiModelProperty()
   @Column('text', {
     nullable: true,
+    default: null,
     name: 'newobject',
   })
   newObject: object;
