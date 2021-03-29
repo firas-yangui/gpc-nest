@@ -10,7 +10,19 @@ export class AuditService {
     private auditRepository: AuditRepository,
   ) {}
 
-  async find(options: object = {}): Promise<Audit[]> {
+  async find(query): Promise<Audit[]> {
+    const options: { [key: string]: any } = {};
+
+    if (query.userId) options.where.user.id = query.userId;
+    if (query.take) {
+      options.order.id = 'DESC';
+      options.take = query.take;
+    }
+    if (query.skip) {
+      options.order.id = 'DESC';
+      options.skip = query.skip;
+    }
+
     return await this.auditRepository.find(options);
   }
 
