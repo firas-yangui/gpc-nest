@@ -21,7 +21,7 @@ export class ConstantService {
         ORIGIN_SEPARATOR: '|@|',
         SEPARATOR: ';',
         EMAIL_TO: [...this.defaultEmailTo],
-        EMAIL_SUBJECT: 'Lignes rejetées suite à votre import automatique EAC',
+        EMAIL_SUBJECT: `Lignes rejetées suite à votre import automatique EAC en ${process.env.NODE_ENV || 'development'}`,
         EMAIL_BODY: `Bonjour,<br > Suite à votre import automatique,
         vous trouverez un export des lignes rejetées.
         La cause de rejet est ajoutée au bout de chaque ligne(la colonne <b>error</b>).
@@ -55,7 +55,7 @@ export class ConstantService {
         ORIGIN_SEPARATOR: '|@|',
         SEPARATOR: ';',
         EMAIL_TO: [...this.defaultEmailTo],
-        EMAIL_SUBJECT: 'Lignes rejetées suite à votre import automatique EAC pour les outsourcings',
+        EMAIL_SUBJECT: `Lignes rejetées suite à votre import automatique EAC pour les outsourcings en ${process.env.NODE_ENV || 'development'}`,
         EMAIL_BODY: `Bonjour,<br > Suite à votre import automatique,
         vous trouverez un export des lignes rejetées.
         La cause de rejet est ajoutée au bout de chaque ligne(la colonne <b>error</b>).
@@ -89,7 +89,7 @@ export class ConstantService {
         ORIGIN_SEPARATOR: '|@|',
         SEPARATOR: ';',
         EMAIL_TO: [...this.defaultEmailTo],
-        EMAIL_SUBJECT: 'Lignes rejetées suite à votre import automatique de réalisés',
+        EMAIL_SUBJECT: `Lignes rejetées suite à votre import automatique de réalisés en ${process.env.NODE_ENV || 'development'}`,
         EMAIL_BODY: `Bonjour,<br > Suite à votre import automatique,
         vous trouverez un export des lignes rejetées.
         La cause de rejet est ajoutée au bout de chaque ligne(la colonne <b>error</b>).
@@ -144,7 +144,7 @@ export class ConstantService {
         ORIGIN_SEPARATOR: '|@|',
         SEPARATOR: ';',
         EMAIL_TO: [...this.defaultEmailTo],
-        EMAIL_SUBJECT: 'Lignes rejetées suite à votre import automatique Nosica',
+        EMAIL_SUBJECT: `Lignes rejetées suite à votre import automatique Nosica en ${process.env.NODE_ENV || 'development'}`,
         EMAIL_BODY: `Bonjour,<br > Suite à votre import automatique,
         vous trouverez un export des lignes rejetées.
         La cause de rejet est ajoutée au bout de chaque ligne(la colonne <b>error</b>).
@@ -176,7 +176,7 @@ export class ConstantService {
         ORIGIN_SEPARATOR: '|@|',
         SEPARATOR: ';',
         EMAIL_TO: [...this.defaultEmailTo],
-        EMAIL_SUBJECT: 'Lignes rejetées suite à votre import automatique MYGTS',
+        EMAIL_SUBJECT: `Lignes rejetées suite à votre import automatique MYGTS en ${process.env.NODE_ENV || 'development'}`,
         EMAIL_BODY: `Bonjour,<br > Suite à votre import automatique,
         vous trouverez un export des lignes rejetées.
         La cause de rejet est ajoutée au bout de chaque ligne(la colonne <b>error</b>).
