@@ -7,24 +7,24 @@ import { RemoveEvent } from 'typeorm/subscriber/event/RemoveEvent';
 import { Audit } from '../audit/audit.entity';
 import { AuditService } from '../audit/audit.service';
 import { UserService } from '../user/user.service';
-import { Workload } from './workload.entity';
+import { Service } from './services.entity';
 
 @EventSubscriber()
-export class WorkloadSubscriber implements EntitySubscriberInterface<Workload> {
+export class ServiceSubscriber implements EntitySubscriberInterface<Service> {
   constructor(private auditService: AuditService, private userService: UserService) {}
 
   listenTo() {
-    return Workload;
+    return Service;
   }
 
   /**
    * Called before post insertion.
    */
-  beforeInsert(event: InsertEvent<Workload>) {
+  beforeInsert(event: InsertEvent<Service>) {
     try {
       const audit = new Audit();
       audit.methodName = 'create';
-      audit.modelName = Workload.name;
+      audit.modelName = Service.name;
       audit.newObject = event.entity;
       // audit.user = await this.userService.getUserById(event.queryRunner.data.userId);
 
@@ -34,11 +34,11 @@ export class WorkloadSubscriber implements EntitySubscriberInterface<Workload> {
     }
   }
 
-  beforeUpdate(event: UpdateEvent<Workload>) {
+  beforeUpdate(event: UpdateEvent<Service>) {
     try {
       const audit = new Audit();
       audit.methodName = 'update';
-      audit.modelName = Workload.name;
+      audit.modelName = Service.name;
       audit.oldObject = event.databaseEntity;
       audit.newObject = event.entity;
       // audit.user = await this.userService.getUserById(event.queryRunner.data.userId);
@@ -49,11 +49,11 @@ export class WorkloadSubscriber implements EntitySubscriberInterface<Workload> {
     }
   }
 
-  beforeRemove(event: RemoveEvent<Workload>) {
+  beforeRemove(event: RemoveEvent<Service>) {
     try {
       const audit = new Audit();
       audit.methodName = 'delete';
-      audit.modelName = Workload.name;
+      audit.modelName = Service.name;
       audit.oldObject = event.databaseEntity;
       // audit.user = await this.userService.getUserById(event.queryRunner.data.userId);
 
