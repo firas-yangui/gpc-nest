@@ -42,7 +42,6 @@ const mailerOptions: MailerOptions = {
     from: '"noreply" <noreply@nestjs.com>',
   },
   template: {
-    dir: __dirname + '/templates',
     options: {
       strict: true,
     },
