@@ -281,7 +281,7 @@ export class PyramidService {
     orga: Record<string, any>,
   ): Promise<Workload[]> => {
     return this.workloadsService.find({
-      relations: ['subnature'],
+      relations: ['subnature', 'subservice', 'thirdparty'],
       where: {
         subnature: subnature.id,
         subservice: subservice.id,
@@ -363,7 +363,7 @@ export class PyramidService {
     if (!projectCode.trim()) throw 'Project code not defined';
 
     const service = await this.getServiceByPortfolioName(portfolioName);
-    if (!service) `Service not found ${portfolioName}`;
+    if (!service) throw `Service not found ${portfolioName}`;
 
     const planCodes = this.getPlanCode(plan);
     if (!planCodes) throw `Plan Code not found for plan ${plan}`;
@@ -386,7 +386,6 @@ export class PyramidService {
       );
       const owner = await this.thirdpartiesService.findOne({ name: 'RESG/BSC' });
       if (!owner) throw 'subservice owner "RESG/BSC" not found';
-
       subservice = await this.subservicesService.save({
         code: projectCode,
         name: line[fields.ProjectName],
@@ -423,7 +422,6 @@ export class PyramidService {
       }
       workloadsBySubserviceThirdpartySubnature.push(workload);
     }
-
     workload = workloadsBySubserviceThirdpartySubnature[0];
     if (workloadsBySubserviceThirdpartySubnature.length > 1) {
       const previousPeriodAppSettings = await this.getPeriodAppSettings(periodType, isActuals, outsourcing, true);
@@ -432,12 +430,14 @@ export class PyramidService {
         if (subsidiaryAllocation && subsidiaryAllocation.workload) {
           workload = subsidiaryAllocation.workload;
         } else {
+          Logger.warn(`partner not found for this line, an auto creation of workload an allocation will start`);
           const partner = await this.getGpcDatalakePartner(line, fields);
-          if (!partner) throw 'Partner not found';
-          const tmpWorkload = { ...workload };
+          if (!partner) throw 'Partner not found in GPC database';
+          const code: string = await this.workloadsService.generateCode('AUTO');
+          const tmpWorkload = { ...workload, thirdparty, subnature, subservice, code };
           delete tmpWorkload.id;
           workload = await this.workloadsService.save(tmpWorkload);
-          this.subsidiaryallocationService.save({
+          await this.subsidiaryallocationService.save({
             thirdparty: partner,
             weight: 1,
             workload,
@@ -458,7 +458,6 @@ export class PyramidService {
     const salePrice = prices.saleprice;
 
     const amountData = this.getAmountData(line, isActuals);
-
     let createdAmount = this.amountConverter.createAmountEntity(parseFloat(amountData.amount), amountData.unit, rate.value, costPrice, salePrice);
 
     createdAmount = { ...createdAmount, datasource: filename };
