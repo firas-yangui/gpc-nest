@@ -49,7 +49,7 @@ const eacFields = {
   portfolio: 'portfolio',
   subPortfolio: 'sub_portfolio',
   partner: 'partner',
-  caPayor: 'Activity_Ca payor',
+  caPayor: 'code_ca_payor',
   caPayorLabel: 'Activity_Ca payor label',
   payor: 'payor',
   clientEntity: 'Client_Entity',
@@ -76,6 +76,7 @@ const pyramidFields = {
     ProjectCode: 'Project_code',
     ProjectName: 'schedule_name',
     payor: 'Label_Payor',
+    caPayor: 'payor',
     parentDescr: 'Client_Entity',
     partner: 'Partner',
   },
@@ -133,8 +134,8 @@ export class PyramidService {
       line[fields.cds].trim() !== 'RESG/TPS/API' &&
       line[fields.cds].trim() !== 'RESG/TPS/GDO' &&
       line[fields.cds].trim() !== 'RISQ/DTO' &&
-      line[fields.payor].trim() !== 'Global Solution Services SG GSC India (SSBU)' &&
-      line[fields.payor].trim() !== '3000324000' &&
+      line[fields.cds].trim() !== 'Global Solution Services SG GSC India (SSBU)' &&
+      line[fields.caPayor].trim() !== '3000324000' &&
       line[fields.activityType].trim() !== 'Absence';
 
     if (outsourcing) {
