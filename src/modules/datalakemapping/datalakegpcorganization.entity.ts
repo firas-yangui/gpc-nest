@@ -16,13 +16,7 @@ export class DatalakeGpcOrganization {
 
   @Column('text', {
     nullable: false,
-    name: 'gpcname',
+    name: 'dpg',
   })
-  gpcname: string;
-
-  @Column('text', {
-    nullable: false,
-    name: 'projectname',
-  })
-  projectname: string;
+  dpg: string;
 }

@@ -9,7 +9,18 @@ export class SubnatureService {
     private subNatureRepository: SubNatureRepository,
   ) {}
 
+  async find(options: object = {}): Promise<SubNature[]> {
+    return await this.subNatureRepository.find(options);
+  }
+
   async findOne(options: object = {}): Promise<SubNature> {
     return await this.subNatureRepository.findOne(options);
+  }
+
+  async findByName(name: string): Promise<SubNature> {
+    return await this.subNatureRepository
+      .createQueryBuilder()
+      .where('LOWER(name) = LOWER(:name)', { name })
+      .getOne();
   }
 }

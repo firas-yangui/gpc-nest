@@ -21,6 +21,9 @@ import { SchedulerModule } from './modules/scheduler/scheduler.module';
 import { GlobalServicesModule } from './services/global-services.module';
 import { ConstantsModule } from './modules/constants/constants.module';
 import { DatalakeMappingModule } from './modules/datalakemapping/datalakemapping.module';
+import { HomeMessageModule } from './modules/homeMessage/homeMessage.module';
+import { ImportRejectionsHandlerModule } from './modules/import-rejections-handler/import-rejections-handler.module';
+import { MailerModule, MailerOptions } from '@nestjs-modules/mailer';
 
 import DbLoader from './loader';
 
@@ -29,43 +32,54 @@ const options: SgConnectOptions = {
   debug: false,
 };
 
+const mailerOptions: MailerOptions = {
+  transport: {
+    host: process.env.MAILER_HOST,
+    port: process.env.MAILER_PORT,
+    ignoreTLS: true,
+  },
+  defaults: {
+    from: '"noreply" <noreply@nestjs.com>',
+  },
+  template: {
+    options: {
+      strict: true,
+    },
+  },
+};
+
 /**
  * This is the main application module, which imports all the other modules.
  */
 
-const applicationModules = [
-  TypeOrmModule.forRoot(DbLoader),
-  ConfigurationModule,
-  ConstantsModule,
-  SgConnectModule.register(options),
-  TerminusModule.forRootAsync({
-    useClass: TerminusOptionsService,
-  }),
-  EmployeesModule,
-  UserModule,
-  NotificationsModule,
-  TransactionModule,
-  PeriodsModule,
-  AmountsModule,
-  WorkloadsModule,
-  SubnatureModule,
-  ThirdpartiesModule,
-  SubtypologiesModule,
-  SubtypologyAppSettingsModule,
-  GlobalServicesModule,
-  ScheduleModule.forRoot(),
-  DatalakeMappingModule,
-];
-
-if (process.env.TASKS_MODULE_ENABLED) {
-  applicationModules.push(TasksModule);
-}
-
-if (process.env.SCHEDULER_MODULE_ENABLED) {
-  applicationModules.push(SchedulerModule);
-}
-
 @Module({
-  imports: applicationModules,
+  imports: [
+    TypeOrmModule.forRoot(DbLoader),
+    ConfigurationModule,
+    ConstantsModule,
+    SgConnectModule.register(options),
+    TerminusModule.forRootAsync({
+      useClass: TerminusOptionsService,
+    }),
+    EmployeesModule,
+    UserModule,
+    NotificationsModule,
+    TransactionModule,
+    PeriodsModule,
+    AmountsModule,
+    WorkloadsModule,
+    SubnatureModule,
+    ThirdpartiesModule,
+    SubtypologiesModule,
+    SubtypologyAppSettingsModule,
+    GlobalServicesModule,
+    ScheduleModule.forRoot(),
+    DatalakeMappingModule,
+    HomeMessageModule,
+    ImportRejectionsHandlerModule,
+    MailerModule.forRoot(mailerOptions),
+    TasksModule,
+    SchedulerModule,
+  ],
 })
 export class AppModule {}
