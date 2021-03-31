@@ -4,13 +4,15 @@ import { PyramidService } from './pyramid/pyramid.service';
 import { MyGtsService } from './mgts/mygts.service';
 import { ConstantService } from '../constants/constants';
 import { Cron, CronExpression } from '@nestjs/schedule';
-import { readFileSync, readdirSync } from 'fs';
+import { readFileSync, readdirSync, existsSync, unlinkSync } from 'fs';
 import AWS = require('aws-sdk');
 import * as csvParser from 'csv-parser';
-import { map, includes } from 'lodash';
+import { map, includes, isString } from 'lodash';
+import { ImportRejectionsHandlerService } from '../import-rejections-handler/import-rejections-handler.service';
+import { MailerService } from '@nestjs-modules/mailer';
 import * as stringToStream from 'string-to-stream';
 import path = require('path');
-import { on } from 'process';
+import { stringValue } from 'aws-sdk/clients/iot';
 
 const secureEnvs = ['homologation', 'production'];
 process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
@@ -24,6 +26,8 @@ export class TasksService {
     private pyramidService: PyramidService,
     private constantService: ConstantService,
     private myGtsService: MyGtsService,
+    private rejectionsHandlerService: ImportRejectionsHandlerService,
+    private readonly mailerService: MailerService,
   ) {}
 
   getFlowType(flow: string): string {
@@ -61,23 +65,55 @@ export class TasksService {
             await this.importLine(filename, flowType, parsed);
             stream.resume();
           } catch (error) {
-            this.logger.error(`${filename} error occurred: ${error}`);
+            stream.pause();
+            this.logger.error(`${filename} error occurred "${error}" on line ${JSON.stringify(parsed)}`);
+            const line = { ...parsed, error };
+            if (isString(error)) await this.rejectionsHandlerService.append(filename, line);
             stream.resume();
           }
         })
-        .on('end', () => resolve('end'))
-        .on('finish', () => resolve('finish'))
+        .on('end', async () => {
+          await this.sendRejectedFile(filename, flowType);
+          resolve('end');
+        })
         .on('error', err => reject(err));
     });
+  }
+
+  async sendRejectedFile(filename: string, flowType: string): Promise<boolean> {
+    const rejectedFileName = `${filename}.REJECTED.csv`;
+    const file = `/tmp/${rejectedFileName}`;
+    if (existsSync(file)) {
+      try {
+        await this.mailerService.sendMail({
+          to: this.constantService.GLOBAL_CONST.QUEUE[flowType].EMAIL_TO,
+          subject: this.constantService.GLOBAL_CONST.QUEUE[flowType].EMAIL_SUBJECT,
+          html: this.constantService.GLOBAL_CONST.QUEUE[flowType].EMAIL_BODY,
+          attachments: [
+            {
+              filename: rejectedFileName,
+              path: file,
+              contentType: 'csv',
+            },
+          ],
+        });
+        Logger.log('rejected lines was sent by email');
+        await unlinkSync(file);
+        return Promise.resolve(true);
+      } catch (error) {
+        Logger.error(`Faild to send email with rejected line: ${error}`);
+        Promise.resolve(false);
+      }
+    }
+    Promise.resolve(false);
   }
 
   /**
    * This cron will be executed in a secure environment [HML, PRD]
    */
-  @Cron(CronExpression.EVERY_MINUTE)
+  @Cron(CronExpression.EVERY_10_MINUTES)
   async importFromS3() {
     if (!includes(secureEnvs, process.env.NODE_ENV)) return false;
-
     let params: any = {
       Bucket: `${process.env.AWS_BUCKET_PREFIX}gpc-set`,
     };

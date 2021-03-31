@@ -6,8 +6,9 @@ import { MyGTSModule } from './mgts/mygts.module';
 import { ConstantsModule } from '../constants/constants.module';
 import { AmountsModule } from '../amounts/amounts.module';
 import { RawAmountsModule } from '../rawamounts/rawamounts.module';
+import { ImportRejectionsHandlerModule } from '../import-rejections-handler/import-rejections-handler.module';
 @Module({
-  imports: [NosicaModule, MyGTSModule, PyramidModule, AmountsModule, RawAmountsModule, ConstantsModule],
+  imports: [NosicaModule, MyGTSModule, PyramidModule, AmountsModule, RawAmountsModule, ConstantsModule, ImportRejectionsHandlerModule],
   providers: [TasksService],
   exports: [TasksService],
 })

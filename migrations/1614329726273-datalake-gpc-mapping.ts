@@ -265,13 +265,14 @@ export class datalakeGpcMapping1614329726273 implements MigrationInterface {
         ('SGEF','SGEF_BSC'),
         ('SGSS','SGSS'),
         ('TRANSACTIS','TRS'),
-        ('WAAM','WAAM');
+        ('WAAM','WAAM'),
+        ('NB25', 'NB25');
         `);
         await queryRunner.query(`
         INSERT INTO datalake_gpc_payor (payorname, gpcpartnername)
         VALUES
         ('FAT/TSV/SOC','BSC_SOC'),
-        ('RESG BSC FAT TSV DNA DDS ','GSPR'),
+        ('RESG BSC FAT TSV DNA DDS','GSPR'),
         ('RESG/BSC/CRL/ODS/OCR','BSC_OdS'),
         ('RESG/BSC/DAT/ODS/DDD','BSC_OdS'),
         ('RESG/BSC/DAT/ODS/QDO','BSC_OdS'),
