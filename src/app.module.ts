@@ -52,42 +52,34 @@ const mailerOptions: MailerOptions = {
  * This is the main application module, which imports all the other modules.
  */
 
-const applicationModules = [
-  TypeOrmModule.forRoot(DbLoader),
-  ConfigurationModule,
-  ConstantsModule,
-  SgConnectModule.register(options),
-  TerminusModule.forRootAsync({
-    useClass: TerminusOptionsService,
-  }),
-  EmployeesModule,
-  UserModule,
-  NotificationsModule,
-  TransactionModule,
-  PeriodsModule,
-  AmountsModule,
-  WorkloadsModule,
-  SubnatureModule,
-  ThirdpartiesModule,
-  SubtypologiesModule,
-  SubtypologyAppSettingsModule,
-  GlobalServicesModule,
-  ScheduleModule.forRoot(),
-  DatalakeMappingModule,
-  HomeMessageModule,
-  ImportRejectionsHandlerModule,
-  MailerModule.forRoot(mailerOptions),
-];
-
-if (process.env.TASKS_MODULE_ENABLED) {
-  applicationModules.push(TasksModule);
-}
-
-if (process.env.SCHEDULER_MODULE_ENABLED) {
-  applicationModules.push(SchedulerModule);
-}
-
 @Module({
-  imports: applicationModules,
+  imports: [
+    TypeOrmModule.forRoot(DbLoader),
+    ConfigurationModule,
+    ConstantsModule,
+    SgConnectModule.register(options),
+    TerminusModule.forRootAsync({
+      useClass: TerminusOptionsService,
+    }),
+    EmployeesModule,
+    UserModule,
+    NotificationsModule,
+    TransactionModule,
+    PeriodsModule,
+    AmountsModule,
+    WorkloadsModule,
+    SubnatureModule,
+    ThirdpartiesModule,
+    SubtypologiesModule,
+    SubtypologyAppSettingsModule,
+    GlobalServicesModule,
+    ScheduleModule.forRoot(),
+    DatalakeMappingModule,
+    HomeMessageModule,
+    ImportRejectionsHandlerModule,
+    MailerModule.forRoot(mailerOptions),
+    TasksModule,
+    SchedulerModule,
+  ],
 })
 export class AppModule {}
