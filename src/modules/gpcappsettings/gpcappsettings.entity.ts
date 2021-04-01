@@ -49,7 +49,7 @@ export class GpcAppSettings {
 
   @OneToMany(
     () => ServiceAppSettings,
-    (serviceAppSettings: ServiceAppSettings) => serviceAppSettings.gpcappsettings,
+    (serviceAppSettings: ServiceAppSettings) => serviceAppSettings.gpcAppSettings,
   )
   serviceAppSettings: ServiceAppSettings[];
 

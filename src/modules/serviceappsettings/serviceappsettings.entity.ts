@@ -1,4 +1,4 @@
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { Service } from './../services/services.entity';
 import { GpcAppSettings } from './../gpcappsettings/gpcappsettings.entity';
 import { Thirdparty } from './../thirdparties/thirdparty.entity';
@@ -25,7 +25,7 @@ export class ServiceAppSettings {
     { nullable: false },
   )
   @JoinColumn({ name: 'gpcappsettingsid' })
-  gpcappsettings: GpcAppSettings | null;
+  gpcAppSettings: GpcAppSettings | null;
 
   @ManyToOne(
     () => Thirdparty,

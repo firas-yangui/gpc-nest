@@ -1,5 +1,6 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { getConnection } from 'typeorm';
 import { SubService } from '../subservices/subservice.entity';
 import { ServiceRepository } from './../services/services.repository';
 import { Service } from './services.entity';
@@ -11,8 +12,20 @@ export class ServicesService {
     private serviceRepository: ServiceRepository,
   ) {}
 
-  async find(options: object = {}): Promise<Service[]> {
-    return await this.serviceRepository.find(options);
+  async find(options: { gpcAppSettingsId: string }): Promise<Service[]> {
+    try {
+      return await getConnection()
+        .createQueryBuilder()
+        .select('service')
+        .from(Service, 'service')
+        .leftJoin('service.serviceAppSettings', 'serviceAppSettings')
+        .leftJoin('serviceAppSettings.gpcAppSettings', 'gpcAppSettings')
+        .where('gpcAppSettings.id = :gpcAppSettingsId', { gpcAppSettingsId: +options.gpcAppSettingsId })
+        .getMany();
+    } catch (error) {
+      Logger.error(error);
+      return [];
+    }
   }
 
   async findOne(options: object = {}): Promise<Service> {
