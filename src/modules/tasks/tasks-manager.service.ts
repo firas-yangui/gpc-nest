@@ -111,7 +111,7 @@ export class TasksService {
   /**
    * This cron will be executed in a secure environment [HML, PRD]
    */
-  @Cron(CronExpression.EVERY_30_MINUTES)
+  @Cron(CronExpression.EVERY_10_MINUTES)
   async importFromS3() {
     if (!includes(secureEnvs, process.env.NODE_ENV)) return false;
     let params: any = {
