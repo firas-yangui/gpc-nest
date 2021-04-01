@@ -2,6 +2,7 @@ import { Column, Entity, OneToMany, PrimaryGeneratedColumn, ManyToOne, JoinColum
 import { TransactionEntity } from '../transactions/transaction.entity';
 import { User } from '../user/user.entity';
 import { UserThirdpartiesAuthorizations } from '../user/user-thirdparties-authorizations.entity';
+import { ServiceAppSettings } from './../serviceappsettings/serviceappsettings.entity';
 import { Thirdpartyappsettings } from './thirdpartyappsettings/thirdpartyappsettings.entity';
 import { Country } from './../country/country.entity';
 import { PortfolioAppSettings } from './../portfolioAppSettings/portfolioappsettings.entity';
@@ -96,6 +97,12 @@ export class Thirdparty {
     (scope: UserThirdpartiesAuthorizations) => scope.thirdparty,
   )
   scopes: UserThirdpartiesAuthorizations[];
+
+  @OneToMany(
+    () => ServiceAppSettings,
+    (serviceAppSettings: ServiceAppSettings) => serviceAppSettings.thirdparty,
+  )
+  serviceAppSettings: ServiceAppSettings[];
 
   @OneToMany(
     () => Thirdpartyappsettings,
