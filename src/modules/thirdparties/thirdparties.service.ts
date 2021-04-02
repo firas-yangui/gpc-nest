@@ -4,6 +4,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import * as _ from 'lodash';
 import { Thirdparty } from './thirdparty.entity';
 import { Thirdparty as ThirdpartyInterface } from './../interfaces/common-interfaces';
+import { getConnection } from 'typeorm';
 
 @Injectable()
 export class ThirdpartiesService {
@@ -68,5 +69,23 @@ export class ThirdpartiesService {
 
   getMyThirdPartiesChilds(): Array<number> {
     return this.thirdpartyChilds;
+  }
+
+  async getHydratedThirdpartiesSkipTake(): Promise<Thirdparty[]> {
+    const query = getConnection()
+      .createQueryBuilder()
+      .select('thirdparty')
+      .from(Thirdparty, 'thirdparty')
+      .take(10)
+      .leftJoinAndSelect('thirdparty.serviceAppSettings', 'serviceappsettings')
+      .leftJoinAndSelect('serviceappsettings.model', 'service');
+    // .leftJoinAndSelect('service.subservices', 'subservice');
+
+    // const query2 = getConnection()
+    //   .createQueryBuilder()
+    //   .select('service')
+    //   .leftJoinAndSelect('subservice.service', 'service');
+
+    return await query.execute();
   }
 }

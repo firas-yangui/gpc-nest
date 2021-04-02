@@ -1,7 +1,7 @@
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { GpcAppSettings } from '../gpcappsettings/gpcappsettings.entity';
 
-@Entity('homemessage', { schema: 'public' })
+@Entity('homemessage')
 export class HomeMessageEntity {
   @PrimaryGeneratedColumn({
     type: 'integer',
@@ -11,11 +11,15 @@ export class HomeMessageEntity {
 
   @Column('text', {
     nullable: false,
-    default: () => "''",
+    default: '',
     name: 'message',
   })
   message: string;
 
+  @Column('int', {
+    nullable: true,
+    name: 'gpcappsettingsid',
+  })
   @ManyToOne(
     () => GpcAppSettings,
     (gpcappsettings: GpcAppSettings) => gpcappsettings.homeMessages,

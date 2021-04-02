@@ -47,4 +47,31 @@ export class ThirdpartiesController {
 
     return await this.thirdpartiesService.find(options);
   }
+
+  @Get('/test')
+  @Header('Cache-Control', 'none')
+  @Header('Content-Type', 'application/json')
+  @Header('Accept-Charset', 'utf-8')
+  // @SgConnectScopes('api.soapoc.read')
+  @ApiResponse({
+    status: 200,
+    description: 'Return all thirdparties',
+    type: Thirdparty,
+    isArray: true,
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized',
+    type: ErrorModel,
+    isArray: false,
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'Internal server error',
+    type: ErrorModel,
+    isArray: false,
+  })
+  async getthird(): Promise<ThirdpartyInterface[]> {
+    return await this.thirdpartiesService.getHydratedThirdpartiesSkipTake();
+  }
 }
