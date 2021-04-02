@@ -4,7 +4,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import * as _ from 'lodash';
 import { Thirdparty } from './thirdparty.entity';
 import { Thirdparty as ThirdpartyInterface } from './../interfaces/common-interfaces';
-import { getConnection } from 'typeorm';
+import { getConnection, getRepository } from 'typeorm';
 
 @Injectable()
 export class ThirdpartiesService {
@@ -72,19 +72,17 @@ export class ThirdpartiesService {
   }
 
   async getHydratedThirdpartiesSkipTake(): Promise<Thirdparty[]> {
-    const query = getConnection()
-      .createQueryBuilder()
-      .select('thirdparty')
-      .from(Thirdparty, 'thirdparty')
-      .take(10)
-      .leftJoinAndSelect('thirdparty.serviceAppSettings', 'serviceappsettings')
-      .leftJoinAndSelect('serviceappsettings.model', 'service');
-    // .leftJoinAndSelect('service.subservices', 'subservice');
-
-    // const query2 = getConnection()
-    //   .createQueryBuilder()
-    //   .select('service')
-    //   .leftJoinAndSelect('subservice.service', 'service');
+    const query = await getRepository('thirdparty')
+      .createQueryBuilder('thirdparty')
+      .select(['thirdparty.id', 'thirdparty.trigram'])
+      .leftJoin('thirdparty.serviceAppSettings', 'serviceappsettings')
+      .leftJoin('serviceappsettings.model', 'service')
+      .addSelect(['service.id', 'service.name'])
+      .leftJoin('service.subservices', 'subservice')
+      .where('subservice.thirdPartyId = thirdparty.id')
+      .addSelect(['subservice.id', 'subservice.code', 'subservice.name', 'subservice.thirdPartyId'])
+      .leftJoin('subservice.workloads', 'workload')
+      .addSelect(['workload.id', 'workload.description']);
 
     return await query.execute();
   }
