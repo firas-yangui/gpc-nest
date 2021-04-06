@@ -4,6 +4,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import * as _ from 'lodash';
 import { Thirdparty } from './thirdparty.entity';
 import { Thirdparty as ThirdpartyInterface } from './../interfaces/common-interfaces';
+import { getConnection } from 'typeorm';
 
 @Injectable()
 export class ThirdpartiesService {
@@ -25,8 +26,24 @@ export class ThirdpartiesService {
     return await this.thirdpartyRepository.findAndCount();
   }
 
-  async find(options: object = {}): Promise<Thirdparty[]> {
-    return await this.thirdpartyRepository.find(options);
+  async find(options): Promise<Thirdparty[]> {
+    // options.relations = ['thirdpartyappsettings', 'thirdpartyappsettings.gpcappsettings', 'country'];
+
+    try {
+      const query = getConnection()
+        .createQueryBuilder()
+        .select('thirdparty')
+        .from(Thirdparty, 'thirdparty')
+        .innerJoinAndSelect('thirdparty.thirdpartyappsettings', 'thirdpartyappsettings')
+        .innerJoinAndSelect('thirdpartyappsettings.gpcappsettings', 'gpcappsettings')
+        .innerJoinAndSelect('thirdparty.country', 'country');
+
+      if (options.gpcAppSettingsId) query.where('gpcappsettings.id = :gpcAppSettingsId', { gpcAppSettingsId: +options.gpcAppSettingsId });
+      return await query.getMany();
+    } catch (error) {
+      Logger.error(error, 'ThirdpartiesService');
+      return [];
+    }
   }
 
   async findOne(options: object = {}): Promise<Thirdparty> {
