@@ -14,14 +14,16 @@ export class ServicesService {
 
   async find(options: { gpcAppSettingsId: string }): Promise<Service[]> {
     try {
-      return await getConnection()
+      const query = getConnection()
         .createQueryBuilder()
         .select('service')
         .from(Service, 'service')
         .leftJoin('service.serviceAppSettings', 'serviceAppSettings')
-        .leftJoin('serviceAppSettings.gpcAppSettings', 'gpcAppSettings')
-        .where('gpcAppSettings.id = :gpcAppSettingsId', { gpcAppSettingsId: +options.gpcAppSettingsId })
-        .getMany();
+        .leftJoin('serviceAppSettings.gpcAppSettings', 'gpcAppSettings');
+
+      if (options.gpcAppSettingsId) query.where('gpcAppSettings.id = :gpcAppSettingsId', { gpcAppSettingsId: +options.gpcAppSettingsId });
+
+      return await query.getMany();
     } catch (error) {
       Logger.error(error);
       return [];

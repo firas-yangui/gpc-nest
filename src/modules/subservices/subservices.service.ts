@@ -14,15 +14,17 @@ export class SubservicesService {
 
   async find(options: { gpcAppSettingsId: string }): Promise<SubService[]> {
     try {
-      return await getConnection()
+      const query = getConnection()
         .createQueryBuilder()
         .select('subservice')
         .from(SubService, 'subservice')
         .innerJoin('subservice.service', 'service')
         .innerJoin('service.serviceAppSettings', 'serviceAppSettings')
-        .innerJoin('serviceAppSettings.gpcAppSettings', 'gpcAppSettings')
-        .where('gpcAppSettings.id = :gpcAppSettingsId', { gpcAppSettingsId: +options.gpcAppSettingsId })
-        .getMany();
+        .innerJoin('serviceAppSettings.gpcAppSettings', 'gpcAppSettings');
+
+      if (options.gpcAppSettingsId) query.where('gpcAppSettings.id = :gpcAppSettingsId', { gpcAppSettingsId: +options.gpcAppSettingsId });
+
+      return await query.getMany();
     } catch (error) {
       Logger.error(error);
       return [];
