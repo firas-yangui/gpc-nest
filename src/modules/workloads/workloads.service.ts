@@ -180,7 +180,7 @@ export class WorkloadsService {
 
       return await query.groupBy('period.type').execute();
     } catch (error) {
-      // Logger.error(error);
+      Logger.error(error);
 
       return [];
     }
