@@ -26,7 +26,7 @@ export class ThirdpartiesService {
     return await this.thirdpartyRepository.findAndCount();
   }
 
-  async find(options): Promise<Thirdparty[]> {
+  async find(options: { gpcAppSettingsId?: string }): Promise<Thirdparty[]> {
     // options.relations = ['thirdpartyappsettings', 'thirdpartyappsettings.gpcappsettings', 'country'];
 
     try {

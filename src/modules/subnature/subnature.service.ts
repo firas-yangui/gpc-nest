@@ -10,7 +10,7 @@ export class SubnatureService {
     private subNatureRepository: SubNatureRepository,
   ) {}
 
-  async find(options: { gpcAppSettingsId: string }): Promise<SubNature[]> {
+  async find(options: { gpcAppSettingsId?: string }): Promise<SubNature[]> {
     try {
       const query = getConnection()
         .createQueryBuilder()

@@ -12,7 +12,7 @@ export class SubservicesService {
     private subServiceRepository: SubServiceRepository,
   ) {}
 
-  async find(options: { gpcAppSettingsId: string }): Promise<SubService[]> {
+  async find(options: { gpcAppSettingsId?: string }): Promise<SubService[]> {
     try {
       const query = getConnection()
         .createQueryBuilder()
