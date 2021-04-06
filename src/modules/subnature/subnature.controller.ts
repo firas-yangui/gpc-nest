@@ -1,4 +1,4 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Query } from '@nestjs/common';
 import { SubNature } from './subnature.entity';
 import { SubnatureService } from './subnature.service';
 
@@ -6,7 +6,7 @@ import { SubnatureService } from './subnature.service';
 export class SubnatureController {
   constructor(private subnaturesService: SubnatureService) {}
   @Get()
-  findAll(): Promise<SubNature[]> {
-    return this.subnaturesService.find({});
+  findAll(@Query() query): Promise<SubNature[]> {
+    return this.subnaturesService.find(query);
   }
 }
