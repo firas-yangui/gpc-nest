@@ -71,7 +71,7 @@ export class ThirdpartiesController {
     type: ErrorModel,
     isArray: false,
   })
-  async getthird(): Promise<any[]> {
+  async getThirdpartiesHydrated(): Promise<any[]> {
     return await this.thirdpartiesService.getHydratedThirdpartiesSkipTake();
   }
 }
