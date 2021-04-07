@@ -105,25 +105,5 @@ export class ThirdpartiesService {
       Logger.error(error);
       return [];
     }
-
-    // const thirdparties = await getConnection()
-    //   .createQueryBuilder()
-    //   .select(['thirdparty.id', 'thirdparty.trigram'])
-    //   .from(Thirdparty, 'thirdparty')
-    //   .orderBy('thirdparty.id')
-    //   .take(20)
-    //   .getMany();
-
-    // for (let i = 0; i < thirdparties.length; i++) {
-    //   await getConnection()
-    //     .createQueryBuilder()
-    //     .select(['serviceappsettings.thirdpartyid', 'serviceappsettings.id'])
-    //     .from(ServiceAppSettings, 'serviceappsettings')
-    //     .where('serviceappsettings.thirdpartyid = :id', { id: thirdparties[i].id })
-    //     .leftJoin('serviceappsettings.model', 'service')
-    //     .addSelect(['service.id', 'service.name'])
-    //     .getRawMany()
-    //     .then(servicesArray => (thirdparties[i].serviceAppSettings = servicesArray));
-    // }
   }
 }
