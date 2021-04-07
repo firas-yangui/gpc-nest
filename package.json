@@ -76,6 +76,7 @@
     "@semantic-release/release-notes-generator": "7.3.5",
     "@types/express": "4.17.2",
     "@types/jest": "24.0.23",
+    "@types/json2csv": "^5.0.1",
     "@types/lodash": "^4.14.149",
     "@types/lowdb": "1.0.9",
     "@types/node": "12.12.14",
