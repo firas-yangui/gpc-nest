@@ -29,7 +29,7 @@ export class SubService {
     nullable: false,
     name: 'thirdpartyid',
   })
-  thirdPartyId: number;
+  thirdpPartyId: number;
 
   @Column('text', {
     nullable: true,

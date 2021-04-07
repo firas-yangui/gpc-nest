@@ -87,7 +87,7 @@ export class ThirdpartiesService {
         .createQueryBuilder('thirdparty')
         .select(['thirdparty.id', 'thirdparty.trigram'])
         .addSelect(['service.id', 'service.name'])
-        .addSelect(['subservice.id', 'subservice.code', 'subservice.name', 'subservice.thirdPartyId'])
+        .addSelect(['subservice.id', 'subservice.code', 'subservice.name', 'subservice.thirdpPartyId'])
         .addSelect(['workload.id', 'workload.description'])
         .addSelect(['amount.keuros', 'amount.period'])
 
@@ -98,7 +98,7 @@ export class ThirdpartiesService {
         .leftJoin('workload.amounts', 'amount')
 
         .where('thirdparty.id IN (:...ids)', { ids: thirdpartiesIds })
-        .andWhere('subservice.thirdPartyId = thirdparty.id')
+        .andWhere('subservice.thirdpPartyId = thirdparty.id')
         .orderBy('thirdparty.id')
         .getRawMany();
 
