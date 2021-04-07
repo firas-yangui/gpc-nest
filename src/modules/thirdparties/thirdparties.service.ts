@@ -5,6 +5,7 @@ import * as _ from 'lodash';
 import { Thirdparty } from './thirdparty.entity';
 import { Thirdparty as ThirdpartyInterface } from './../interfaces/common-interfaces';
 import { getConnection, getRepository } from 'typeorm';
+//import { ServiceAppSettings } from '../serviceappsettings/serviceappsettings.entity';
 
 @Injectable()
 export class ThirdpartiesService {
@@ -71,19 +72,58 @@ export class ThirdpartiesService {
     return this.thirdpartyChilds;
   }
 
-  async getHydratedThirdpartiesSkipTake(): Promise<Thirdparty[]> {
-    const query = await getRepository('thirdparty')
-      .createQueryBuilder('thirdparty')
-      .select(['thirdparty.id', 'thirdparty.trigram'])
-      .leftJoin('thirdparty.serviceAppSettings', 'serviceappsettings')
-      .leftJoin('serviceappsettings.model', 'service')
-      .addSelect(['service.id', 'service.name'])
-      .leftJoin('service.subservices', 'subservice')
-      .where('subservice.thirdPartyId = thirdparty.id')
-      .addSelect(['subservice.id', 'subservice.code', 'subservice.name', 'subservice.thirdPartyId'])
-      .leftJoin('subservice.workloads', 'workload')
-      .addSelect(['workload.id', 'workload.description']);
+  async getHydratedThirdpartiesSkipTake(take = 10): Promise<any[]> {
+    try {
+      const ids = await getConnection()
+        .createQueryBuilder()
+        .select(['thirdparty.id', 'thirdparty.name'])
+        .from(Thirdparty, 'thirdparty')
+        .orderBy('thirdparty.id')
+        .take(take)
+        .getMany();
+      const thirdpartiesIds = ids.map(e => e.id);
 
-    return await query.execute();
+      const thirdparties = await getRepository('thirdparty')
+        .createQueryBuilder('thirdparty')
+        .select(['thirdparty.id', 'thirdparty.trigram'])
+        .where('thirdparty.id IN (:...ids)', { ids: thirdpartiesIds })
+        .leftJoin('thirdparty.serviceAppSettings', 'serviceappsettings')
+        .leftJoin('serviceappsettings.model', 'service')
+        .addSelect(['service.id', 'service.name'])
+        .leftJoin('service.subservices', 'subservice')
+        .andWhere('subservice.thirdPartyId = thirdparty.id')
+        .addSelect(['subservice.id', 'subservice.code', 'subservice.name', 'subservice.thirdPartyId'])
+        .leftJoin('subservice.workloads', 'workload')
+        .addSelect(['workload.id', 'workload.description'])
+        .leftJoin('workload.amounts', 'amount')
+        .addSelect(['amount.keuros', 'amount.period'])
+        .orderBy('thirdparty.id')
+        .getRawMany();
+
+      return thirdparties;
+    } catch (error) {
+      Logger.error(error);
+      return [];
+    }
+
+    // const thirdparties = await getConnection()
+    //   .createQueryBuilder()
+    //   .select(['thirdparty.id', 'thirdparty.trigram'])
+    //   .from(Thirdparty, 'thirdparty')
+    //   .orderBy('thirdparty.id')
+    //   .take(20)
+    //   .getMany();
+
+    // for (let i = 0; i < thirdparties.length; i++) {
+    //   await getConnection()
+    //     .createQueryBuilder()
+    //     .select(['serviceappsettings.thirdpartyid', 'serviceappsettings.id'])
+    //     .from(ServiceAppSettings, 'serviceappsettings')
+    //     .where('serviceappsettings.thirdpartyid = :id', { id: thirdparties[i].id })
+    //     .leftJoin('serviceappsettings.model', 'service')
+    //     .addSelect(['service.id', 'service.name'])
+    //     .getRawMany()
+    //     .then(servicesArray => (thirdparties[i].serviceAppSettings = servicesArray));
+    // }
   }
 }

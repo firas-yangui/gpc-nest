@@ -48,7 +48,7 @@ export class ThirdpartiesController {
     return await this.thirdpartiesService.find(options);
   }
 
-  @Get('/test')
+  @Get('/enriched-entity-view')
   @Header('Cache-Control', 'none')
   @Header('Content-Type', 'application/json')
   @Header('Accept-Charset', 'utf-8')
@@ -71,7 +71,7 @@ export class ThirdpartiesController {
     type: ErrorModel,
     isArray: false,
   })
-  async getthird(): Promise<ThirdpartyInterface[]> {
+  async getthird(): Promise<any[]> {
     return await this.thirdpartiesService.getHydratedThirdpartiesSkipTake();
   }
 }
