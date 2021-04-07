@@ -35,7 +35,7 @@ export class WorkloadsService {
 
   async getTotalByPeriodTypesAndBusinessPlan(body: { [key: string]: number }, thirdpartyRootId: number): Promise<MonthlyBusinessPlanAmount[]> {
     const myThirdpartyRoot = await this.thirdpartiesService.getThirdPartyById(thirdpartyRootId);
-    const thirdparties: ThirdpartyInterface[] = await this.thirdpartiesService.find();
+    const thirdparties: ThirdpartyInterface[] = await this.thirdpartiesService.find({});
     this.thirdpartiesService.buildTree(thirdparties, myThirdpartyRoot);
     const thirdpartyChilds = this.thirdpartiesService.getMyThirdPartiesChilds();
 
@@ -169,7 +169,7 @@ export class WorkloadsService {
         .leftJoin('amount.period', 'period')
 
         .where('workload.thirdpartyid IN (:...thirdparties)', { thirdparties: thirdparties })
-        .where('subtypology.businesstype = :businessPlan', { businessPlan: businessPlan })
+        .andWhere('subtypology.businesstype = :businessPlan', { businessPlan: businessPlan })
         .andWhere('amount.periodid IN (:...periodIds)', { periodIds: periodIds });
 
       if (!isNull(serviceId) && !isUndefined(serviceId)) query.andWhere('service.id = :serviceId', { serviceId: serviceId });
@@ -181,7 +181,7 @@ export class WorkloadsService {
 
       return await query.groupBy('period.type').execute();
     } catch (error) {
-      // Logger.error(error);
+      Logger.error(error);
 
       return [];
     }

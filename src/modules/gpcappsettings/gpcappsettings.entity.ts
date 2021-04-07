@@ -5,6 +5,7 @@ import { HomeMessageEntity } from './../homeMessage/homeMessage.entity';
 import { SubNatureAppSettings } from './../subnatureappsettings/subnatureappsettings.entity';
 import { PortfolioAppSettings } from './../portfolioAppSettings/portfolioappsettings.entity';
 import { SubTypologyAppSettings } from './../subTypologyAppSettings/subtypologyappsettings.entity';
+import { ServiceAppSettings } from '../serviceappsettings/serviceappsettings.entity';
 
 @Entity('gpcappsettings')
 @Index('gpcappsettings_name_key', ['name'], { unique: true })
@@ -45,6 +46,12 @@ export class GpcAppSettings {
     (portfolioAppSettings: PortfolioAppSettings) => portfolioAppSettings.gpcappsettings,
   )
   portfolioAppSettings: PortfolioAppSettings[];
+
+  @OneToMany(
+    () => ServiceAppSettings,
+    (serviceAppSettings: ServiceAppSettings) => serviceAppSettings.gpcAppSettings,
+  )
+  serviceAppSettings: ServiceAppSettings[];
 
   @OneToMany(
     () => SubTypologyAppSettings,

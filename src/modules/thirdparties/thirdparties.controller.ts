@@ -1,4 +1,4 @@
-import { Controller, Get, Header, UseFilters } from '@nestjs/common';
+import { Controller, Get, Header, Query, UseFilters } from '@nestjs/common';
 import { ApiResponse, ApiImplicitHeader } from '@nestjs/swagger';
 
 import { Thirdparty } from './thirdparty.entity';
@@ -40,11 +40,7 @@ export class ThirdpartiesController {
     isArray: false,
   })
   @UseFilters(new AllExceptionsFilter())
-  async getAllUsers(): Promise<ThirdpartyInterface[]> {
-    const options = {
-      relations: ['thirdpartyappsettings', 'thirdpartyappsettings.gpcappsettings', 'country'],
-    };
-
-    return await this.thirdpartiesService.find(options);
+  async getAllThirdparties(@Query() query): Promise<ThirdpartyInterface[]> {
+    return await this.thirdpartiesService.find(query);
   }
 }
