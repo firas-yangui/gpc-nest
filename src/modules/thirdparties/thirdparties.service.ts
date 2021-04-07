@@ -86,17 +86,19 @@ export class ThirdpartiesService {
       const thirdparties = await getRepository('thirdparty')
         .createQueryBuilder('thirdparty')
         .select(['thirdparty.id', 'thirdparty.trigram'])
-        .where('thirdparty.id IN (:...ids)', { ids: thirdpartiesIds })
+        .addSelect(['service.id', 'service.name'])
+        .addSelect(['subservice.id', 'subservice.code', 'subservice.name', 'subservice.thirdPartyId'])
+        .addSelect(['workload.id', 'workload.description'])
+        .addSelect(['amount.keuros', 'amount.period'])
+
         .leftJoin('thirdparty.serviceAppSettings', 'serviceappsettings')
         .leftJoin('serviceappsettings.model', 'service')
-        .addSelect(['service.id', 'service.name'])
         .leftJoin('service.subservices', 'subservice')
-        .andWhere('subservice.thirdPartyId = thirdparty.id')
-        .addSelect(['subservice.id', 'subservice.code', 'subservice.name', 'subservice.thirdPartyId'])
         .leftJoin('subservice.workloads', 'workload')
-        .addSelect(['workload.id', 'workload.description'])
         .leftJoin('workload.amounts', 'amount')
-        .addSelect(['amount.keuros', 'amount.period'])
+
+        .where('thirdparty.id IN (:...ids)', { ids: thirdpartiesIds })
+        .andWhere('subservice.thirdPartyId = thirdparty.id')
         .orderBy('thirdparty.id')
         .getRawMany();
 
