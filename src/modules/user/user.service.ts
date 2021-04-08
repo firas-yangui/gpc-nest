@@ -11,6 +11,15 @@ export class UserService {
     private userRepository: UserRepository,
   ) {}
 
+  async getUserById(id: number): Promise<User> {
+    const user = await this.userRepository.findOne({ where: { id: id }, relations: ['gpcAppSettings', 'thirdParty', 'maxAuthorizations'] });
+    if (!user) {
+      throw new NotFoundException(`User with id ${id} not found`);
+    }
+
+    return user;
+  }
+
   async getUserByEmail(email: string): Promise<User> {
     const user = await this.userRepository.findOne({ where: { email: email }, relations: ['gpcAppSettings', 'thirdParty', 'maxAuthorizations'] });
     if (!user) {

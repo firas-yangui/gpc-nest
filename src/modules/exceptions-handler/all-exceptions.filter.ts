@@ -18,8 +18,9 @@ export class AllExceptionsFilter implements ExceptionFilter {
 
     if (exception instanceof BusinessException) {
       Logger.error('exception', JSON.stringify(exception));
-      const statusMsg = exception.getStatus();
-      const msg = exception.getMessage();
+      const e: BusinessException = exception;
+      const statusMsg = e.getStatus();
+      const msg = e.getMessage();
       errorResponse = {
         code: statusMsg,
         message: msg,
@@ -28,12 +29,13 @@ export class AllExceptionsFilter implements ExceptionFilter {
     }
     if (exception instanceof CustomBadRequestException) {
       Logger.error('exception', JSON.stringify(exception));
-      const statusMsg = exception.getStatus();
-      const msg = exception.getMessage();
+      const e: CustomBadRequestException = exception;
+      const statusMsg = e.getStatus();
+      const msg = e.getMessage();
       errorResponse = {
         code: statusMsg,
         message: msg,
-        errors: exception.getErrors() || [] || undefined,
+        errors: e.getErrors() || [] || undefined,
       };
     }
     Logger.error(`${request.method} ${request.url}`, JSON.stringify(errorResponse), 'ExceptionFilter');
