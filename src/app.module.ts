@@ -37,7 +37,6 @@ const options: SgConnectOptions = {
 
 const applicationModules = [
   TypeOrmModule.forRoot(DbLoader),
-  AuditModule,
   ConfigurationModule,
   ConstantsModule,
   SgConnectModule.register(options),

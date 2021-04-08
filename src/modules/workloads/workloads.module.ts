@@ -7,19 +7,10 @@ import { ThirdpartiesModule } from './../thirdparties/thirdparties.module';
 import { PeriodsModule } from './../periods/periods.module';
 import { ServicesModule } from './../services/services.module';
 import { SubservicesModule } from './../subservices/subservices.module';
-import { UserModule } from '../user/user.module';
 import { AuditModule } from '../audit/audit.module';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([WorkloadRepository]),
-    ThirdpartiesModule,
-    ServicesModule,
-    SubservicesModule,
-    PeriodsModule,
-    AuditModule,
-    UserModule,
-  ],
+  imports: [TypeOrmModule.forFeature([WorkloadRepository]), ThirdpartiesModule, ServicesModule, SubservicesModule, PeriodsModule, AuditModule],
   controllers: [WorkloadsController],
   providers: [WorkloadsService],
   exports: [WorkloadsService],

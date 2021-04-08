@@ -17,6 +17,6 @@ import { AllExceptionsFilter } from './../exceptions-handler/all-exceptions.filt
     },
   ],
 
-  exports: [],
+  exports: [AuditService],
 })
 export class AuditModule {}
