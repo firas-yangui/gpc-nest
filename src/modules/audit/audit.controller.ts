@@ -1,4 +1,4 @@
-import { Controller, Get, HttpException, HttpStatus, Param, Query } from '@nestjs/common';
+import { Controller, Get, HttpException, HttpStatus, Logger, Param, Query } from '@nestjs/common';
 import { AuditService } from './audit.service';
 import { ApiUseTags } from '@nestjs/swagger';
 import { Audit } from './audit.entity';
@@ -10,6 +10,7 @@ export class AuditController {
 
   @Get()
   find(@Query() query): Promise<Audit[]> {
+    Logger.log('Find audits ' + JSON.stringify(query), 'AuditController');
     return this.auditService.find(query);
   }
 }

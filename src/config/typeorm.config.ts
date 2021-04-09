@@ -1,5 +1,4 @@
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
-import { TypeOrmLogger } from './TypeOrmLogger';
 
 export const typeOrmConfig: TypeOrmModuleOptions = {
   type: 'postgres',
@@ -17,7 +16,6 @@ export const typeOrmConfig: TypeOrmModuleOptions = {
   cli: {
     migrationsDir: __dirname + 'migrations/*{.ts,.js}',
   },
-  logger: new TypeOrmLogger(),
 };
 
 export default typeOrmConfig;
