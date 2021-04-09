@@ -62,7 +62,7 @@ export class PeriodsService {
     // @Todo: filter periods by connected user appsettings to query
     const periods = await this.periodRepository.find({ where: { code: Like(`%${periodName}%`), isarchived: false } });
     if (!periods.length) {
-      throw new NotFoundException(`No Period found for month ${month} and yaer ${year}`);
+      throw new NotFoundException(`No Period found for month ${month} and year ${year}`);
     }
     return periods;
   }
