@@ -1,7 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { AuditRepository } from './audit.repository';
 import { Audit } from './audit.entity';
+import { getConnection } from 'typeorm';
+import { APIGateway } from 'aws-sdk';
 
 @Injectable()
 export class AuditService {
@@ -11,19 +13,20 @@ export class AuditService {
   ) {}
 
   async find(query): Promise<Audit[]> {
-    const options: { [key: string]: any } = {};
+    try {
+      const dbQuery = getConnection()
+        .createQueryBuilder()
+        .from(Audit, 'audit')
+        .select('audit')
+        .innerJoin('audit.user', 'user');
 
-    if (query.userId) options.where.user.id = query.userId;
-    if (query.take) {
-      options.order.id = 'DESC';
-      options.take = query.take;
-    }
-    if (query.skip) {
-      options.order.id = 'DESC';
-      options.skip = query.skip;
-    }
+      if (query.userId) dbQuery.where('user.id = :userId', { userId: +query.userId });
 
-    return await this.auditRepository.find(options);
+      return await dbQuery.getMany();
+    } catch (err) {
+      Logger.error(err);
+      return [];
+    }
   }
 
   async findOne(options: object = {}): Promise<Audit> {
