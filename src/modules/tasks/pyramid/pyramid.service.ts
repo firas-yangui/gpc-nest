@@ -430,6 +430,12 @@ export class PyramidService {
         const subsidiaryAllocation = await this.getAllocations(workloadsBySubserviceThirdpartySubnature, line, fields, previousPeriodAppSettings);
         if (subsidiaryAllocation && subsidiaryAllocation.workload) {
           workload = subsidiaryAllocation.workload;
+          await this.subsidiaryallocationService.save({
+            thirdparty: subsidiaryAllocation.thirdparty,
+            weight: 1,
+            workload,
+            period: periodAppSettings.period,
+          });
         } else {
           Logger.warn(`partner not found for this line, an auto creation of workload an allocation will start`);
           const partner = await this.getGpcDatalakePartner(line, fields);
