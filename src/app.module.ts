@@ -24,6 +24,7 @@ import { DatalakeMappingModule } from './modules/datalakemapping/datalakemapping
 import { HomeMessageModule } from './modules/homeMessage/homeMessage.module';
 import { ImportRejectionsHandlerModule } from './modules/import-rejections-handler/import-rejections-handler.module';
 import { MailerModule, MailerOptions } from '@nestjs-modules/mailer';
+import { AmountStatsModule } from './modules/amountstats/amountstats.module';
 
 import DbLoader from './loader';
 
@@ -55,6 +56,7 @@ const mailerOptions: MailerOptions = {
 @Module({
   imports: [
     TypeOrmModule.forRoot(DbLoader),
+    ScheduleModule.forRoot(),
     ConfigurationModule,
     ConstantsModule,
     SgConnectModule.register(options),
@@ -67,6 +69,7 @@ const mailerOptions: MailerOptions = {
     TransactionModule,
     PeriodsModule,
     AmountsModule,
+    AmountStatsModule,
     WorkloadsModule,
     SubnatureModule,
     ThirdpartiesModule,
@@ -80,6 +83,7 @@ const mailerOptions: MailerOptions = {
     MailerModule.forRoot(mailerOptions),
     TasksModule,
     SchedulerModule,
+    AmountStatsModule,
   ],
 })
 export class AppModule {}
