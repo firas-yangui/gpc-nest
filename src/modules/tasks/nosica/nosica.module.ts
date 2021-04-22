@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 
 import { NosicaService } from './nosica.service';
+import { ProductService } from './product.service';
 import { ServicesModule } from './../../../modules/services/services.module';
 import { SubservicesModule } from './../../../modules/subservices/subservices.module';
 import { SubnatureappsettingsModule } from './../../../modules/subnatureappsettings/subnatureappsettings.module';
@@ -27,7 +28,7 @@ import { PricesModule } from './../../prices/prices.module';
     SubnatureappsettingsModule,
     WorkloadsModule,
   ],
-  providers: [NosicaService],
-  exports: [NosicaService],
+  providers: [NosicaService, ProductService],
+  exports: [NosicaService, ProductService],
 })
 export class NosicaModule {}

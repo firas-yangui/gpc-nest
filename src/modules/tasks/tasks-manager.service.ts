@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { NosicaService } from './nosica/nosica.service';
+import { ProductService } from './nosica/product.service';
 import { PyramidService } from './pyramid/pyramid.service';
 import { MyGtsService } from './mgts/mygts.service';
 import { ConstantService } from '../constants/constants';
@@ -12,7 +13,6 @@ import { ImportRejectionsHandlerService } from '../import-rejections-handler/imp
 import { MailerService } from '@nestjs-modules/mailer';
 import * as stringToStream from 'string-to-stream';
 import path = require('path');
-import { stringValue } from 'aws-sdk/clients/iot';
 
 const secureEnvs = ['homologation', 'production'];
 process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
@@ -26,6 +26,7 @@ export class TasksService {
     private pyramidService: PyramidService,
     private constantService: ConstantService,
     private myGtsService: MyGtsService,
+    private productService: ProductService,
     private rejectionsHandlerService: ImportRejectionsHandlerService,
     private readonly mailerService: MailerService,
   ) {}
@@ -48,6 +49,8 @@ export class TasksService {
         return this.nosicaService.import(filename, line);
       case this.constantService.GLOBAL_CONST.QUEUE.MYGTS.NAME:
         return this.myGtsService.import(filename, line);
+      case this.constantService.GLOBAL_CONST.QUEUE.NOSICAPRD.NAME:
+        return this.productService.import(filename, line);
     }
   }
 
