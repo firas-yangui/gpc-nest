@@ -16,7 +16,7 @@ export class ThirdpartiesService {
   public async getThirdPartyById(id: number) {
     const thirdparty = await this.thirdpartyRepository.findOne({ id });
     if (!thirdparty) {
-      throw new NotFoundException(`User with id ${id} not found`);
+      throw new NotFoundException(`Thirdparty with id ${id} not found`);
     }
 
     return thirdparty;
