@@ -29,7 +29,7 @@ const cdsType = {
   PRF: 'RESG/BSC/PRF',
 };
 
-const serviceName = '%Activités Transverses BSC%';
+const serviceName = '%Activités Transverses%';
 const rejectedFileName = `nosica-rejected-lines-${Date.now()}.csv`;
 const writeStream = createWriteStream(`/tmp/${rejectedFileName}`);
 @Injectable()
@@ -75,28 +75,25 @@ export class NosicaService {
       month: receivedMonth,
       type: PeriodType.actual,
     });
-    if (!actualPeriodAppSettings)
-      throw new Error(`No Period found with year  ${receivedYear} and month ${receivedMonth} and type ${PeriodType.actual}`);
+    if (!actualPeriodAppSettings) throw `No Period found with year  ${receivedYear} and month ${receivedMonth} and type ${PeriodType.actual}`;
 
     const actualPeriod = actualPeriodAppSettings.period;
 
-    if (!amount || !Number(amount)) throw new Error(`No amount defined for this line :${JSON.stringify(line)}`);
+    if (!amount || !Number(amount)) throw `No amount defined for this line :${JSON.stringify(line)}`;
     amount = (amount * -1) / 1000;
 
     const thirdparty: Thirdparty = await this.thirdpartiesService.findOne({ name: Like(receivedTrigram) });
-    if (!thirdparty) throw new Error(`No Thirdparty found for Trigram Code : ${receivedTrigram}`);
+    if (!thirdparty) throw `No Thirdparty found for Trigram Code : ${receivedTrigram}`;
 
     const subnatureappsetting = await this.subnatureappsettingsService.findOne({
       where: { nrgcode: Like(`%${receivedNRGCode}%`), gpcappsettingsid: this.constantService.GLOBAL_CONST.SCOPES.BSC },
       relations: ['subnature'],
     });
-    if (!subnatureappsetting) throw new Error(`No Subnature found with NRG Code : ${receivedNRGCode}`);
+    if (!subnatureappsetting) throw `No Subnature found with NRG Code : ${receivedNRGCode}`;
 
     const workload = await this.workloadsService.getNosicaWorkloadInSubserviceName(serviceName, thirdparty.id, subnatureappsetting.subnature.id);
     if (!workload)
-      throw new Error(
-        `No workload match with subnature ID ${subnatureappsetting.subnature.id} - nrgCode "${subnatureappsetting.nrgcode}" and thirdparty ID ${thirdparty.id} - Thirdparty Name "${thirdparty.name}"`,
-      );
+      throw `No workload match with subnature ID ${subnatureappsetting.subnature.id} - nrgCode "${subnatureappsetting.nrgcode}" and thirdparty ID ${thirdparty.id} - Thirdparty Name "${thirdparty.name}"`;
     Logger.log(
       `Workload found with subnature ID ${subnatureappsetting.subnature.id} - nrgCode "${subnatureappsetting.nrgcode}" and thirdparty ID ${
         thirdparty.id
@@ -104,16 +101,11 @@ export class NosicaService {
     );
 
     const prices = await this.pricesService.getPricesFromWorkload(workload, actualPeriod.type);
+    if (!prices) throw `Price not found with: ${workload.code} and period type ${actualPeriod.type}`;
     const rate = await this.currencyRateService.getCurrencyRateByThirdpartyAndPeriod(workload.thirdparty.id, actualPeriod.id);
     const GLOBAL_CONST = this.constantService.GLOBAL_CONST;
-    let costPrice = null;
-    let salePrice = null;
-    if (prices) {
-      costPrice = prices.price;
-      salePrice = prices.saleprice;
-    } else {
-      Logger.warn(`Price not found with: ${workload.code} and period type ${actualPeriod.type}`);
-    }
+    const costPrice = prices.price;
+    const salePrice = prices.saleprice;
 
     let createdAmount = this.amountConverter.createAmountEntity(parseFloat(amount), GLOBAL_CONST.AMOUNT_UNITS.KLC, rate.value, costPrice, salePrice);
     createdAmount = { ...createdAmount, datasource: filename };
