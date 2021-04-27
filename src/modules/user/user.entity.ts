@@ -4,6 +4,7 @@ import { Thirdparty } from '../thirdparties/thirdparty.entity';
 import { TransactionEntity } from '../transactions/transaction.entity';
 import { UserThirdpartiesAuthorizations } from './user-thirdparties-authorizations.entity';
 import { Workload } from './../workloads/workload.entity';
+import { Audit } from '../audit/audit.entity';
 
 @Entity('gpcuser')
 export class User {
@@ -76,6 +77,13 @@ export class User {
 
   @Column()
   bipcode: string | null;
+
+  @OneToMany(
+    () => Audit,
+    (audit: Audit) => audit.user,
+    { onDelete: 'SET NULL' },
+  )
+  audits: Audit[];
 
   @OneToMany(
     () => UserThirdpartiesAuthorizations,

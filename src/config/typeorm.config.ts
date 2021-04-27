@@ -9,6 +9,7 @@ export const typeOrmConfig: TypeOrmModuleOptions = {
   database: process.env.DATABASE_DB || process.env.TYPEORM_DATABASE,
   schema: process.env.DATABASE_SCHEMA || process.env.TYPEORM_DATABASE_SCHEMA || 'public',
   entities: [__dirname + '/../**/*.entity.{js,ts}'],
+  subscribers: [__dirname + '/../**/*.subscriber.{js,ts}'],
   synchronize: false,
   migrationsTableName: 'gpc_migrations',
   migrations: [__dirname + 'migrations/*{.ts,.js}'],

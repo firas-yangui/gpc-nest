@@ -1,22 +1,22 @@
 import { Module } from '@nestjs/common';
 import { APP_FILTER } from '@nestjs/core';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { AuditController } from './audit.controller';
+import { AuditRepository } from './audit.repository';
+import { AuditService } from './audit.service';
 import { AllExceptionsFilter } from './../exceptions-handler/all-exceptions.filter';
-import { UserRepository } from './user.repository';
-import { UserController } from './user.controller';
-import { UserService } from './user.service';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([UserRepository])],
-  controllers: [UserController],
+  imports: [TypeOrmModule.forFeature([AuditRepository])],
+  controllers: [AuditController],
   providers: [
-    UserService,
+    AuditService,
     {
       provide: APP_FILTER,
       useClass: AllExceptionsFilter,
     },
   ],
 
-  exports: [UserService],
+  exports: [AuditService],
 })
-export class UserModule {}
+export class AuditModule {}

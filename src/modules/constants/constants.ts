@@ -184,6 +184,19 @@ export class ConstantService {
         <br > L'equipe GPC.`,
         HEADER: ['ClientLongName', '€', 'Code NRG', 'Gamme', 'Sous-Gamme', 'Mois'],
       }),
+      NOSICAPRD: Object.freeze({
+        NAME: 'NOSICAPRD',
+        ORIGIN_SEPARATOR: '|@|',
+        SEPARATOR: ';',
+        EMAIL_TO: [...this.defaultEmailTo],
+        EMAIL_SUBJECT: `Lignes rejetées suite à votre import automatique NOSICA vision produit en ${process.env.NODE_ENV || 'development'}`,
+        EMAIL_BODY: `Bonjour,<br > Suite à votre import automatique,
+        vous trouverez un export des lignes rejetées.
+        La cause de rejet est ajoutée au bout de chaque ligne(la colonne <b>error</b>).
+        <br > Cordialement,
+        <br > L'equipe GPC.`,
+        HEADER: ['PRD : Libellé CA Prestataire', 'RFI - Numero Rubrique FI', 'RFI - Libelle Rubrique FI', 'PRD : Facture du mois'],
+      }),
     }),
     S3_BUCKET: 'bsc-fin-fpm-gpc-a2870-',
   });

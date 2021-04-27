@@ -319,6 +319,22 @@ export class PyramidService {
     }
   };
 
+  formatProjectCode = (projectCode: string): string => {
+    projectCode = projectCode.trim();
+    switch (projectCode.length) {
+      case 1:
+        return '0000'.concat(projectCode);
+      case 2:
+        return '000'.concat(projectCode);
+      case 3:
+        return '00'.concat(projectCode);
+      case 4:
+        return '0'.concat(projectCode);
+      default:
+        return projectCode;
+    }
+  };
+
   import = async (filename, line: any, isActuals = false, outsourcing = false): Promise<any> => {
     let workload: Workload;
     let fields: Record<string, any> = pyramidFields.eac;
@@ -343,7 +359,7 @@ export class PyramidService {
     const subnatureName = line[fields.staffType];
     const portfolioName = line[fields.portfolio];
     const plan = line[fields.activityPlan];
-    const projectCode = line[fields.ProjectCode];
+    const projectCode = this.formatProjectCode(line[fields.ProjectCode]);
 
     if (!subnatureName.trim()) throw 'subnature name not defined';
     if (!portfolioName.trim()) throw 'Service name not defined';
@@ -421,6 +437,12 @@ export class PyramidService {
         const subsidiaryAllocation = await this.getAllocations(workloadsBySubserviceThirdpartySubnature, line, fields, previousPeriodAppSettings);
         if (subsidiaryAllocation && subsidiaryAllocation.workload) {
           workload = subsidiaryAllocation.workload;
+          await this.subsidiaryallocationService.save({
+            thirdparty: subsidiaryAllocation.thirdparty,
+            weight: 1,
+            workload,
+            period: periodAppSettings.period,
+          });
         } else {
           Logger.warn(`partner not found for this line, an auto creation of workload an allocation will start`);
           const partner = await this.getGpcDatalakePartner(line, fields);

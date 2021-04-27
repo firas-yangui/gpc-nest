@@ -1,4 +1,4 @@
-import { Controller, Get, HttpException, HttpStatus, Param } from '@nestjs/common';
+import { Controller, Get, HttpException, HttpStatus, Param, Query } from '@nestjs/common';
 import { Workload } from '../workloads/workload.entity';
 import { SubService } from './subservice.entity';
 import { SubservicesService } from './subservices.service';
@@ -8,8 +8,8 @@ export class SubservicesController {
   constructor(private subservicesService: SubservicesService) {}
 
   @Get()
-  findAll(): Promise<SubService[]> {
-    return this.subservicesService.find({});
+  async findAll(@Query() query): Promise<SubService[]> {
+    return await this.subservicesService.find(query);
   }
 
   @Get(':id')

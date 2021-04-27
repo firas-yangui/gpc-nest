@@ -1,5 +1,5 @@
 import { Controller, Get, Header, Logger, Param } from '@nestjs/common';
-import { ApiUseTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiForbiddenResponse, ApiImplicitHeader } from '@nestjs/swagger';
+import { ApiUseTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { TransactionService } from './transaction.service';
 import { TransactionEntity } from './transaction.entity';
 import { ErrorModel } from '../exceptions-handler/error-model';
@@ -14,11 +14,6 @@ export class TransactionController {
   @Header('Cache-Control', 'none')
   @Header('Content-Type', 'application/json')
   @Header('Accept-Charset', 'utf-8')
-  // @ApiImplicitHeader({ name: 'X-BSC-SOA-CONSUMER-APP-CODE', description: 'Consumer App Code' })
-  // @ApiImplicitHeader({ name: 'X-BSC-SOA-CONSUMER-APP-NAME', description: 'Consumer App Name' })
-  // @ApiImplicitHeader({ name: 'X-BSC-SOA-CONSUMER-CODE', description: 'Consumer Code' })
-  // @ApiImplicitHeader({ name: 'X-BSC-SOA-CONSUMER-NAME', description: 'Consumer Name' })
-  // @ApiImplicitHeader({ name: 'X-BSC-SOA-CONSUMER-ORG', description: 'Consumer Organization' })
   @ApiOperation({
     description: 'Get all transactions',
     title: 'Get all',
@@ -46,15 +41,10 @@ export class TransactionController {
     return await this.transactionService.getAll();
   }
 
-  @Get('/userId/:id')
+  @Get('/userId/:id/thirdparty/:thirdpartyId')
   @Header('Cache-Control', 'none')
   @Header('Content-Type', 'application/json')
   @Header('Accept-Charset', 'utf-8')
-  // @ApiImplicitHeader({ name: 'X-BSC-SOA-CONSUMER-APP-CODE', description: 'Consumer App Code' })
-  // @ApiImplicitHeader({ name: 'X-BSC-SOA-CONSUMER-APP-NAME', description: 'Consumer App Name' })
-  // @ApiImplicitHeader({ name: 'X-BSC-SOA-CONSUMER-CODE', description: 'Consumer Code' })
-  // @ApiImplicitHeader({ name: 'X-BSC-SOA-CONSUMER-NAME', description: 'Consumer Name' })
-  // @ApiImplicitHeader({ name: 'X-BSC-SOA-CONSUMER-ORG', description: 'Consumer Organization' })
   @ApiOperation({
     description: 'Get all transactions',
     title: 'Get all',
@@ -78,8 +68,13 @@ export class TransactionController {
     type: ErrorModel,
     isArray: false,
   })
-  private async getAllWithUserId(@Param('id') userId) {
-    return await this.transactionService.getAllWithUserId(userId);
+  private async getAllWithUserId(@Param('id') userId: number, @Param('thirdpartyId') thirdpartyId: number) {
+    try {
+      Logger.log('Fetching user transactions', 'TransactionController');
+      return await this.transactionService.getAllWithUserId(userId, thirdpartyId);
+    } catch (error) {
+      Logger.error(error, 'TransactionController');
+    }
   }
 
   // Get all transactions
@@ -87,11 +82,6 @@ export class TransactionController {
   @Header('Cache-Control', 'none')
   @Header('Content-Type', 'application/json')
   @Header('Accept-Charset', 'utf-8')
-  // @ApiImplicitHeader({ name: 'X-BSC-SOA-CONSUMER-APP-CODE', description: 'Consumer App Code' })
-  // @ApiImplicitHeader({ name: 'X-BSC-SOA-CONSUMER-APP-NAME', description: 'Consumer App Name' })
-  // @ApiImplicitHeader({ name: 'X-BSC-SOA-CONSUMER-CODE', description: 'Consumer Code' })
-  // @ApiImplicitHeader({ name: 'X-BSC-SOA-CONSUMER-NAME', description: 'Consumer Name' })
-  // @ApiImplicitHeader({ name: 'X-BSC-SOA-CONSUMER-ORG', description: 'Consumer Organization' })
   @ApiOperation({
     description: 'Get latest transactions which by default returns the 6 latest transactions but you could pass how many you would want to load',
     title: 'Get latest transactions',
