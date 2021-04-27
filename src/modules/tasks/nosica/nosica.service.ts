@@ -29,7 +29,7 @@ const cdsType = {
   PRF: 'RESG/BSC/PRF',
 };
 
-const serviceName = '%Activités Transverses BSC%';
+const serviceName = '%Activités Transverses%';
 const rejectedFileName = `nosica-rejected-lines-${Date.now()}.csv`;
 const writeStream = createWriteStream(`/tmp/${rejectedFileName}`);
 @Injectable()
