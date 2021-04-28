@@ -1,5 +1,6 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { getConnection } from 'typeorm';
 import { In } from 'typeorm';
 import { SubtypologyRepository } from './subtypologies.repository';
 import { Subtypology } from './subtypology.entity';
@@ -17,5 +18,24 @@ export class SubtypologiesService {
 
   async findByCodes(codes: string[]): Promise<Subtypology[]> {
     return await this.subtypologyRepository.find({ where: { code: In(codes) } });
+  }
+
+  async findEnrichedWithPlans(options: { gpcAppSettingsId?: string }): Promise<any> {
+    try {
+      const query = getConnection()
+        .createQueryBuilder()
+        .select('subtypology')
+        .addSelect('subtypologyappsettings.plan')
+        .from(Subtypology, 'subtypology')
+        .leftJoin('subtypology.subTypologyAppSettings', 'subtypologyappsettings')
+        .leftJoin('subtypologyappsettings.gpcappsettings', 'gpcappsettings');
+
+      if (options.gpcAppSettingsId) query.where('gpcappsettings.id = :gpcAppSettingsId', { gpcAppSettingsId: parseInt(options.gpcAppSettingsId) });
+
+      return await query.getRawMany();
+    } catch (error) {
+      Logger.error(error);
+      return [];
+    }
   }
 }
