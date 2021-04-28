@@ -1,5 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { SubtypologiesController } from './subtypologies.controller';
+import { SubtypologiesService } from './subtypologies.service';
+
+const subtypologiesServiceMock = () => ({});
 
 describe('subtypologies Controller', () => {
   let controller: SubtypologiesController;
@@ -7,6 +10,12 @@ describe('subtypologies Controller', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [SubtypologiesController],
+      providers: [
+        {
+          provide: SubtypologiesService,
+          useFactory: subtypologiesServiceMock,
+        },
+      ],
     }).compile();
 
     controller = module.get<SubtypologiesController>(SubtypologiesController);
