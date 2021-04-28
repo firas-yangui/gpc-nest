@@ -91,7 +91,7 @@ export class ThirdpartiesService {
     try {
       const ids = await getConnection()
         .createQueryBuilder()
-        .select(['thirdparty.id', 'thirdparty.name'])
+        .select(['thirdparty.id'])
         .from(Thirdparty, 'thirdparty')
         .orderBy('thirdparty.id')
         .take(take)
