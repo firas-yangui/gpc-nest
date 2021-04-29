@@ -184,17 +184,23 @@ export class PyramidService {
     const options: any = { name: line[fields.csm] };
     const thirdParty = await this.thirdpartiesService.findOne(options);
     if (!thirdParty) {
-      let parendDescrFiled = line[fields.parentDescr];
+      let parendDescrFiled = line[fields.parentDescr].slice(0, 7);
 
-      if (!startsWith(line[fields.parentDescr], 'HRCO/')) {
-        parendDescrFiled = line[fields.parentDescr].slice(0, 11);
-      }
+      // if (!startsWith(line[fields.parentDescr], 'HRCO/')) {
+      //   parendDescrFiled = line[fields.parentDescr].slice(0, 11);
+      // }
 
       let findOptions: any = { datalakename: parendDescrFiled };
       let datalakeThirdParty = await this.datalakeGpcOrganizationService.findOne(findOptions);
 
       if (!datalakeThirdParty) {
-        parendDescrFiled = line[fields.parentDescr].slice(0, 7);
+        parendDescrFiled = line[fields.parentDescr].slice(0, 11);
+        findOptions = { datalakename: parendDescrFiled };
+        datalakeThirdParty = await this.datalakeGpcOrganizationService.findOne(findOptions);
+      }
+
+      if (!datalakeThirdParty) {
+        parendDescrFiled = line[fields.parentDescr].slice(0, 15);
         findOptions = { datalakename: parendDescrFiled };
         datalakeThirdParty = await this.datalakeGpcOrganizationService.findOne(findOptions);
       }
