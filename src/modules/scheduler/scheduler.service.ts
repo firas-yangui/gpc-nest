@@ -38,51 +38,51 @@ export class SchedulerService {
       .createQueryRunner()
       .query(
         `
-          DROP TABLE IF EXISTS amount_stats;
+        DROP TABLE IF EXISTS amount_stats;
 
-          SELECT
-            ROW_NUMBER() over() as id,
-            amount.workloadid as "workloadId",
-            workload.thirdpartyid AS "thirdpartyId",
-            subservice.serviceid AS "serviceId",
-            workload.subserviceid AS "subserviceId",
-            workload.subnatureid AS "subnatureId",
-            period.id AS "periodId","
-            period.type AS "period_type","
-            period.month AS "month","
-            period.year AS "year","
-            subtypology.businesstype as "business_type","
+        SELECT
+          ROW_NUMBER() over() as id,
+          amount.workloadid as "workloadId",
+          workload.thirdpartyid AS "thirdpartyId",
+          subservice.serviceid AS "serviceId",
+          workload.subserviceid AS "subserviceId",
+          workload.subnatureid AS "subnatureId",
+          period.id AS "periodId",
+          period.type AS "period_type",
+          period.month AS "month",
+          period.year AS "year",
+          subtypology.businesstype as "business_type",
 
-            amount.mandays as "mandays",
-            amount.keuros as "keuros",
-            amount.keurossales as "keurossales",
-            amount.klocalcurrency as "klocalcurrency"
+          amount.mandays as "mandays",
+          amount.keuros as "keuros",
+          amount.keurossales as "keurossales",
+          amount.klocalcurrency as "klocalcurrency"
 
-          INTO amount_stats
+        INTO amount_stats
 
-          FROM amount
+        FROM amount
 
-          -- Extract subserviceid, subnatureid and thirdpartyid
-          INNER JOIN workload
-          ON amount.workloadid = workload.id
+        -- Extract subserviceid, subnatureid and thirdpartyid
+        INNER JOIN workload
+        ON amount.workloadid = workload.id
 
-          -- Extract subtypology id and service id
-          INNER JOIN subservice
-          ON workload.subserviceid = subservice.id
+        -- Extract subtypology id and service id
+        INNER JOIN subservice
+        ON workload.subserviceid = subservice.id
 
-          -- Extract month and year and period type (actual, forecast, notified)
-          INNER JOIN period
-          ON amount.periodid = period.id
+        -- Extract month and year and period type (actual, forecast, notified)
+        INNER JOIN period
+        ON amount.periodid = period.id
 
-          -- Extract business type
-          INNER JOIN subtypology
-          ON subservice.subtypologyid = subtypology.id
+        -- Extract business type
+        INNER JOIN subtypology
+        ON subservice.subtypologyid = subtypology.id
 
-          -- Only extract periods from january of the current year to the current month
-          WHERE
-            period.year = cast(date_part('year', now()) as text)
-            AND period.month <= cast(date_part('month', now()) as text)
-    ;
+        -- Only extract periods from january of the current year to the current month
+        WHERE
+          period.year = cast(date_part('year', now()) as text)
+          AND period.month <= cast(date_part('month', now()) as text)
+  ;
           `,
       )
       .then(() => Logger.log('Amount stats table job succeded'))
