@@ -249,32 +249,12 @@ export class PyramidService {
   getGpcDatalakePartner = async (line: Record<string, any>, fields: Record<string, any>) => {
     let partner: string;
     if (line[fields.partner]) {
-      if (line[fields.partner].trim() === 'RESG/BSC') {
-        if (line[fields.portfolio]) {
-          switch (line[fields.portfolio].trim()) {
-            case 'Offres de Services BSC':
-              partner = 'BSC_OdS';
-              break;
-            case 'Activités transverses BSC':
-              partner = 'BSC_AC';
-              break;
-            case 'Transformation BSC':
-              partner = 'BSC_TRA';
-              break;
-            default: {
-              const datalakePartner = await this.datalakeGpcPayorService.findByPayorName(line[fields.payor].trim());
-              if (datalakePartner) {
-                partner = datalakePartner.gpcpartnername;
-              }
-              break;
-            }
-          }
-        }
+      const datalakePartner = await this.datalakeGpcPartnerService.findOne({ datalakename: line[fields.partner] });
+      if (datalakePartner) {
+        partner = datalakePartner.gpcname;
       } else {
-        const datalakePartner = await this.datalakeGpcPartnerService.findOne({ datalakename: line[fields.partner] });
-        if (datalakePartner) {
-          partner = datalakePartner.gpcname;
-        }
+        const datalakePayor = await this.datalakeGpcPayorService.findByPayorName(line[fields.payor].trim());
+        if (datalakePayor) partner = datalakePayor.gpcpartnername;
       }
     }
 
