@@ -6,6 +6,7 @@ import { Thirdparty } from './thirdparty.entity';
 import { Thirdparty as ThirdpartyInterface } from './../interfaces/common-interfaces';
 import { getConnection, getRepository } from 'typeorm';
 import { AmountStat } from '../amountstats/amountstat.entity';
+import { isNull, isUndefined } from 'lodash';
 
 @Injectable()
 export class ThirdpartiesService {
@@ -125,7 +126,7 @@ export class ThirdpartiesService {
     }
   }
 
-  async findThirdpartiesWithAmountTotals(options: { gpcAppSettingsId: number; thirdpartyRootId: number; periodId: number }): Promise<Thirdparty[]> {
+  async findThirdpartiesWithAmountTotals(options: { gpcAppSettingsId: number; thirdpartyRootId: number; periodId?: number }): Promise<any> {
     try {
       const myThirdpartyRoot = await this.getThirdPartyById(+options.thirdpartyRootId);
       const thirdparties: ThirdpartyInterface[] = await this.find({});
@@ -134,24 +135,43 @@ export class ThirdpartiesService {
 
       const query = getConnection()
         .createQueryBuilder()
-        .select('thirdparty.id', 'id')
-        .addSelect('thirdparty.trigram', 'trigram')
+        .select('thirdparty.trigram', 'trigram')
         .addSelect('thirdparty.name', 'name')
-        .addSelect('SUM(amount-stat.mandays)', 'mandays')
-        .addSelect('SUM(amount-stat.keuros)', 'keuros')
-        .addSelect('SUM(amount-stat.keurossales)', 'keurossales')
-        .addSelect('SUM(amount-stat.klocalcurrency)', 'klocalcurrency')
+        .addSelect('thirdparty.id', 'id')
+
         .from(Thirdparty, 'thirdparty')
         .innerJoin('thirdparty.thirdpartyappsettings', 'thirdpartyappsettings')
         .innerJoin('thirdpartyappsettings.gpcappsettings', 'gpcappsettings')
-        .innerJoin('thirdparty.amountStats', 'amount-stat')
-        .where('amount-stat.thirdpartyId = thirdparty.id')
-        .andWhere('amount-stat.periodId = :periodId', { periodId: +options.periodId });
+        .leftJoinAndSelect(
+          qb =>
+            qb
+              .select('amountstat1.periodId', 'periodId')
+              .addSelect('amountstat1.thirdpartyId', 'thirdpartyId')
+              .addSelect('SUM(amountstat1.mandays)', 'mandays')
+              .addSelect('SUM(amountstat1.keuros)', 'keuros')
+              .addSelect('SUM(amountstat1.keurossales)', 'keurossales')
+              .addSelect('SUM(amountstat1.klocalcurrency)', 'klocalcurrency')
+              .from(AmountStat, 'amountstat1')
+              .groupBy('amountstat1.periodId')
+              .addGroupBy('amountstat1.thirdpartyId'),
+          'amountstat1',
+          'amountstat1."thirdpartyId" = thirdparty.id',
+        );
+
+      if (!isNull(options.periodId) && !isUndefined(options.periodId))
+        query.andWhere('amount-stat.periodId = :periodId', { periodId: +options.periodId });
 
       if (options.gpcAppSettingsId) query.andWhere('gpcappsettings.id = :gpcAppSettingsId', { gpcAppSettingsId: +options.gpcAppSettingsId });
       if (options.thirdpartyRootId) query.andWhere('thirdparty.id IN (:...ids)', { ids: thirdpartyChildrenIds });
 
-      return await query.groupBy('thirdparty.id').getRawMany();
+      const rows = await query.getRawMany();
+
+      const grouped = _.groupBy(rows, 'id');
+      const result = _.mapValues(grouped, function(group) {
+        return _.groupBy(group, 'periodId');
+      });
+
+      return result;
     } catch (error) {
       Logger.error(error, 'ThirdpartiesService');
       return [];
