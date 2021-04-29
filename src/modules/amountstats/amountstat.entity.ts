@@ -13,6 +13,9 @@ export class AmountStat {
   @Column('integer', { name: 'workloadId', nullable: false, onUpdate: 'CASCADE' })
   workloadId: number;
 
+  @Column('integer', { name: 'periodId', nullable: false, onUpdate: 'CASCADE' })
+  periodId: number;
+
   @Column('integer', { name: 'thirdpartyId', nullable: false, onUpdate: 'CASCADE' })
   thirdpartyId: number;
 

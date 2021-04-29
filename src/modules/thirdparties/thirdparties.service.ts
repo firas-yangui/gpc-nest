@@ -125,7 +125,7 @@ export class ThirdpartiesService {
     }
   }
 
-  async findThirdpartiesWithAmountTotals(options: { gpcAppSettingsId: number; thirdpartyRootId: number }): Promise<Thirdparty[]> {
+  async findThirdpartiesWithAmountTotals(options: { gpcAppSettingsId: number; thirdpartyRootId: number; periodId: number }): Promise<Thirdparty[]> {
     try {
       const myThirdpartyRoot = await this.getThirdPartyById(+options.thirdpartyRootId);
       const thirdparties: ThirdpartyInterface[] = await this.find({});
@@ -145,7 +145,8 @@ export class ThirdpartiesService {
         .innerJoin('thirdparty.thirdpartyappsettings', 'thirdpartyappsettings')
         .innerJoin('thirdpartyappsettings.gpcappsettings', 'gpcappsettings')
         .innerJoin('thirdparty.amountStats', 'amount-stat')
-        .where('amount-stat.thirdpartyId = thirdparty.id');
+        .where('amount-stat.thirdpartyId = thirdparty.id')
+        .andWhere('amount-stat.periodId = :periodId', { periodId: +options.periodId });
 
       if (options.gpcAppSettingsId) query.andWhere('gpcappsettings.id = :gpcAppSettingsId', { gpcAppSettingsId: +options.gpcAppSettingsId });
       if (options.thirdpartyRootId) query.andWhere('thirdparty.id IN (:...ids)', { ids: thirdpartyChildrenIds });

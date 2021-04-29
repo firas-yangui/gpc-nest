@@ -42,20 +42,21 @@ export class SchedulerService {
 
           SELECT
             ROW_NUMBER() over() as id,
-            amount.workloadid as workloadid,
-            workload.thirdpartyid AS thirdpartyid,
-            subservice.serviceid AS serviceid,
-            workload.subserviceid AS subserviceid,
-            workload.subnatureid AS subnatureid,
-            period.type AS period_type,
-            period.month AS month,
-            period.year AS year,
-            subtypology.businesstype as business_type,
+            amount.workloadid as "workloadId",
+            workload.thirdpartyid AS "thirdpartyId",
+            subservice.serviceid AS "serviceId",
+            workload.subserviceid AS "subserviceId",
+            workload.subnatureid AS "subnatureId",
+            period.id AS "periodId","
+            period.type AS "period_type","
+            period.month AS "month","
+            period.year AS "year","
+            subtypology.businesstype as "business_type","
 
-            amount.mandays as mandays,
-            amount.keuros as keuros,
-            amount.keurossales as keurossales,
-            amount.klocalcurrency as klocalcurrency
+            amount.mandays as "mandays",
+            amount.keuros as "keuros",
+            amount.keurossales as "keurossales",
+            amount.klocalcurrency as "klocalcurrency"
 
           INTO amount_stats
 
