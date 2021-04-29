@@ -1,5 +1,6 @@
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { SubsidiaryAllocation } from '../subsidiaryallocation/subsidiaryallocation.entity';
+import { Thirdparty } from '../thirdparties/thirdparty.entity';
 
 @Entity('amount_stats')
 export class AmountStat {
@@ -9,19 +10,19 @@ export class AmountStat {
   })
   id: number;
 
-  @Column('integer', { name: 'workloadid', nullable: false, onUpdate: 'CASCADE' })
+  @Column('integer', { name: 'workloadId', nullable: false, onUpdate: 'CASCADE' })
   workloadId: number;
 
-  @Column('integer', { name: 'thirdpartyid', nullable: false, onUpdate: 'CASCADE' })
+  @Column('integer', { name: 'thirdpartyId', nullable: false, onUpdate: 'CASCADE' })
   thirdpartyId: number;
 
-  @Column('integer', { name: 'serviceid', nullable: false, onUpdate: 'CASCADE' })
+  @Column('integer', { name: 'serviceId', nullable: false, onUpdate: 'CASCADE' })
   serviceId: number;
 
-  @Column('integer', { name: 'subserviceid', nullable: false, onUpdate: 'CASCADE' })
+  @Column('integer', { name: 'subserviceId', nullable: false, onUpdate: 'CASCADE' })
   subserviceId: number;
 
-  @Column('integer', { name: 'subnatureid', nullable: false, onUpdate: 'CASCADE' })
+  @Column('integer', { name: 'subnatureId', nullable: false, onUpdate: 'CASCADE' })
   subnatureId: number;
 
   @Column('character', { name: 'period_type', nullable: false, onUpdate: 'CASCADE' })
@@ -69,4 +70,10 @@ export class AmountStat {
     (subsidiaryAllocation: SubsidiaryAllocation) => subsidiaryAllocation.workload,
   )
   partners: SubsidiaryAllocation[];
+
+  @ManyToOne(
+    () => Thirdparty,
+    thirdparty => thirdparty.amountStats,
+  )
+  thirdparty: Thirdparty;
 }

@@ -5,6 +5,7 @@ import * as _ from 'lodash';
 import { Thirdparty } from './thirdparty.entity';
 import { Thirdparty as ThirdpartyInterface } from './../interfaces/common-interfaces';
 import { getConnection, getRepository } from 'typeorm';
+import { AmountStat } from '../amountstats/amountstat.entity';
 
 @Injectable()
 export class ThirdpartiesService {
@@ -120,6 +121,38 @@ export class ThirdpartiesService {
       return thirdparties;
     } catch (error) {
       Logger.error(error);
+      return [];
+    }
+  }
+
+  async findThirdpartiesWithAmountTotals(options: { gpcAppSettingsId: number; thirdpartyRootId: number }): Promise<Thirdparty[]> {
+    try {
+      const myThirdpartyRoot = await this.getThirdPartyById(+options.thirdpartyRootId);
+      const thirdparties: ThirdpartyInterface[] = await this.find({});
+      this.buildTree(thirdparties, myThirdpartyRoot);
+      const thirdpartyChildrenIds = this.getMyThirdPartiesChilds();
+
+      const query = getConnection()
+        .createQueryBuilder()
+        .select('thirdparty.id', 'id')
+        .addSelect('thirdparty.trigram', 'trigram')
+        .addSelect('thirdparty.name', 'name')
+        .addSelect('SUM(amount-stat.mandays)', 'mandays')
+        .addSelect('SUM(amount-stat.keuros)', 'keuros')
+        .addSelect('SUM(amount-stat.keurossales)', 'keurossales')
+        .addSelect('SUM(amount-stat.klocalcurrency)', 'klocalcurrency')
+        .from(Thirdparty, 'thirdparty')
+        .innerJoin('thirdparty.thirdpartyappsettings', 'thirdpartyappsettings')
+        .innerJoin('thirdpartyappsettings.gpcappsettings', 'gpcappsettings')
+        .innerJoin('thirdparty.amountStats', 'amount-stat')
+        .where('amount-stat.thirdpartyId = thirdparty.id');
+
+      if (options.gpcAppSettingsId) query.andWhere('gpcappsettings.id = :gpcAppSettingsId', { gpcAppSettingsId: +options.gpcAppSettingsId });
+      if (options.thirdpartyRootId) query.andWhere('thirdparty.id IN (:...ids)', { ids: thirdpartyChildrenIds });
+
+      return await query.groupBy('thirdparty.id').getRawMany();
+    } catch (error) {
+      Logger.error(error, 'ThirdpartiesService');
       return [];
     }
   }

@@ -9,6 +9,7 @@ import { PortfolioAppSettings } from './../portfolioAppSettings/portfolioappsett
 import { Price } from './../prices/prices.entity';
 import { Workload } from '../workloads/workload.entity';
 import { SubsidiaryAllocation } from './../subsidiaryallocation/subsidiaryallocation.entity';
+import { AmountStat } from '../amountstats/amountstat.entity';
 
 @Entity('thirdparty')
 export class Thirdparty {
@@ -121,6 +122,12 @@ export class Thirdparty {
     (price: Price) => price.thirdparty,
   )
   prices: Price[];
+
+  @OneToMany(
+    () => AmountStat,
+    (amountStats: AmountStat) => amountStats.thirdparty,
+  )
+  amountStats: AmountStat[];
 
   @ManyToOne(
     () => Country,
