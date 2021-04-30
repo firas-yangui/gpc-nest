@@ -159,7 +159,7 @@ export class ThirdpartiesService {
         );
 
       if (!isNull(options.periodId) && !isUndefined(options.periodId))
-        query.andWhere('amount-stat.periodId = :periodId', { periodId: +options.periodId });
+        query.andWhere('amountstat1."periodId" = :periodId', { periodId: +options.periodId });
 
       if (options.gpcAppSettingsId) query.andWhere('gpcappsettings.id = :gpcAppSettingsId', { gpcAppSettingsId: +options.gpcAppSettingsId });
       if (options.thirdpartyRootId) query.andWhere('thirdparty.id IN (:...ids)', { ids: thirdpartyChildrenIds });
