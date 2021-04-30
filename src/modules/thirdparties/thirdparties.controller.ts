@@ -74,12 +74,15 @@ export class ThirdpartiesController {
 
   @Get('/with-amounts')
   async getAllThirdpartiesByPerimeterWithAmountsSums(@Query() query) {
-    const { gpcAppSettingsId, thirdpartyRootId, periodId } = query;
-
-    if (isNull(gpcAppSettingsId) || isUndefined(gpcAppSettingsId)) throw new Error('Please set the perimeter id!');
-    else if (isNull(thirdpartyRootId) || isUndefined(thirdpartyRootId)) throw new Error("Please set the root thirdparty's id!");
-    else if (isNaN(+gpcAppSettingsId)) throw new Error('Perimeter id should be of type number!');
     try {
+      Logger.log('Getting thirdparties with amounts ' + query, 'ThirdpartiesController');
+
+      const { gpcAppSettingsId, thirdpartyRootId, periodId } = query;
+
+      if (isNull(gpcAppSettingsId) || isUndefined(gpcAppSettingsId)) throw new Error('Please set the perimeter id!');
+      else if (isNull(thirdpartyRootId) || isUndefined(thirdpartyRootId)) throw new Error("Please set the root thirdparty's id!");
+      else if (isNaN(+gpcAppSettingsId)) throw new Error('Perimeter id should be of type number!');
+
       return await this.thirdpartiesService.findThirdpartiesWithAmountTotals({ gpcAppSettingsId, thirdpartyRootId, periodId });
     } catch (error) {
       Logger.error(error, 'ThirdpartiesController');

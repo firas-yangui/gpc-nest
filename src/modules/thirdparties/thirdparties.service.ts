@@ -153,9 +153,7 @@ export class ThirdpartiesService {
         query.andWhere('amountstat1."periodId" = :periodId', { periodId: +options.periodId });
 
       if (options.gpcAppSettingsId) query.andWhere('gpcappsettings.id = :gpcAppSettingsId', { gpcAppSettingsId: +options.gpcAppSettingsId });
-      // if (options.thirdpartyRootId) query.andWhere('thirdparty.id IN (:...ids)', { ids: thirdpartyChildrenIds });
-
-      Logger.log(query.getSql());
+      if (options.thirdpartyRootId) query.andWhere('thirdparty.id IN (:...ids)', { ids: thirdpartyChildrenIds });
 
       const rows = await query
         .groupBy('thirdparty.id')
