@@ -28,7 +28,7 @@ export class SchedulerService {
     Logger.log('END cron to handle duplicates flows lines');
   }
 
-  @Cron(CronExpression.EVERY_DAY_AT_4AM, {
+  @Cron(CronExpression.EVERY_MINUTE, {
     name: 'Populating amount stats table',
     timeZone: 'Europe/Paris',
   })
