@@ -179,17 +179,23 @@ export class PyramidService {
     const options: any = { name: line[fields.csm] };
     const thirdParty = await this.thirdpartiesService.findOne(options);
     if (!thirdParty) {
-      let parendDescrFiled = line[fields.parentDescr];
+      let parendDescrFiled = line[fields.parentDescr].slice(0, 7);
 
-      if (!startsWith(line[fields.parentDescr], 'HRCO/')) {
-        parendDescrFiled = line[fields.parentDescr].slice(0, 11);
-      }
+      // if (!startsWith(line[fields.parentDescr], 'HRCO/')) {
+      //   parendDescrFiled = line[fields.parentDescr].slice(0, 11);
+      // }
 
       let findOptions: any = { datalakename: parendDescrFiled };
       let datalakeThirdParty = await this.datalakeGpcOrganizationService.findOne(findOptions);
 
       if (!datalakeThirdParty) {
-        parendDescrFiled = line[fields.parentDescr].slice(0, 7);
+        parendDescrFiled = line[fields.parentDescr].slice(0, 11);
+        findOptions = { datalakename: parendDescrFiled };
+        datalakeThirdParty = await this.datalakeGpcOrganizationService.findOne(findOptions);
+      }
+
+      if (!datalakeThirdParty) {
+        parendDescrFiled = line[fields.parentDescr].slice(0, 15);
         findOptions = { datalakename: parendDescrFiled };
         datalakeThirdParty = await this.datalakeGpcOrganizationService.findOne(findOptions);
       }
@@ -238,32 +244,12 @@ export class PyramidService {
   getGpcDatalakePartner = async (line: Record<string, any>, fields: Record<string, any>) => {
     let partner: string;
     if (line[fields.partner]) {
-      if (line[fields.partner].trim() === 'RESG/BSC') {
-        if (line[fields.portfolio]) {
-          switch (line[fields.portfolio].trim()) {
-            case 'Offres de Services BSC':
-              partner = 'BSC_OdS';
-              break;
-            case 'Activités transverses BSC':
-              partner = 'BSC_AC';
-              break;
-            case 'Transformation BSC':
-              partner = 'BSC_TRA';
-              break;
-            default: {
-              const datalakePartner = await this.datalakeGpcPayorService.findByPayorName(line[fields.payor].trim());
-              if (datalakePartner) {
-                partner = datalakePartner.gpcpartnername;
-              }
-              break;
-            }
-          }
-        }
+      const datalakePartner = await this.datalakeGpcPartnerService.findOne({ datalakename: line[fields.partner] });
+      if (datalakePartner) {
+        partner = datalakePartner.gpcname;
       } else {
-        const datalakePartner = await this.datalakeGpcPartnerService.findOne({ datalakename: line[fields.partner] });
-        if (datalakePartner) {
-          partner = datalakePartner.gpcname;
-        }
+        const datalakePayor = await this.datalakeGpcPayorService.findByPayorName(line[fields.payor].trim());
+        if (datalakePayor) partner = datalakePayor.gpcpartnername;
       }
     }
 
