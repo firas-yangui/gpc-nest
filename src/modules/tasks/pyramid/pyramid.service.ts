@@ -184,7 +184,7 @@ export class PyramidService {
     const options: any = { name: line[fields.csm] };
     const thirdParty = await this.thirdpartiesService.findOne(options);
     if (!thirdParty) {
-      let parendDescrFiled = line[fields.parentDescr].slice(0, 7);
+      let parendDescrFiled = line[fields.parentDescr].slice(0, 15);
 
       // if (!startsWith(line[fields.parentDescr], 'HRCO/')) {
       //   parendDescrFiled = line[fields.parentDescr].slice(0, 11);
@@ -200,7 +200,7 @@ export class PyramidService {
       }
 
       if (!datalakeThirdParty) {
-        parendDescrFiled = line[fields.parentDescr].slice(0, 15);
+        parendDescrFiled = line[fields.parentDescr].slice(0, 7);
         findOptions = { datalakename: parendDescrFiled };
         datalakeThirdParty = await this.datalakeGpcOrganizationService.findOne(findOptions);
       }
@@ -213,14 +213,18 @@ export class PyramidService {
     return thirdParty;
   };
 
-  getPeriodAppSettings = async (type: string, isActual: boolean, outsourcing: boolean, previous: boolean) => {
+  getPeriodAppSettings = async (type: string, isActual: boolean, outsourcing: boolean, previous: boolean, isV2 = false) => {
     let month = moment(Date.now());
     if (isActual || outsourcing) month = month.subtract(1, 'month');
     if (previous) month = month.subtract(1, 'month');
+    let endWith = '_';
+    if (isV2) endWith = '_V2';
+
     return this.periodsService.findOneInAppSettings(this.constantService.GLOBAL_CONST.SCOPES.BSC, {
-      type: type,
+      type,
       year: month.format('YYYY'),
       month: month.format('MM'),
+      endWith,
     });
   };
 
@@ -330,7 +334,7 @@ export class PyramidService {
     }
   };
 
-  import = async (filename, line: any, isActuals = false, outsourcing = false): Promise<any> => {
+  import = async (filename, line: any, isActuals = false, outsourcing = false, isV2 = false): Promise<any> => {
     let workload: Workload;
     let fields: Record<string, any> = pyramidFields.eac;
     let requiredParams;
@@ -360,7 +364,7 @@ export class PyramidService {
     if (!portfolioName.trim()) throw 'Service name not defined';
     if (!plan.trim()) throw 'Plan not defined';
 
-    const periodAppSettings = await this.getPeriodAppSettings(periodType, isActuals, outsourcing, false);
+    const periodAppSettings = await this.getPeriodAppSettings(periodType, isActuals, outsourcing, false, isV2);
     if (!periodAppSettings) throw 'period not found';
 
     if (!projectCode.trim()) throw 'Project code not defined';
