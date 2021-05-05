@@ -184,7 +184,7 @@ export class PyramidService {
     const options: any = { name: line[fields.csm] };
     const thirdParty = await this.thirdpartiesService.findOne(options);
     if (!thirdParty) {
-      let parendDescrFiled = line[fields.parentDescr].slice(0, 7);
+      let parendDescrFiled = line[fields.parentDescr].slice(0, 15);
 
       // if (!startsWith(line[fields.parentDescr], 'HRCO/')) {
       //   parendDescrFiled = line[fields.parentDescr].slice(0, 11);
@@ -200,7 +200,7 @@ export class PyramidService {
       }
 
       if (!datalakeThirdParty) {
-        parendDescrFiled = line[fields.parentDescr].slice(0, 15);
+        parendDescrFiled = line[fields.parentDescr].slice(0, 7);
         findOptions = { datalakename: parendDescrFiled };
         datalakeThirdParty = await this.datalakeGpcOrganizationService.findOne(findOptions);
       }
@@ -218,7 +218,7 @@ export class PyramidService {
     if (isActual || outsourcing) month = month.subtract(1, 'month');
     if (previous) month = month.subtract(1, 'month');
     let endWith = '_';
-    if (isV2) endWith = '_v2';
+    if (isV2) endWith = '_V2';
 
     return this.periodsService.findOneInAppSettings(this.constantService.GLOBAL_CONST.SCOPES.BSC, {
       type,
