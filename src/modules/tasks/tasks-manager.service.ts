@@ -43,6 +43,8 @@ export class TasksService {
     switch (flow) {
       case this.constantService.GLOBAL_CONST.QUEUE.EAC.NAME:
         return this.pyramidService.import(filename, line);
+      case this.constantService.GLOBAL_CONST.QUEUE.EACFINMOIS.NAME:
+        return this.pyramidService.import(filename, line, false, false, true);
       case this.constantService.GLOBAL_CONST.QUEUE.PMD.NAME:
         return this.pyramidService.import(filename, line, false, true);
       case this.constantService.GLOBAL_CONST.QUEUE.TM.NAME:

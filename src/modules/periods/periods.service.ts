@@ -11,6 +11,7 @@ interface IfindOneInAppSettings {
   type: string;
   month: string;
   year: string;
+  endWith?: string;
 }
 
 @Injectable()
@@ -33,13 +34,16 @@ export class PeriodsService {
   }
 
   async findOneInAppSettings(appSettings: number, options: IfindOneInAppSettings): Promise<any> {
-    return await createQueryBuilder('periodappsettings', 'pas')
+    const query = createQueryBuilder('periodappsettings', 'pas')
       .leftJoinAndSelect('pas.period', 'p')
       .where('pas.gpcappsettingsid = :gpcappsettingsid', { gpcappsettingsid: appSettings })
       .andWhere('p.type = :type', { type: options.type })
       .andWhere('p.year = :year', { year: options.year })
       .andWhere('p.month = :month', { month: options.month })
-      .getOne();
+      .andWhere('p.month = :month', { month: options.month });
+    if (options.endWith) query.andWhere('p.code like :code', { code: `%${options.endWith}%` });
+
+    return await query.getOne();
   }
 
   async getPeriodsByType(type: PeriodType): Promise<Period[]> {
