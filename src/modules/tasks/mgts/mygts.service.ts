@@ -127,7 +127,7 @@ export class MyGtsService {
   };
 
   getSubservice = async (thirdparty: Thirdparty): Promise<SubService> => {
-    const SERVICE_NAME = 'Activités Transverses BSC';
+    const SERVICE_NAME = '%Activités Transverses%'
     const service = await this.getService(SERVICE_NAME);
     const subService = await this.subServiceService.findOne({
       where: { service: Equal(service.id), thirdpPartyId: Equal(thirdparty.id) },
