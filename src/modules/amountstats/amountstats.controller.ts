@@ -1,7 +1,7 @@
 import { Controller, Get, HttpStatus, HttpException, Query, Logger } from '@nestjs/common';
 import { AmountStatsService } from './amountstats.service';
 
-@Controller('amountstats')
+@Controller('amount-stats')
 export class AmountstatsController {
   constructor(private readonly amountstatsService: AmountStatsService) {}
 

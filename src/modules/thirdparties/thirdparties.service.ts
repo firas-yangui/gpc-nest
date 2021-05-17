@@ -5,12 +5,15 @@ import * as _ from 'lodash';
 import { Thirdparty } from './thirdparty.entity';
 import { Thirdparty as ThirdpartyInterface } from './../interfaces/common-interfaces';
 import { getConnection, getRepository } from 'typeorm';
+import { AmountStat } from '../amountstats/amountstat.entity';
+import { isNull, isUndefined } from 'lodash';
 
 @Injectable()
 export class ThirdpartiesService {
-  public thirdpartyChilds: number[];
+  public thirdpartyChilds: Set<number>;
   constructor(@InjectRepository(ThirdpartyRepository) private readonly thirdpartyRepository: ThirdpartyRepository) {
-    this.thirdpartyChilds = [];
+    // eslint-disable-next-line no-undef
+    this.thirdpartyChilds = new Set();
   }
 
   public async getThirdPartyById(id: number) {
@@ -55,7 +58,7 @@ export class ThirdpartiesService {
   }
 
   populateChildren(itemList: ThirdpartyInterface[], parent: ThirdpartyInterface): ThirdpartyInterface {
-    this.thirdpartyChilds.push(parent.id);
+    this.thirdpartyChilds.add(parent.id);
     parent.children = _.filter<ThirdpartyInterface>(itemList, (item: ThirdpartyInterface) => {
       return item.thirdpartyparent == parent.trigram && item.trigram !== item.thirdpartyparent;
     });
@@ -75,7 +78,7 @@ export class ThirdpartiesService {
       radical: myThirdpartyRoot.radical,
       children: [],
     };
-    this.thirdpartyChilds.push(myThirdpartyRoot.id);
+    this.thirdpartyChilds.add(myThirdpartyRoot.id);
     _.forEach<ThirdpartyInterface[]>(thirdparties, (thirdparty: ThirdpartyInterface) =>
       result.children.push(this.populateChildren(thirdparties, thirdparty)),
     );
@@ -84,7 +87,7 @@ export class ThirdpartiesService {
   }
 
   getMyThirdPartiesChilds(): Array<number> {
-    return this.thirdpartyChilds;
+    return Array.from(this.thirdpartyChilds);
   }
 
   async getHydratedThirdpartiesSkipTake(take = 10): Promise<any[]> {
@@ -120,6 +123,54 @@ export class ThirdpartiesService {
       return thirdparties;
     } catch (error) {
       Logger.error(error);
+      return [];
+    }
+  }
+
+  async findThirdpartiesWithAmountTotals(options: { gpcAppSettingsId?: number; thirdpartyRootId?: number; periodId?: number }): Promise<any> {
+    try {
+      const myThirdpartyRoot = await this.getThirdPartyById(+options.thirdpartyRootId);
+      const thirdparties: ThirdpartyInterface[] = await this.find({});
+      this.buildTree(thirdparties, myThirdpartyRoot);
+      const thirdpartyChildrenIds = this.getMyThirdPartiesChilds();
+
+      const query = getConnection()
+        .createQueryBuilder()
+        .select('thirdparty.id', 'id')
+        .addSelect('thirdparty.name', 'name')
+        .addSelect('thirdparty.trigram', 'trigram')
+        .addSelect('amountstat1."periodId"', 'periodId')
+        .addSelect('SUM(amountstat1.mandays)', 'mandays')
+        .addSelect('SUM(amountstat1.keuros)', 'keuros')
+        .addSelect('SUM(amountstat1.keurossales)', 'keurossales')
+        .addSelect('SUM(amountstat1.klocalcurrency)', 'klocalcurrency')
+
+        .from(Thirdparty, 'thirdparty')
+        .innerJoin('thirdparty.thirdpartyappsettings', 'thirdpartyappsettings')
+        .innerJoin('thirdpartyappsettings.gpcappsettings', 'gpcappsettings')
+        .leftJoin('thirdparty.amountStats', 'amountstat1', 'amountstat1."thirdpartyId" = thirdparty.id');
+
+      if (!isNull(options.periodId) && !isUndefined(options.periodId))
+        query.andWhere('amountstat1."periodId" = :periodId', { periodId: +options.periodId });
+
+      if (options.gpcAppSettingsId) query.andWhere('gpcappsettings.id = :gpcAppSettingsId', { gpcAppSettingsId: +options.gpcAppSettingsId });
+      if (options.thirdpartyRootId) query.andWhere('thirdparty.id IN (:...ids)', { ids: thirdpartyChildrenIds });
+
+      const rows = await query
+        .groupBy('thirdparty.id')
+        .addGroupBy('thirdparty.name')
+        .addGroupBy('thirdparty.trigram')
+        .addGroupBy('amountstat1."periodId"')
+        .getRawMany();
+
+      const grouped = _.groupBy(rows, 'id');
+      const result = _.mapValues(grouped, function(group) {
+        return _.groupBy(group, 'periodId');
+      });
+
+      return result;
+    } catch (error) {
+      Logger.error(error, 'ThirdpartiesService');
       return [];
     }
   }
