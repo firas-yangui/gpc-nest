@@ -24,8 +24,8 @@ export class SubtypologiesService {
     try {
       const query = getConnection()
         .createQueryBuilder()
-        .select('subtypology')
-        .addSelect('subtypologyappsettings.plan')
+        .select('subtypology.*')
+        .addSelect('subtypologyappsettings.plan', 'plan')
         .from(Subtypology, 'subtypology')
         .leftJoin('subtypology.subTypologyAppSettings', 'subtypologyappsettings')
         .leftJoin('subtypologyappsettings.gpcappsettings', 'gpcappsettings');
