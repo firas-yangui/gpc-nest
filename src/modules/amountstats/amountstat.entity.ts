@@ -1,5 +1,6 @@
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { SubsidiaryAllocation } from '../subsidiaryallocation/subsidiaryallocation.entity';
+import { Thirdparty } from '../thirdparties/thirdparty.entity';
 
 @Entity('amount_stats')
 export class AmountStat {
@@ -24,7 +25,14 @@ export class AmountStat {
   @Column('integer', { name: 'subnatureid', nullable: false, onUpdate: 'CASCADE' })
   subnatureId: number;
 
-  @Column('character', { name: 'period_type', nullable: false, onUpdate: 'CASCADE' })
+  @Column('integer', { name: 'periodid', nullable: false, onUpdate: 'CASCADE' })
+  periodId: number;
+
+  @Column('enum', {
+    nullable: true,
+    enum: ['notified', 'actual', 'sum', 'committed', 'budget', 'forecast'],
+    name: 'period_type',
+  })
   periodType: string;
 
   @Column('character', { name: 'month', nullable: false, onUpdate: 'CASCADE' })
@@ -69,4 +77,10 @@ export class AmountStat {
     (subsidiaryAllocation: SubsidiaryAllocation) => subsidiaryAllocation.workload,
   )
   partners: SubsidiaryAllocation[];
+
+  @ManyToOne(
+    () => Thirdparty,
+    thirdparty => thirdparty.amountStats,
+  )
+  thirdparty: Thirdparty;
 }

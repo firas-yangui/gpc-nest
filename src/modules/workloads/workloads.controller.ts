@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpException, HttpStatus, Logger, Param, Post } from '@nestjs/common';
+import { Controller, Get, HttpException, HttpStatus, Logger, Param, Query } from '@nestjs/common';
 import { WorkloadsService } from './workloads.service';
 import { ApiUseTags } from '@nestjs/swagger';
 import { Workload } from './workload.entity';
@@ -13,17 +13,17 @@ export class WorkloadsController {
     return this.workloadsService.find({});
   }
 
-  @Post('/total-amount')
-  async getTotalByPeriodTypesAndBusinessPlan(@Body() body: { [key: string]: number }) {
+  @Get('/total-amount')
+  async getTotalByPeriodTypesAndBusinessPlan(@Query() query: { [key: string]: number }) {
     try {
-      const { thirdpartyRootId } = body;
+      const { thirdpartyRootId } = query;
       if (!thirdpartyRootId) throw new HttpException('Please set the thirdpartyrootId value', HttpStatus.BAD_REQUEST);
 
-      return await this.workloadsService.getTotalByPeriodTypesAndBusinessPlan(body, thirdpartyRootId);
+      return await this.workloadsService.getTotalByPeriodTypesAndBusinessPlan(query, thirdpartyRootId);
     } catch (error) {
       Logger.error(error);
 
-      return [];
+      return error;
     }
   }
 

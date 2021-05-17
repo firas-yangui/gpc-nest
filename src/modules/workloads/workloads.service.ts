@@ -3,7 +3,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { WorkloadRepository } from './workload.repository';
 import { ThirdpartiesService } from './../thirdparties/thirdparties.service';
 import { PeriodsService } from './../periods/periods.service';
-import { Request } from 'express';
 import { UpdateResult } from 'typeorm/query-builder/result/UpdateResult';
 import * as _ from 'lodash';
 import * as moment from 'moment';
@@ -19,7 +18,7 @@ import { getConnection, Like } from 'typeorm';
 import { Workload } from './workload.entity';
 import { SubservicesService } from './../subservices/subservices.service';
 import { ServicesService } from './../services/services.service';
-import { SubsidiaryAllocation } from '../subsidiaryallocation/subsidiaryallocation.entity';
+import { AmountStat } from '../amountstats/amountstat.entity';
 import { isNull, isUndefined } from 'lodash';
 
 @Injectable()
@@ -143,43 +142,38 @@ export class WorkloadsService {
     thirdparties: number[],
   ): Promise<SumAmountByPeriodTypeAndBusinessPlan[]> {
     try {
-      const { serviceId, subserviceId, organizationId, partnerId, subnatureId } = body;
-
       const periods = await this.periodsService.getPeriodsByYearAndMonth(null, month);
       const periodIds = _.map(periods, 'id');
+
+      Logger.log('Period Ids length : ' + periodIds.length, 'Native query');
+
+      const { serviceId, subserviceId, organizationId, partnerId, subnatureId } = body;
+
       /**
        * @todo add relation with appSettings for connected user
        */
 
       const query = getConnection()
         .createQueryBuilder()
-        .from(Workload, 'workload')
-        .select('period.type', 'type')
+        .from(AmountStat, 'amountStats')
+        .select('period_type')
         .addSelect('SUM(amount.mandays)', 'mandays')
         .addSelect('SUM(amount.keuros)', 'keuros')
         .addSelect('SUM(amount.keurossales)', 'keurossales')
         .addSelect('SUM(amount.klocalcurrency)', 'klocalcurrency')
 
-        .leftJoin('workload.subservice', 'subservice')
-        .leftJoin('subservice.subtypology', 'subtypology')
-        .innerJoin('subservice.service', 'service')
-        .leftJoin('workload.subsidiaryAllocations', 'partners')
-        .leftJoin('workload.subnature', 'subnature')
-        .leftJoin('workload.amounts', 'amount')
-        .leftJoin('amount.period', 'period')
-
-        .where('workload.thirdpartyid IN (:...thirdparties)', { thirdparties: thirdparties })
+        .where('thirdpartyid IN (:...thirdparties)', { thirdparties: thirdparties })
         .andWhere('subtypology.businesstype = :businessPlan', { businessPlan: businessPlan })
         .andWhere('amount.periodid IN (:...periodIds)', { periodIds: periodIds });
 
       if (!isNull(serviceId) && !isUndefined(serviceId)) query.andWhere('service.id = :serviceId', { serviceId: serviceId });
-      if (!isNull(subserviceId) && !isUndefined(subserviceId)) query.andWhere('subservice.id = :subserviceId', { subserviceId: subserviceId });
+      if (!isNull(subserviceId) && !isUndefined(subserviceId)) query.andWhere('subserviceid = :subserviceId', { subserviceId: subserviceId });
       if (!isNull(organizationId) && !isUndefined(organizationId))
-        query.andWhere('workload.thirdpartyid = :organizationId', { organizationId: organizationId });
-      if (!isNull(subnatureId) && !isUndefined(subnatureId)) query.andWhere('workload.subnatureid = :subnatureId', { subnatureId: subnatureId });
-      if (!isNull(partnerId) && !isUndefined(partnerId)) query.andWhere('partners.thirdpartyid = :partnerId', { partnerId: partnerId });
+        query.andWhere('thirdpartyid = :organizationId', { organizationId: organizationId });
+      if (!isNull(subnatureId) && !isUndefined(subnatureId)) query.andWhere('subnatureid = :subnatureId', { subnatureId: subnatureId });
+      // if (!isNull(partnerId) && !isUndefined(partnerId)) query.andWhere('partners.thirdpartyid = :partnerId', { partnerId: partnerId });
 
-      return await query.groupBy('period.type').execute();
+      return await query.groupBy('period_type').execute();
     } catch (error) {
       Logger.error(error);
 

@@ -1,4 +1,4 @@
-import { Controller, Get, Header, Query, UseFilters } from '@nestjs/common';
+import { Controller, Get, Header, Logger, Query, UseFilters } from '@nestjs/common';
 import { ApiResponse, ApiImplicitHeader } from '@nestjs/swagger';
 
 import { Thirdparty } from './thirdparty.entity';
@@ -6,6 +6,7 @@ import { ThirdpartiesService } from './thirdparties.service';
 import { AllExceptionsFilter } from './../exceptions-handler/all-exceptions.filter';
 import { ErrorModel } from './../exceptions-handler/error-model';
 import { Thirdparty as ThirdpartyInterface } from './../interfaces/common-interfaces';
+import { isNull, isUndefined } from 'lodash';
 
 @Controller('thirdparties')
 export class ThirdpartiesController {
@@ -69,5 +70,22 @@ export class ThirdpartiesController {
   })
   async getThirdpartiesHydrated(): Promise<any[]> {
     return await this.thirdpartiesService.getHydratedThirdpartiesSkipTake();
+  }
+
+  @Get('/with-amounts')
+  async getAllThirdpartiesByPerimeterWithAmountsSums(@Query() query) {
+    try {
+      Logger.log('Getting thirdparties with amounts ' + query, 'ThirdpartiesController');
+
+      const { gpcAppSettingsId, thirdpartyRootId, periodId } = query;
+
+      if (isNull(gpcAppSettingsId) || isUndefined(gpcAppSettingsId)) throw new Error('Please set the perimeter id!');
+      else if (isNull(thirdpartyRootId) || isUndefined(thirdpartyRootId)) throw new Error("Please set the root thirdparty's id!");
+      else if (isNaN(+gpcAppSettingsId)) throw new Error('Perimeter id should be of type number!');
+
+      return await this.thirdpartiesService.findThirdpartiesWithAmountTotals({ gpcAppSettingsId, thirdpartyRootId, periodId });
+    } catch (error) {
+      Logger.error(error, 'ThirdpartiesController');
+    }
   }
 }
