@@ -369,8 +369,8 @@ export class PyramidService {
 
     if (!projectCode.trim()) throw 'Project code not defined';
 
-    const service = await this.getServiceByPortfolioName(portfolioName);
-    if (!service) throw `Service not found ${portfolioName}`;
+    const service = await this.getServiceByPortfolioName(portfolioName.trim());
+    if (!service) throw `Service not found ${portfolioName.trim()}`;
 
     const planCodes = this.getPlanCode(plan);
     if (!planCodes) throw `Plan Code not found for plan ${plan}`;
@@ -402,8 +402,8 @@ export class PyramidService {
       });
       if (!subservice) throw 'subservice could not be created';
     }
-    const subnature = await this.subnatureService.findByName(subnatureName);
-    if (!subnature) throw `subNature not found with name: "${subnatureName}"`;
+    const subnature = await this.subnatureService.findByName(subnatureName.trim());
+    if (!subnature) throw `subNature not found with name: "${subnatureName.trim()}"`;
 
     const workloadsBySubserviceThirdpartySubnature = await this.findWorkloadBySubserviceThirdpartySubnature(subnature, subservice, thirdparty);
 
