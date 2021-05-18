@@ -33,18 +33,16 @@ export class SchedulerService {
     timeZone: 'Europe/Paris',
   })
   async populateTable() {
-    Logger.log('Populating amount stats table job started');
+    const queryRunner = getConnection().createQueryRunner();
+    await queryRunner.startTransaction();
+    try {
+      Logger.log('Populating amount stats table job started');
 
-    await getConnection()
-      .createQueryRunner()
-      .query('TRUNCATE TABLE amount_stats')
-      .then(() => Logger.log('Amounts stats table truncated'));
+      await queryRunner.manager.query('TRUNCATE TABLE amountstats');
 
-    await getConnection()
-      .createQueryRunner()
-      .query(
+      await queryRunner.manager.query(
         `
-        INSERT INTO "amount_stats"
+        INSERT INTO "amountstats"
           (workloadid, thirdpartyid, serviceid, subserviceid, subnatureid, periodid,
           period_type, month, year, business_type, mandays, keuros, keurossales, klocalcurrency)
         SELECT
@@ -87,8 +85,14 @@ export class SchedulerService {
           period.year = cast(date_part('year', now()) as text)
           AND period.month <= cast(date_part('month', now()) as text)
           `,
-      )
-      .then(() => Logger.log('Amount stats table job succeded'))
-      .catch(err => Logger.error(err));
+      );
+
+      await queryRunner.commitTransaction();
+    } catch (error) {
+      Logger.error(error);
+      await queryRunner.rollbackTransaction();
+    } finally {
+      queryRunner.release();
+    }
   }
 }
