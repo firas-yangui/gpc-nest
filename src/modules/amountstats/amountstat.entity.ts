@@ -2,7 +2,7 @@ import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'ty
 import { SubsidiaryAllocation } from '../subsidiaryallocation/subsidiaryallocation.entity';
 import { Thirdparty } from '../thirdparties/thirdparty.entity';
 
-@Entity('amount_stats')
+@Entity('amountstats')
 export class AmountStat {
   @PrimaryGeneratedColumn({
     type: 'integer',

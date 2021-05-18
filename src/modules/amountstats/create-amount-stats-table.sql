@@ -1,4 +1,4 @@
-CREATE TABLE amount_stats
+CREATE TABLE amountstats
 ( id SERIAL PRIMARY KEY,
   workloadid INT NOT NULL,
   thirdpartyid INT NOT NULL,
