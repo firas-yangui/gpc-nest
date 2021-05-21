@@ -487,7 +487,18 @@ export class PyramidNewOrgasMappingV21620658072431 implements MigrationInterface
         ('GSC/ARS/ARS/ML','5555571917'),
         ('GSC/CRL/BLR/ML','5555514928'),
         ('GSC/BSC/DIR/DIR','5555534108'),
-        ('GSC/DAT/DAT/ML','5555514913');
+        ('GSC/DAT/DAT/ML','5555514913'),
+        ('GSC/CFT/CRL/GSC','5555571863'),
+        ('EBS/CFT/MGT/EBS','3000371976'),
+        ('EBS/CFT/NIT/ISS','3000371976'),
+        ('DAT/REF/ROD','5555514914'),
+        ('GSC/DDS/DCS/DIR','3000371980'),
+        ('GSC/DDS/ITF/DIR','3000371989'),
+        ('DAT/REF/NOM','5555514914'),
+        ('DAT/REF/DIR','5555514914'),
+        ('INIM003090_','5555571791'),
+        ('3000314923_','5555514923'),
+        ('DAT/REF/ELR','5555514914');
         `);
     await queryRunner.query(`
         INSERT INTO datalake_gpc_partner (datalakename, gpcname)
