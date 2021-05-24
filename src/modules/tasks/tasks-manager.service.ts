@@ -121,7 +121,7 @@ export class TasksService {
   @Cron(CronExpression.EVERY_10_MINUTES)
   async importFromS3() {
     if (!includes(secureEnvs, process.env.NODE_ENV)) return false;
-    const params: any = {
+    let params: any = {
       Bucket: `${process.env.AWS_BUCKET_PREFIX}gpc-set`,
     };
 
@@ -134,6 +134,7 @@ export class TasksService {
     map(objects.Contents, async file => {
       const flow = file.Key;
       const flowType = this.getFlowType(flow);
+      params = { ...params, Key: flow };
       const rejectedFile = `/tmp/${flow}.REJECTED.csv`;
 
       if (!flowType) return;

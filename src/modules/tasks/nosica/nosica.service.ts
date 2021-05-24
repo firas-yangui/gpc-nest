@@ -30,8 +30,6 @@ const cdsType = {
 };
 
 const serviceName = '%Activités Transverses%';
-const rejectedFileName = `nosica-rejected-lines-${Date.now()}.csv`;
-const writeStream = createWriteStream(`/tmp/${rejectedFileName}`);
 @Injectable()
 export class NosicaService {
   constructor(
@@ -112,9 +110,5 @@ export class NosicaService {
     Logger.log(`amount saved with success for workload "${workload.code}" and period "${actualPeriod.code}"`);
     Logger.log(`The created amount ... ${JSON.stringify(createdAmount)}`);
     return this.rawAmountsService.save(createdAmount, workload, actualPeriod);
-  };
-
-  endNosicaCallback = () => {
-    writeStream.end();
   };
 }
