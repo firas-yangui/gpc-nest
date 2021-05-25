@@ -498,7 +498,10 @@ export class PyramidNewOrgasMappingV21620658072431 implements MigrationInterface
         ('DAT/REF/DIR','5555514914'),
         ('INIM003090_','5555571791'),
         ('3000314923_','5555514923'),
-        ('DAT/REF/ELR','5555514914');
+        ('DAT/REF/ELR','5555514914'),
+        ('GSC/DDS/ITF/SOF','3000371991'),
+        ('3000331451','3000371558'),
+        ('CFT/FIN/FPM/SAL','3000371558');
         `);
     await queryRunner.query(`
         INSERT INTO datalake_gpc_partner (datalakename, gpcname)
