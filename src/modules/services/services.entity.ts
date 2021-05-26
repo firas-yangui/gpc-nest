@@ -1,4 +1,5 @@
 import { Column, Entity, Index, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { AmountStat } from '../amountstats/amountstat.entity';
 import { ServiceAppSettings } from '../serviceappsettings/serviceappsettings.entity';
 import { SubService } from './../subservices/subservice.entity';
 
@@ -47,4 +48,10 @@ export class Service {
     (serviceappsettings: ServiceAppSettings) => serviceappsettings.model,
   )
   serviceAppSettings: ServiceAppSettings[];
+
+  @OneToMany(
+    () => AmountStat,
+    (amountStats: AmountStat) => amountStats.service,
+  )
+  amountStats: AmountStat[];
 }

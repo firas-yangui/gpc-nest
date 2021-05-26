@@ -3,7 +3,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { SubServiceRepository } from './subservices.repository';
 import { SubService } from './subservice.entity';
 import { Workload } from '../workloads/workload.entity';
-import { getConnection } from 'typeorm';
+import { getManager } from 'typeorm';
+import { AmountStat } from '../amountstats/amountstat.entity';
 
 @Injectable()
 export class SubservicesService {
@@ -14,7 +15,7 @@ export class SubservicesService {
 
   async find(options: { gpcAppSettingsId?: string }): Promise<SubService[]> {
     try {
-      const query = getConnection()
+      const query = getManager()
         .createQueryBuilder()
         .select('subservice')
         .from(SubService, 'subservice')
@@ -29,8 +30,30 @@ export class SubservicesService {
       Logger.error(error);
       return [];
     }
+  }
 
-    // return await this.subServiceRepository.find(options);
+  async getSubservicesWithAmounts(options: { serviceId: number; periodId: number }): Promise<any> {
+    try {
+      const query = getManager()
+        .createQueryBuilder()
+        .from(AmountStat, 'amount')
+        .select('amount.subserviceid', 'subserviceId')
+        .addSelect('amount.periodId', 'periodId')
+        .addSelect('SUM(amount.mandays)', 'mandays')
+        .addSelect('SUM(amount.keuros)', 'keuros')
+        .addSelect('SUM(amount.keurossales)', 'keurossales')
+        .addSelect('SUM(amount.klocalcurrency)', 'klocalcurrency')
+
+        .where('amount.periodid = :periodId', { periodId: +options.periodId })
+        .andWhere('amount.serviceid = :serviceId', { serviceId: +options.serviceId });
+
+      query.groupBy('amount.subserviceid').addGroupBy('amount.periodId');
+
+      return await query.getRawMany();
+    } catch (error) {
+      Logger.error(error);
+      return [];
+    }
   }
 
   async findOne(options: object = {}): Promise<SubService> {
@@ -38,7 +61,19 @@ export class SubservicesService {
   }
 
   async getWorkloads(options: { id: number }): Promise<Workload[]> {
-    return await (await this.subServiceRepository.findOne({ where: { id: options.id }, relations: ['workloads'] })).workloads;
+    const query = getManager()
+      .createQueryBuilder()
+      .from(SubService, 'subservice')
+      .select('workload.*')
+      .addSelect('subnature.id', 'subnatureId')
+      .addSelect('subnature.name', 'subnatureName')
+      .addSelect('thirdparty.name', 'thirdpartyName')
+      .innerJoin('subservice.workloads', 'workload')
+      .innerJoin('workload.subnature', 'subnature')
+      .innerJoin('workload.thirdparty', 'thirdparty')
+      .where('subservice.id = :subserviceId', { subserviceId: options.id });
+
+    return await query.execute();
   }
 
   async save(subService): Promise<SubService> {

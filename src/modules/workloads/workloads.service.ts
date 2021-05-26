@@ -14,7 +14,7 @@ import {
   Thirdparty as ThirdpartyInterface,
   SumAmountByPeriodTypeAndBusinessPlan,
 } from './../interfaces/common-interfaces';
-import { getConnection, Like } from 'typeorm';
+import { getConnection, getManager, Like } from 'typeorm';
 import { Workload } from './workload.entity';
 import { SubservicesService } from './../subservices/subservices.service';
 import { ServicesService } from './../services/services.service';
@@ -177,6 +177,30 @@ export class WorkloadsService {
     } catch (error) {
       Logger.error(error);
 
+      return [];
+    }
+  }
+
+  async getWorkloadsWithAmounts(options: { subserviceId: number; periodId: number }): Promise<any> {
+    try {
+      const query = getManager()
+        .createQueryBuilder()
+        .from(AmountStat, 'amount')
+        .select('amount.workloadId', 'workloadId')
+        .addSelect('amount.periodId', 'periodId')
+        .addSelect('SUM(amount.mandays)', 'mandays')
+        .addSelect('SUM(amount.keuros)', 'keuros')
+        .addSelect('SUM(amount.keurossales)', 'keurossales')
+        .addSelect('SUM(amount.klocalcurrency)', 'klocalcurrency')
+
+        .where('amount.periodid = :periodId', { periodId: +options.periodId })
+        .andWhere('amount.subserviceid = :serviceId', { serviceId: +options.subserviceId });
+
+      query.groupBy('amount.workloadId').addGroupBy('amount.periodId');
+
+      return await query.getRawMany();
+    } catch (error) {
+      Logger.error(error);
       return [];
     }
   }

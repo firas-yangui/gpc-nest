@@ -27,6 +27,11 @@ export class WorkloadsController {
     }
   }
 
+  @Get('with-amount')
+  async getSubservicesWithAmounts(@Query() query): Promise<any> {
+    return await this.workloadsService.getWorkloadsWithAmounts(query);
+  }
+
   @Get(':id')
   async findById(@Param('id') id: number): Promise<Workload> {
     return this.workloadsService.findOne({ id }).catch(err => {

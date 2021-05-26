@@ -12,6 +12,11 @@ export class SubservicesController {
     return await this.subservicesService.find(query);
   }
 
+  @Get('with-amount')
+  async getSubservicesWithAmounts(@Query() query): Promise<any> {
+    return await this.subservicesService.getSubservicesWithAmounts(query);
+  }
+
   @Get(':id')
   findById(@Param('id') id: number): Promise<SubService> {
     return this.subservicesService.findOne({ id }).catch(err => {
