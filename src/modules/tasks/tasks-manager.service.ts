@@ -13,7 +13,6 @@ import { ImportRejectionsHandlerService } from '../import-rejections-handler/imp
 import { RawAmountsService } from '../rawamounts/rawamounts.service';
 import { MailerService } from '@nestjs-modules/mailer';
 import * as stringToStream from 'string-to-stream';
-import { RawAmountsService } from '../rawamounts/rawamounts.service';
 import path = require('path');
 
 const secureEnvs = ['homologation', 'production'];
@@ -31,7 +30,6 @@ export class TasksService {
     private productService: ProductService,
     private rawAmountsService: RawAmountsService,
     private rejectionsHandlerService: ImportRejectionsHandlerService,
-    private rawAmountsService: RawAmountsService,
     private readonly mailerService: MailerService,
   ) {}
 
