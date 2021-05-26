@@ -17,4 +17,15 @@ export class AmountstatsController {
       return [];
     }
   }
+
+  @Get()
+  async getSingleAmount(@Query() query) {
+    try {
+      Logger.log(query);
+      return await this.amountstatsService.getAmount(query);
+    } catch (error) {
+      Logger.error(error);
+      return { keuros: 0, klocalcurrency: 0, keurossales: 0, mandays: 0 };
+    }
+  }
 }

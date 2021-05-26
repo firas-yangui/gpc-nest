@@ -2,7 +2,7 @@ import moment = require('moment');
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { isNull, isUndefined } from 'lodash';
-import { getConnection } from 'typeorm';
+import { getManager } from 'typeorm';
 import { ThirdpartiesService } from '../thirdparties/thirdparties.service';
 import { Thirdparty } from '../thirdparties/thirdparty.entity';
 import { AmountStat } from './amountstat.entity';
@@ -81,6 +81,7 @@ export class AmountStatsService {
     businessPlan: string,
     thirdparties: number[],
   ): Promise<SumAmountByPeriodTypeAndBusinessPlan[]> {
+    const manager = getManager();
     try {
       // Extracting filters
       const { serviceId, subserviceId, organizationId, partnerId, subnatureId } = filters;
@@ -89,41 +90,62 @@ export class AmountStatsService {
       const periods = await this.periodsService.getPeriodsByYearAndMonth(null, month);
       const periodIds = _.map(periods, 'id');
 
-      /** For debug: @todo delete these loggers */
-
-      Logger.log('Period Ids length : ' + periodIds.length, 'Native query');
-      Logger.log('Thirdparties ids count: ' + thirdparties.length, 'Native query');
-
-      const query = getConnection()
+      const query = manager
         .createQueryBuilder()
-        .from(AmountStat, 'amount_stat')
-        .select('amount_stat.periodType', 'type')
-        .addSelect('SUM(amount_stat.mandays)', 'mandays')
-        .addSelect('SUM(amount_stat.keuros)', 'keuros')
-        .addSelect('SUM(amount_stat.keurossales)', 'keurossales')
-        .addSelect('SUM(amount_stat.klocalcurrency)', 'klocalcurrency');
+        .from(AmountStat, 'amountstats')
+        .select('amountstats.period_type', 'type')
+        .addSelect('SUM(NULLIF(amountstats.mandays, 0))', 'mandays')
+        .addSelect('SUM(NULLIF(amountstats.keuros, 0))', 'keuros')
+        .addSelect('SUM(NULLIF(amountstats.keurossales, 0))', 'keurossales')
+        .addSelect('SUM(NULLIF(amountstats.klocalcurrency, 0))', 'klocalcurrency')
 
-      query
-        .where('amount_stat.thirdpartyid IN (:...thirdparties)', { thirdparties })
-        .andWhere('amount_stat.businessType = :businessPlan', { businessPlan })
-        .andWhere('amount_stat.periodId IN (:...periodIds)', { periodIds });
+        .where('amountstats.thirdpartyId IN (:...thirdparties)', { thirdparties: thirdparties })
+        .andWhere('amountstats.businessType = :businessPlan', { businessPlan: businessPlan })
+        .andWhere('amountstats.periodId IN (:...periodIds)', { periodIds: periodIds });
 
-      if (!isNull(serviceId) && !isUndefined(serviceId)) query.andWhere('amount_stat.serviceid = :serviceId', { serviceId: serviceId });
-      if (!isNull(subserviceId) && !isUndefined(subserviceId))
-        query.andWhere('amount_stat.subserviceId = :subserviceId', { subserviceId: subserviceId });
+      if (!isNull(serviceId) && !isUndefined(serviceId)) query.andWhere('serviceId = :serviceId', { serviceId: serviceId });
+      if (!isNull(subserviceId) && !isUndefined(subserviceId)) query.andWhere('subserviceId = :subserviceId', { subserviceId: subserviceId });
       if (!isNull(organizationId) && !isUndefined(organizationId))
-        query.andWhere('amount_stat.thirdpartyId = :organizationId', { organizationId: organizationId });
-      if (!isNull(subnatureId) && !isUndefined(subnatureId)) query.andWhere('amount_stat.subnatureId = :subnatureId', { subnatureId: subnatureId });
-      if (!isNull(partnerId) && !isUndefined(partnerId)) {
-        query.andWhere('partner.id = :partnerId', { partnerId: partnerId });
-        query.andWhere('amount_stat.workloadId = partner.workloadid');
-      }
+        query.andWhere('thirdpartyId = :organizationId', { organizationId: organizationId });
+      if (!isNull(subnatureId) && !isUndefined(subnatureId)) query.andWhere('subnatureId = :subnatureId', { subnatureId: subnatureId });
+      // if (!isNull(partnerId) && !isUndefined(partnerId)) query.andWhere('partners.thirdpartyid = :partnerId', { partnerId: partnerId });
 
-      return await query.groupBy('amount_stat.periodType').execute();
+      return await query.groupBy('amountstats.period_type').execute();
     } catch (error) {
       Logger.error(error);
 
       return [];
+    }
+  }
+
+  async getAmount(query: { periodId: number; thirdpartyId?: number; serviceId?: number; subserviceId?: number; workloadId?: number }) {
+    const manager = getManager();
+
+    try {
+      const dbQuery = manager
+        .createQueryBuilder()
+        .from(AmountStat, 'amountstats')
+        .select('SUM(NULLIF(amountstats.mandays, 0))', 'mandays')
+        .addSelect('SUM(NULLIF(amountstats.keuros, 0))', 'keuros')
+        .addSelect('SUM(NULLIF(amountstats.keurossales, 0))', 'keurossales')
+        .addSelect('SUM(NULLIF(amountstats.klocalcurrency, 0))', 'klocalcurrency')
+        .where('amountstats.periodId = :periodId', { periodId: query.periodId });
+
+      if (!isNull(query.thirdpartyId) && !isUndefined(query.thirdpartyId))
+        dbQuery.andWhere('amountstats.thirdpartyId = :thirdpartyId', { thirdpartyId: query.thirdpartyId });
+
+      if (!isNull(query.serviceId) && !isUndefined(query.serviceId))
+        dbQuery.andWhere('amountstats.serviceId = :serviceId', { serviceId: query.serviceId });
+
+      if (!isNull(query.subserviceId) && !isUndefined(query.subserviceId))
+        dbQuery.andWhere('amountstats.subserviceId = :subserviceId', { subserviceId: query.subserviceId });
+
+      if (!isNull(query.workloadId) && !isUndefined(query.workloadId))
+        dbQuery.andWhere('amountstats.workloadId = :workloadId', { workloadId: query.workloadId });
+
+      return dbQuery.execute();
+    } catch (error) {
+      Logger.error(error);
     }
   }
 }
