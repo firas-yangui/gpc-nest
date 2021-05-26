@@ -1,11 +1,10 @@
-import { Injectable, NotFoundException, Logger } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { PeriodRepository } from './period.repository';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PeriodType } from './../interfaces/common-interfaces';
 import { Period } from './period.entity';
 import { createQueryBuilder, Like } from 'typeorm';
 import * as moment from 'moment';
-import { Object } from 'lodash';
 
 interface IfindOneInAppSettings {
   type: string;
@@ -25,10 +24,6 @@ export class PeriodsService {
     return await this.periodRepository.findAndCount();
   }
 
-  async find(options: object): Promise<Period[]> {
-    return await this.periodRepository.find(options);
-  }
-
   async findOne(options: object): Promise<Period> {
     return await this.periodRepository.findOne(options);
   }
@@ -44,6 +39,22 @@ export class PeriodsService {
     if (options.endWith) query.andWhere('p.code like :code', { code: `%${options.endWith}%` });
 
     return await query.getOne();
+  }
+
+  async find(appSettings: number, options: any): Promise<any> {
+    try {
+      return await createQueryBuilder()
+        .from(Period, 'period')
+        .select('period.*')
+        .addSelect('pas.iscampaignperiod', 'iscampaignperiod')
+        .leftJoin('period.periodappsettings', 'pas')
+        .leftJoin('pas.gpcappsettings', 'gas')
+        .where('gas.id = :gpcappsettingsid', { gpcappsettingsid: appSettings })
+        .getRawMany();
+    } catch (error) {
+      Logger.error(error, 'PeriodsService');
+      return [];
+    }
   }
 
   async getPeriodsByType(type: PeriodType): Promise<Period[]> {

@@ -8,11 +8,12 @@ import { Cron, CronExpression } from '@nestjs/schedule';
 import { readFileSync, readdirSync, existsSync, unlinkSync } from 'fs';
 import AWS = require('aws-sdk');
 import * as csvParser from 'csv-parser';
-import { map, includes, isString } from 'lodash';
+import { map, includes, isEmpty, isString } from 'lodash';
 import { ImportRejectionsHandlerService } from '../import-rejections-handler/import-rejections-handler.service';
 import { RawAmountsService } from '../rawamounts/rawamounts.service';
 import { MailerService } from '@nestjs-modules/mailer';
 import * as stringToStream from 'string-to-stream';
+import { RawAmountsService } from '../rawamounts/rawamounts.service';
 import path = require('path');
 
 const secureEnvs = ['homologation', 'production'];
@@ -28,6 +29,7 @@ export class TasksService {
     private constantService: ConstantService,
     private myGtsService: MyGtsService,
     private productService: ProductService,
+    private rawAmountsService: RawAmountsService,
     private rejectionsHandlerService: ImportRejectionsHandlerService,
     private rawAmountsService: RawAmountsService,
     private readonly mailerService: MailerService,
@@ -137,9 +139,13 @@ export class TasksService {
       const flow = file.Key;
       const flowType = this.getFlowType(flow);
       params = { ...params, Key: flow };
+      const rejectedFile = `/tmp/${flow}.REJECTED.csv`;
 
       if (!flowType) return;
       if (!this.constantService.GLOBAL_CONST.QUEUE[flowType]) return;
+      if (existsSync(rejectedFile)) return;
+      const rawInProgress = this.rawAmountsService.findOne({ datasource: flow });
+      if (rawInProgress && !isEmpty(rawInProgress)) return;
 
       const s3object = await this.S3.getObject(params).promise();
       const parsed = await this.parseFile(s3object.Body, flow);
@@ -157,13 +163,16 @@ export class TasksService {
     if (inProgressImports.length) return false;
     const receptiondir = `${__dirname}/../../set/reception`;
     const files = readdirSync(receptiondir, { withFileTypes: true }).filter(file => file.isFile());
-
     if (!files || !files.length) {
       this.logger.log(`No file found in reception dir`);
       return;
     }
 
     map(files, async file => {
+      const rejectedFile = `/tmp/${file.name}.REJECTED.csv`;
+      if (existsSync(rejectedFile)) return;
+      const rawInProgress = this.rawAmountsService.findOne({ datasource: file.name });
+      if (rawInProgress && !isEmpty(rawInProgress)) return;
       const lines = readFileSync(path.join(receptiondir, file.name));
       await this.parseFile(lines, file.name);
     });

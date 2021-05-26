@@ -14,7 +14,7 @@ import {
   SumAmountByPeriodTypeAndBusinessPlan,
 } from '../interfaces/common-interfaces';
 import * as _ from 'lodash';
-import { SubsidiaryAllocation } from '../subsidiaryallocation/subsidiaryallocation.entity';
+import { PeriodsService } from '../periods/periods.service';
 
 @Injectable()
 export class AmountStatsService {
@@ -22,6 +22,7 @@ export class AmountStatsService {
     @InjectRepository(AmountStatRepository)
     private amountStatRepository: AmountStatRepository,
     private readonly thirdpartiesService: ThirdpartiesService,
+    private readonly periodsService: PeriodsService,
   ) {}
 
   async getFilteredTotalAmounts(query: { [key: string]: number }, thirdpartyRootId: number) {
@@ -81,13 +82,21 @@ export class AmountStatsService {
     thirdparties: number[],
   ): Promise<SumAmountByPeriodTypeAndBusinessPlan[]> {
     try {
+      // Extracting filters
       const { serviceId, subserviceId, organizationId, partnerId, subnatureId } = filters;
-      const year = moment().format('YYYY');
+
+      // Getting periods Ids for selected month and year (arguments)
+      const periods = await this.periodsService.getPeriodsByYearAndMonth(null, month);
+      const periodIds = _.map(periods, 'id');
+
+      /** For debug: @todo delete these loggers */
+
+      Logger.log('Period Ids length : ' + periodIds.length, 'Native query');
+      Logger.log('Thirdparties ids count: ' + thirdparties.length, 'Native query');
 
       const query = getConnection()
         .createQueryBuilder()
-        .addFrom(AmountStat, 'amount_stat')
-        .addFrom(SubsidiaryAllocation, 'partner')
+        .from(AmountStat, 'amount_stat')
         .select('amount_stat.periodType', 'type')
         .addSelect('SUM(amount_stat.mandays)', 'mandays')
         .addSelect('SUM(amount_stat.keuros)', 'keuros')
@@ -95,20 +104,19 @@ export class AmountStatsService {
         .addSelect('SUM(amount_stat.klocalcurrency)', 'klocalcurrency');
 
       query
-        .where('amount_stat.thirdpartyid IN (:...thirdparties)', { thirdparties: thirdparties })
-        .andWhere('amount_stat.businessType = :businessPlan', { businessPlan: businessPlan })
-        .andWhere('amount_stat.month = :month', { month: month })
-        .andWhere('amount_stat.year = :year', { year: year });
+        .where('amount_stat.thirdpartyid IN (:...thirdparties)', { thirdparties })
+        .andWhere('amount_stat.businessType = :businessPlan', { businessPlan })
+        .andWhere('amount_stat.periodId IN (:...periodIds)', { periodIds });
 
       if (!isNull(serviceId) && !isUndefined(serviceId)) query.andWhere('amount_stat.serviceid = :serviceId', { serviceId: serviceId });
       if (!isNull(subserviceId) && !isUndefined(subserviceId))
-        query.andWhere('amount_stat.subserviceid = :subserviceId', { subserviceId: subserviceId });
+        query.andWhere('amount_stat.subserviceId = :subserviceId', { subserviceId: subserviceId });
       if (!isNull(organizationId) && !isUndefined(organizationId))
         query.andWhere('amount_stat.thirdpartyId = :organizationId', { organizationId: organizationId });
       if (!isNull(subnatureId) && !isUndefined(subnatureId)) query.andWhere('amount_stat.subnatureId = :subnatureId', { subnatureId: subnatureId });
       if (!isNull(partnerId) && !isUndefined(partnerId)) {
         query.andWhere('partner.id = :partnerId', { partnerId: partnerId });
-        query.andWhere('amount_stat.workloadid = partner.workloadid');
+        query.andWhere('amount_stat.workloadId = partner.workloadid');
       }
 
       return await query.groupBy('amount_stat.periodType').execute();

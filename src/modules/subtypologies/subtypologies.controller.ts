@@ -5,7 +5,7 @@ import { SubtypologiesService } from './subtypologies.service';
 @Controller('subtypologies')
 export class SubtypologiesController {
   constructor(private subtypologiesService: SubtypologiesService) {}
-  @Get()
+  @Get('/enriched-with-plan')
   findAllWithPlans(@Query() query): Promise<Subtypology[]> {
     return this.subtypologiesService.findEnrichedWithPlans(query);
   }
