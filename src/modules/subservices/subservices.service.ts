@@ -67,7 +67,7 @@ export class SubservicesService {
       .select('workload.*')
       .addSelect('subnature.id', 'subnatureId')
       .addSelect('subnature.name', 'subnatureName')
-      .addSelect('thirdparty.name', 'thirdpartyName')
+      .addSelect('thirdparty.trigram', 'thirdpartyTrigram')
       .innerJoin('subservice.workloads', 'workload')
       .innerJoin('workload.subnature', 'subnature')
       .innerJoin('workload.thirdparty', 'thirdparty')
