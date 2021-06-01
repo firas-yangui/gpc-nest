@@ -29,7 +29,7 @@ import { Subtypology } from 'src/modules/subtypologies/subtypology.entity';
 const intExtStaffType: string[] = ['internal', 'external'];
 const onshoreStaffType = 'onshore';
 const actualsValideStaffType = [...intExtStaffType, onshoreStaffType, 'nearshore', 'offshore'];
-const eacValideStaffType = ['outsourcing - consulting', 'outsourcing - fixed-price contract'];
+const eacValideStaffType = ['outsourcing - consulting', 'outsourcing - fixed-price contract', 'restatement'];
 const staffTypeWithEnvCost = ['outsourcing - consulting'];
 const eacFields = {
   ProjectCode: 'Project_Code',
