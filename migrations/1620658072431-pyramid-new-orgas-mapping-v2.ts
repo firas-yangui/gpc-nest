@@ -501,7 +501,27 @@ export class PyramidNewOrgasMappingV21620658072431 implements MigrationInterface
         ('DAT/REF/ELR','5555514914'),
         ('GSC/DDS/ITF/SOF','3000371991'),
         ('3000331451','3000371558'),
-        ('CFT/FIN/FPM/SAL','3000371558');
+        ('CFT/FIN/FPM/SAL','3000371558'),
+        ('GSC/CFT/ARC/DIR','3000371696'),
+        ('GSC/CFT/COO/DIR','3000371959'),
+        ('GSC/CFT/CRL/BLR','3000314928'),
+        ('GSC/CFT/CRL/CHN','3000314928'),
+        ('GSC/CFT/DIR/DIR','3000371976'),
+        ('GSC/CFT/FIN/BLR','3000314922'),
+        ('GSC/CFT/FIN/CHN','3000314922'),
+        ('GSC/CFT/H2R/BLR','3000314934'),
+        ('GSC/CFT/H2R/CHN','3000314934'),
+        ('GSC/CFT/H2R/GSC','3000314934'),
+        ('GSC/CFT/ITO/BLR','3000314938'),
+        ('GSC/CFT/ITO/CHN','3000314938'),
+        ('GSC/CFT/SCR/BLR','3000371917'),
+        ('GSC/CFT/SEC/DIR','3000371866'),
+        ('GSC/CFT/SEC/BLR','3000371866'),
+        ('GSC/CFT/TSR/TAF','3000371913'),
+        ('GSC/CFT/TSR/BLR','3000371964'),
+        ('GSC/DDS/DAT/DIR','3000314913'),
+        ('GSC/DDS/DIR/DIR','3000371994'),
+        ('USIU20J833','3000371967');
         `);
     await queryRunner.query(`
         INSERT INTO datalake_gpc_partner (datalakename, gpcname)
@@ -534,7 +554,6 @@ export class PyramidNewOrgasMappingV21620658072431 implements MigrationInterface
         ('RESG/GTS','RESG/GTS'),
         ('RESG/IMM','RESG/IMM'),
         ('RESG/SGC','RESG/SGC'),
-        ('RESG/TPS','RESG/TPS'),
         ('RISQ','RISQ'),
         ('RUSS','RUSS_BSC'),
         ('SEGL','SEGL'),
@@ -573,11 +592,19 @@ export class PyramidNewOrgasMappingV21620658072431 implements MigrationInterface
         ('RESG/DDS/FAT/TSV/DDS','GSPR'),
         ('RESG/CFT/FAT/TSV/CTA','GSPR'),
         ('RESG/CFT/FAE/ASS/MOO','ASSU_BSC'),
-        ('RESG/CFT/FAT/TSV/CFT','GSPR'),
         ('RESG/DDS/FAT/TSV/CTA','GSPR'),
         ('RESG/DDS/FAT/TSV/TRF','DDS_TRA'),
         ('RESG/BSC/DCO/ODS/LIF','CFT_OdS'),
-        ('RESG/CFT/ITO/VDF','CFT_AC');
+        ('RESG/CFT/ITO/VDF','CFT_AC'),
+        ('RESG/DDS/FAT/TSV/DDS','GSPR'),
+        ('RESG/TPS/GDO','RESG/TPS'),
+        ('RESG/TPS/API','RESG/TPS'),
+        ('RESG/TPS/ISR','RESG/TPS'),
+        ('RESG/TPS/API/CTA','RESG/TPS'),
+        ('RESG/TPS/GDO/CTA','RESG/TPS'),
+        ('RESG/TPS/ISR/RSW','RESG/TPS'),
+        ('RESG/TPS/ISR/CTA','RESG/TPS'),
+        ('RESG/CFT/FAT/TSV/CFT','GSPR');
         `);
   }
 
