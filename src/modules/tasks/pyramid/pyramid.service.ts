@@ -156,10 +156,6 @@ export class PyramidService {
     return includes(eacValideStaffType, subnature.toLocaleLowerCase());
   };
 
-  isEnvCost = (subnature: string) => {
-    return includes(staffTypeWithEnvCost, subnature.toLocaleLowerCase());
-  };
-
   getSubtypologyByCode = async (codes: string[]) => {
     return this.subtypologiesService.findByCodes(codes);
   };
@@ -290,9 +286,7 @@ export class PyramidService {
         };
 
       if (this.isKLC(line[pyramidFields.eac.staffType])) {
-        let eacke = line[pyramidFields.eac.eacKe];
-        if (this.isEnvCost(line[pyramidFields.eac.staffType]) && !startsWith(line[pyramidFields.eac.parentDescr], 'HRCO')) eacke = eacke * 1.0626; // environment Coef
-
+        const eacke = line[pyramidFields.eac.eacKe];
         return {
           amount: eacke,
           unit: this.constantService.GLOBAL_CONST.AMOUNT_UNITS.KLC,
@@ -307,9 +301,7 @@ export class PyramidService {
           unit: this.constantService.GLOBAL_CONST.AMOUNT_UNITS.MD,
         };
       if (this.isKLC(line[pyramidFields.actuals.staffType])) {
-        let amount = line[pyramidFields.actuals.amount];
-        if (this.isEnvCost(line[pyramidFields.actuals.staffType]) && !startsWith(line[pyramidFields.actuals.parentDescr], 'HRCO'))
-          amount = amount * 1.0626;
+        const amount = line[pyramidFields.actuals.amount];
         return {
           amount: amount,
           unit: this.constantService.GLOBAL_CONST.AMOUNT_UNITS.KLC,

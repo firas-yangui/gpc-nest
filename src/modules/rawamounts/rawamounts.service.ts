@@ -27,6 +27,10 @@ export class RawAmountsService {
     return this.rawAmountRepository.find(options);
   }
 
+  async findAll(): Promise<RawAmount[] | undefined> {
+    return this.rawAmountRepository.find();
+  }
+
   async findWaitingFlows(): Promise<any | undefined> {
     return this.rawAmountRepository
       .createQueryBuilder()

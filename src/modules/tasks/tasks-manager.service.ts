@@ -10,9 +10,9 @@ import AWS = require('aws-sdk');
 import * as csvParser from 'csv-parser';
 import { map, includes, isEmpty, isString } from 'lodash';
 import { ImportRejectionsHandlerService } from '../import-rejections-handler/import-rejections-handler.service';
+import { RawAmountsService } from '../rawamounts/rawamounts.service';
 import { MailerService } from '@nestjs-modules/mailer';
 import * as stringToStream from 'string-to-stream';
-import { RawAmountsService } from '../rawamounts/rawamounts.service';
 import path = require('path');
 
 const secureEnvs = ['homologation', 'production'];
@@ -118,9 +118,11 @@ export class TasksService {
   /**
    * This cron will be executed in a secure environment [HML, PRD]
    */
-  @Cron(CronExpression.EVERY_10_MINUTES)
+  @Cron(CronExpression.EVERY_30_MINUTES)
   async importFromS3() {
     if (!includes(secureEnvs, process.env.NODE_ENV)) return false;
+    const inProgressImports = await this.rawAmountsService.findAll();
+    if (inProgressImports.length) return false;
     let params: any = {
       Bucket: `${process.env.AWS_BUCKET_PREFIX}gpc-set`,
     };
@@ -153,9 +155,10 @@ export class TasksService {
    * This cron will be executed only in local environment
    */
   @Cron(CronExpression.EVERY_10_SECONDS)
-  importFromLocal() {
+  async importFromLocal() {
     if (includes(secureEnvs, process.env.NODE_ENV)) return false;
-
+    const inProgressImports = await this.rawAmountsService.findAll();
+    if (inProgressImports.length) return false;
     const receptiondir = `${__dirname}/../../set/reception`;
     const files = readdirSync(receptiondir, { withFileTypes: true }).filter(file => file.isFile());
     if (!files || !files.length) {
