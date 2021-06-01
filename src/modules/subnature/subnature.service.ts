@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { getConnection } from 'typeorm';
+import { getManager } from 'typeorm';
 import { SubNature } from './subnature.entity';
 import { SubNatureRepository } from './subnature.repository';
 @Injectable()
@@ -12,7 +12,7 @@ export class SubnatureService {
 
   async find(options: { gpcAppSettingsId?: string }): Promise<SubNature[]> {
     try {
-      const query = getConnection()
+      const query = getManager()
         .createQueryBuilder()
         .select('subnature')
         .from(SubNature, 'subnature')

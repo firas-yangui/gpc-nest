@@ -11,6 +11,11 @@ export class ServicesController {
     return await this.servicesService.find(query);
   }
 
+  @Get('/with-amount')
+  async getServicesWithAmounts(@Query() query): Promise<any> {
+    return await this.servicesService.getServicesWithAmounts(query);
+  }
+
   @Get(':id')
   findById(@Param('id') id: number): Promise<Service> {
     return this.servicesService.findOne({ id }).catch(err => {

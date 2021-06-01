@@ -4,6 +4,8 @@ import { Workload } from './../workloads/workload.entity';
 import { Subtypology } from './../subtypologies/subtypology.entity';
 import { Service } from './../services/services.entity';
 import { Portfolio } from './../portfolio/portfolio.entity';
+import { AmountStat } from '../amountstats/amountstat.entity';
+import { IrtApplication } from '../irtapplication/irtapplication.entity';
 
 @Entity('subservice')
 export class SubService {
@@ -279,4 +281,18 @@ export class SubService {
   )
   @JoinColumn({ name: 'portfolioid' })
   portfolio: Service | null;
+
+  @OneToMany(
+    () => AmountStat,
+    (amountStats: AmountStat) => amountStats.subservice,
+  )
+  amountStats: AmountStat[];
+
+  // IRT application
+  @ManyToOne(
+    () => IrtApplication,
+    irtApplication => irtApplication.subservices,
+  )
+  @JoinColumn({ name: 'irtapplicationid' })
+  irtApplication: IrtApplication;
 }

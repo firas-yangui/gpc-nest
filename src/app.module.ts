@@ -25,6 +25,7 @@ import { HomeMessageModule } from './modules/homeMessage/homeMessage.module';
 import { ImportRejectionsHandlerModule } from './modules/import-rejections-handler/import-rejections-handler.module';
 import { MailerModule, MailerOptions } from '@nestjs-modules/mailer';
 import { AmountStatsModule } from './modules/amountstats/amountstats.module';
+import { IrtApplicationModule } from './modules/irtapplication/irtapplication.module';
 
 import DbLoader from './loader';
 
@@ -84,6 +85,7 @@ const mailerOptions: MailerOptions = {
     TasksModule,
     SchedulerModule,
     AmountStatsModule,
+    IrtApplicationModule,
   ],
 })
 export class AppModule {}
