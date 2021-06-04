@@ -14,7 +14,7 @@ import {
   Thirdparty as ThirdpartyInterface,
   SumAmountByPeriodTypeAndBusinessPlan,
 } from './../interfaces/common-interfaces';
-import { getConnection, getManager, Like } from 'typeorm';
+import { getManager, Like } from 'typeorm';
 import { Workload } from './workload.entity';
 import { SubservicesService } from './../subservices/subservices.service';
 import { ServicesService } from './../services/services.service';
@@ -153,7 +153,7 @@ export class WorkloadsService {
        * @todo add relation with appSettings for connected user
        */
 
-      const query = getConnection()
+      const query = getManager()
         .createQueryBuilder()
         .from(AmountStat, 'amountStats')
         .select('period_type')
