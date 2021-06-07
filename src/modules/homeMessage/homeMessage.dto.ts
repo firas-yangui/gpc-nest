@@ -1,13 +1,13 @@
 import { IsString, Length, IsNumber, IsEmail, IsNotEmpty } from 'class-validator';
-import { ApiModelProperty } from '@nestjs/swagger';
+import { ApiProperty } from '@nestjs/swagger';
 
 export class HomeMessageDto {
-  @ApiModelProperty()
+  @ApiProperty()
   @IsString()
   @Length(0, 500)
   public message: string;
 
-  @ApiModelProperty()
+  @ApiProperty()
   @IsNumber()
   @IsNotEmpty()
   public perimeterId: number;
