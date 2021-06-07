@@ -2,8 +2,10 @@ import { Controller, Get, HttpException, HttpStatus, Param, Query } from '@nestj
 import { Workload } from '../workloads/workload.entity';
 import { SubService } from './subservice.entity';
 import { SubservicesService } from './subservices.service';
+import { ApiTags } from '@nestjs/swagger';
 
 @Controller('subservices')
+@ApiTags('subservices')
 export class SubservicesController {
   constructor(private subservicesService: SubservicesService) {}
 

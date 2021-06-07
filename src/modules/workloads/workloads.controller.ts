@@ -1,10 +1,10 @@
 import { Controller, Get, HttpException, HttpStatus, Logger, Param, Query } from '@nestjs/common';
 import { WorkloadsService } from './workloads.service';
-import { ApiUseTags } from '@nestjs/swagger';
+import { ApiTags } from '@nestjs/swagger';
 import { Workload } from './workload.entity';
 
 @Controller('workloads')
-@ApiUseTags('Workloads')
+@ApiTags('Workloads')
 export class WorkloadsController {
   constructor(private readonly workloadsService: WorkloadsService) {}
 
