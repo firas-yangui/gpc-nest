@@ -1,17 +1,17 @@
 import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
-import { ApiModelProperty } from '@nestjs/swagger';
+import { ApiProperty } from '@nestjs/swagger';
 import { User } from '../user/user.entity';
 
 @Entity('audit')
 export class Audit {
-  @ApiModelProperty()
+  @ApiProperty()
   @PrimaryGeneratedColumn({
     type: 'integer',
     name: 'id',
   })
   id: number;
 
-  @ApiModelProperty()
+  @ApiProperty()
   @Column('character varying', {
     nullable: true,
     name: 'modelname',
@@ -19,7 +19,7 @@ export class Audit {
   })
   modelName: string;
 
-  @ApiModelProperty()
+  @ApiProperty()
   @Column('character varying', {
     nullable: true,
     name: 'methodname',
@@ -27,14 +27,14 @@ export class Audit {
   })
   methodName: 'create' | 'update' | 'delete';
 
-  @ApiModelProperty()
+  @ApiProperty()
   @CreateDateColumn({
     nullable: true,
     name: 'date',
   })
   date: Date;
 
-  @ApiModelProperty()
+  @ApiProperty()
   @Column('text', {
     nullable: true,
     default: null,
@@ -42,7 +42,7 @@ export class Audit {
   })
   oldObject: object;
 
-  @ApiModelProperty()
+  @ApiProperty()
   @Column('text', {
     nullable: true,
     default: null,

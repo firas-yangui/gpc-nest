@@ -2,8 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { AuditRepository } from './audit.repository';
 import { Audit } from './audit.entity';
-import { getConnection } from 'typeorm';
-import { APIGateway } from 'aws-sdk';
+import { getManager } from 'typeorm';
 
 @Injectable()
 export class AuditService {
@@ -14,7 +13,7 @@ export class AuditService {
 
   async find(query): Promise<Audit[]> {
     try {
-      const dbQuery = getConnection()
+      const dbQuery = getManager()
         .createQueryBuilder()
         .from(Audit, 'audit')
         .select('audit')

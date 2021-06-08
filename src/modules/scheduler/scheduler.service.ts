@@ -11,7 +11,6 @@ export class SchedulerService {
   private readonly logger = new Logger(SchedulerService.name);
   constructor(private constantService: ConstantService, private rawAmountsService: RawAmountsService, private amountsService: AmountsService) {}
 
-  @Cron(CronExpression.EVERY_30_MINUTES)
   async handleFlowsDedupLinesCron() {
     Logger.log('START cron to handle duplicates flows lines');
     const waitingFlows = await this.rawAmountsService.findWaitingFlows();

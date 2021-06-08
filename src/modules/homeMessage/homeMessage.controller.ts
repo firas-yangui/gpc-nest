@@ -1,5 +1,5 @@
 import { Controller, Post, Get, Header, Logger, Param, HttpCode, Body } from '@nestjs/common';
-import { ApiResponse, ApiImplicitParam, ApiImplicitBody, ApiOperation, ApiForbiddenResponse } from '@nestjs/swagger';
+import { ApiResponse, ApiParam, ApiOperation, ApiForbiddenResponse, ApiQuery, ApiTags } from '@nestjs/swagger';
 
 import { ErrorModel } from '../exceptions-handler/error-model';
 import { HomeMessageEntity } from './homeMessage.entity';
@@ -7,6 +7,7 @@ import { HomeMessageDto } from './homeMessage.dto';
 import { HomeMessageService } from './homeMessage.service';
 
 @Controller('homeMessage')
+@ApiTags('homeMessage')
 export class HomeMessageController {
   constructor(private readonly homeMessageService: HomeMessageService) {}
 
@@ -15,7 +16,7 @@ export class HomeMessageController {
   @Header('Content-Type', 'application/json')
   @Header('Accept-Charset', 'utf-8')
   // @SgConnectScopes('api.soapoc.read')
-  @ApiImplicitParam({ name: 'perimeterId', description: 'User perimeter' })
+  @ApiParam({ name: 'perimeterId', description: 'User perimeter' })
   @ApiResponse({
     status: 200,
     description: 'Returns HomeMessage',
@@ -44,12 +45,10 @@ export class HomeMessageController {
   @Header('Content-Type', 'application/json')
   @Header('Accept-Charset', 'utf-8')
   // @SgConnectScopes('api.soapoc.write')
-  @ApiImplicitBody({ name: 'message', description: 'Admin message', type: 'string' })
-  @ApiImplicitBody({ name: 'perimeterId', description: 'User perimeter ID', type: 'number' })
+  @ApiQuery({ name: 'message', description: 'Admin message', type: 'string' })
+  @ApiQuery({ name: 'perimeterId', description: 'User perimeter ID', type: 'number' })
   @ApiOperation({
     description: 'Create Home Message',
-    title: 'Create',
-    operationId: 'POST /homeMessage',
   })
   @HttpCode(201)
   @ApiResponse({

@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { getConnection } from 'typeorm';
+import { getManager } from 'typeorm';
 import { In } from 'typeorm';
 import { SubtypologyRepository } from './subtypologies.repository';
 import { Subtypology } from './subtypology.entity';
@@ -22,7 +22,7 @@ export class SubtypologiesService {
 
   async findEnrichedWithPlans(options: { gpcAppSettingsId?: string }): Promise<any> {
     try {
-      const query = getConnection()
+      const query = getManager()
         .createQueryBuilder()
         .select('subtypology.*')
         .addSelect('subtypologyappsettings.plan', 'plan')

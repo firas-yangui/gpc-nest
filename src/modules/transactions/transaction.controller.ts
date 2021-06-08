@@ -1,11 +1,11 @@
 import { Controller, Get, Header, Logger, Param } from '@nestjs/common';
-import { ApiUseTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { TransactionService } from './transaction.service';
 import { TransactionEntity } from './transaction.entity';
 import { ErrorModel } from '../exceptions-handler/error-model';
 
 @Controller('transactions')
-@ApiUseTags('Transactions')
+@ApiTags('Transactions')
 export class TransactionController {
   constructor(private transactionService: TransactionService) {}
 
@@ -16,8 +16,6 @@ export class TransactionController {
   @Header('Accept-Charset', 'utf-8')
   @ApiOperation({
     description: 'Get all transactions',
-    title: 'Get all',
-    operationId: 'GET /transaction',
   })
   @ApiResponse({
     status: 200,
@@ -47,8 +45,6 @@ export class TransactionController {
   @Header('Accept-Charset', 'utf-8')
   @ApiOperation({
     description: 'Get all transactions',
-    title: 'Get all',
-    operationId: 'GET /transaction',
   })
   @ApiResponse({
     status: 200,
@@ -78,14 +74,13 @@ export class TransactionController {
   }
 
   // Get all transactions
-  @Get('/latest/:id')
+  @Get('/latest/:count')
   @Header('Cache-Control', 'none')
   @Header('Content-Type', 'application/json')
   @Header('Accept-Charset', 'utf-8')
   @ApiOperation({
     description: 'Get latest transactions which by default returns the 6 latest transactions but you could pass how many you would want to load',
-    title: 'Get latest transactions',
-    operationId: 'GET /transactions/latest',
+    summary: 'Get latest transactions',
   })
   @ApiResponse({
     status: 200,
@@ -105,7 +100,7 @@ export class TransactionController {
     type: ErrorModel,
     isArray: false,
   })
-  private async getLatestTransactions(@Param('count') count) {
+  private async getLatestTransactions(@Param('count') count: number) {
     try {
       Logger.log(`Get latest ${count} transactions`, 'TransactionController');
       return await this.transactionService.getLatestTransactions(count);

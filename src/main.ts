@@ -30,22 +30,37 @@ async function bootstrap() {
 
   app.use(noCache);
 
-  const serverPort = config.getPort();
-  app.listen(serverPort);
-
   // Swagger configuration
+  // const swaggerConfig = config.getSwaggerOptions();
+  // const options = new DocumentBuilder()
+  //     .setTitle(swaggerConfig.title)
+  //     .setDescription(swaggerConfig.description)
+  //     .setVersion(swaggerConfig.version)
+  //     .setContactEmail(swaggerConfig.contactEmail)
+  //     .setTermsOfService(swaggerConfig.termsOfService)
+  //     .setSchemes(...swaggerConfig.schemes)
+  //     .setHost(swaggerConfig.host)
+  //     .addOAuth2(swaggerConfig.oAuth2.flow, swaggerConfig.oAuth2.authorizationUrl, swaggerConfig.oAuth2.tokenUrl, swaggerConfig.oAuth2.scopes) // Implicit workflow
+  //     .build();
+
+  // const document = SwaggerModule.createDocument(app, options);
+  // SgConnectSwaggerModule.setup(app, document, swaggerConfig.moduleOptions);
+
   const swaggerConfig = config.getSwaggerOptions();
   const options = new DocumentBuilder()
     .setTitle(swaggerConfig.title)
     .setDescription(swaggerConfig.description)
     .setVersion(swaggerConfig.version)
-    .setContactEmail(swaggerConfig.contactEmail)
     .setTermsOfService(swaggerConfig.termsOfService)
-    .setSchemes(...swaggerConfig.schemes)
-    .setHost(swaggerConfig.host)
-    .addOAuth2(swaggerConfig.oAuth2.flow, swaggerConfig.oAuth2.authorizationUrl, swaggerConfig.oAuth2.tokenUrl, swaggerConfig.oAuth2.scopes) // Implicit workflow
     .build();
-  const document = SwaggerModule.createDocument(app, options);
-  SgConnectSwaggerModule.setup(app, document, swaggerConfig.moduleOptions);
+
+  const document = SwaggerModule.createDocument(app, options, {
+    operationIdFactory: (controllerKey, methodKey) => methodKey,
+  });
+  SwaggerModule.setup('docs', app, document);
+
+  const serverPort = config.getPort();
+  app.listen(serverPort);
 }
+
 bootstrap();

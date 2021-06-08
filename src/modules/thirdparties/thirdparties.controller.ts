@@ -1,5 +1,5 @@
 import { Controller, Get, Header, Logger, Query, UseFilters } from '@nestjs/common';
-import { ApiResponse, ApiImplicitHeader } from '@nestjs/swagger';
+import { ApiResponse, ApiHeader, ApiTags } from '@nestjs/swagger';
 
 import { Thirdparty } from './thirdparty.entity';
 import { ThirdpartiesService } from './thirdparties.service';
@@ -9,6 +9,7 @@ import { Thirdparty as ThirdpartyInterface } from './../interfaces/common-interf
 import { isNull, isUndefined } from 'lodash';
 
 @Controller('thirdparties')
+@ApiTags('thirdparties')
 export class ThirdpartiesController {
   constructor(private readonly thirdpartiesService: ThirdpartiesService) {}
 
@@ -17,11 +18,11 @@ export class ThirdpartiesController {
   @Header('Content-Type', 'application/json')
   @Header('Accept-Charset', 'utf-8')
   // @SgConnectScopes('api.soapoc.read')
-  @ApiImplicitHeader({ name: 'X-BSC-SOA-CONSUMER-APP-CODE', description: 'Consumer App Code' })
-  @ApiImplicitHeader({ name: 'X-BSC-SOA-CONSUMER-APP-NAME', description: 'Consumer App Name' })
-  @ApiImplicitHeader({ name: 'X-BSC-SOA-CONSUMER-CODE', description: 'Consumer Code' })
-  @ApiImplicitHeader({ name: 'X-BSC-SOA-CONSUMER-NAME', description: 'Consumer Name' })
-  @ApiImplicitHeader({ name: 'X-BSC-SOA-CONSUMER-ORG', description: 'Consumer Organization' })
+  @ApiHeader({ name: 'X-BSC-SOA-CONSUMER-APP-CODE', description: 'Consumer App Code' })
+  @ApiHeader({ name: 'X-BSC-SOA-CONSUMER-APP-NAME', description: 'Consumer App Name' })
+  @ApiHeader({ name: 'X-BSC-SOA-CONSUMER-CODE', description: 'Consumer Code' })
+  @ApiHeader({ name: 'X-BSC-SOA-CONSUMER-NAME', description: 'Consumer Name' })
+  @ApiHeader({ name: 'X-BSC-SOA-CONSUMER-ORG', description: 'Consumer Organization' })
   @ApiResponse({
     status: 200,
     description: 'Return all thirdparties',
@@ -45,7 +46,7 @@ export class ThirdpartiesController {
     return await this.thirdpartiesService.find(query);
   }
 
-  @Get('/enriched-entity-view')
+  @Get('/hed-entity-view')
   @Header('Cache-Control', 'none')
   @Header('Content-Type', 'application/json')
   @Header('Accept-Charset', 'utf-8')

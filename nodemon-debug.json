@@ -1,6 +1,14 @@
 {
   "watch": ["src"],
   "ext": "ts",
+  "env": {
+    "NODE_ENV": "development",
+    "DOTENV_CONFIG_PATH": ".env.development",
+    "DATABASE_HOST": "localhost",
+    "DATABASE_DB": "gpc",
+    "DATABASE_USER": "gpc",
+    "DATABASE_SCHEMA": "public"
+  },
   "ignore": ["src/**/*.spec.ts"],
-  "exec": "node --inspect-brk -r ts-node/register -r tsconfig-paths/register src/main.ts"
+  "exec": "node --inspect-brk=127.0.0.1:9228 -r ts-node/register -r tsconfig-paths/register src/main.ts"
 }

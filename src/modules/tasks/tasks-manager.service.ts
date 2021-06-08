@@ -10,6 +10,7 @@ import AWS = require('aws-sdk');
 import * as csvParser from 'csv-parser';
 import { map, includes, isEmpty, isString } from 'lodash';
 import { ImportRejectionsHandlerService } from '../import-rejections-handler/import-rejections-handler.service';
+import { AmountsService } from '../amounts/amounts.service';
 import { RawAmountsService } from '../rawamounts/rawamounts.service';
 import { MailerService } from '@nestjs-modules/mailer';
 import * as stringToStream from 'string-to-stream';
@@ -28,6 +29,7 @@ export class TasksService {
     private constantService: ConstantService,
     private myGtsService: MyGtsService,
     private productService: ProductService,
+    private amountsService: AmountsService,
     private rawAmountsService: RawAmountsService,
     private rejectionsHandlerService: ImportRejectionsHandlerService,
     private readonly mailerService: MailerService,
@@ -80,6 +82,7 @@ export class TasksService {
           }
         })
         .on('end', async () => {
+          this.amountsService.synchronizeFromRawAmounts(filename);
           await this.sendRejectedFile(filename, flowType);
           resolve('end');
         })
