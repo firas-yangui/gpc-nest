@@ -59,11 +59,11 @@ export class MyGtsService {
       .pullAt([2])
       .forEach(header => {
         line[header] = line[header].trim();
-        if (!line[header]) throw new Error(`${header} is required`);
+        if (!line[header]) throw `${header} is required`;
       });
 
     if (line[headers[2]] == 'NRG0016') subnatureName = line[headers[4]] == CLIENT_PROJET ? GTS_CLIENT_PROJECT : GTS_HOSTING;
-    else throw new Error(`${headers[2]} not equal to NRG0016: ${line[headers[2]]}`);
+    else throw `${headers[2]} not equal to NRG0016: ${line[headers[2]]}`;
 
     if (line[headers[0]].startsWith('RESG/BSC'))
       thirdPartyName = chain(line[headers[0]])
@@ -72,7 +72,7 @@ export class MyGtsService {
         .concat('COO')
         .join('/')
         .value();
-    else throw new Error(`${headers[0]} doesn't start with RESG/BSC :${line[headers[0]]}`);
+    else throw `${headers[0]} doesn't start with RESG/BSC :${line[headers[0]]}`;
 
     return {
       year: chain(line[headers[5]])
@@ -97,7 +97,7 @@ export class MyGtsService {
     });
 
     if (!actualPeriodAppSettings) {
-      throw new Error(`No Period found with year ${year} and month ${month} and type ${PeriodType.actual}`);
+      throw `No Period found with year ${year} and month ${month} and type ${PeriodType.actual}`;
     }
 
     return actualPeriodAppSettings.period;
@@ -106,7 +106,7 @@ export class MyGtsService {
   getSubnature = async (subnatureName: string): Promise<SubNature> => {
     const subnature = await this.subnatureService.findByName(subnatureName);
     if (!subnature) {
-      throw new Error(`subNature not found with name: "${subnatureName}"`);
+      throw `subNature not found with name: "${subnatureName}"`;
     }
 
     return subnature;
@@ -115,14 +115,14 @@ export class MyGtsService {
   getThirdParty = async (thirdPartyName: string): Promise<Thirdparty> => {
     const thirdParty = await this.thirdpartiesService.findOne({ name: Like(thirdPartyName) });
     if (!thirdParty) {
-      throw new Error(`No Thirdparty found for name like : ${thirdPartyName}`);
+      throw `No Thirdparty found for name like : ${thirdPartyName}`;
     }
     return thirdParty;
   };
 
   getService = async (serviceName: string): Promise<Service> => {
-    const service = await this.servicesService.findByName(serviceName);
-    if (!service) throw new Error(`No service found for ServiceName: ${serviceName}`);
+    const service = await this.servicesService.findOne({ where: { name: Like(serviceName) } });
+    if (!service) throw `No service found for ServiceName: ${serviceName}`;
     return service;
   };
 
@@ -132,7 +132,7 @@ export class MyGtsService {
     const subService = await this.subServiceService.findOne({
       where: { service: Equal(service.id), thirdpPartyId: Equal(thirdparty.id) },
     });
-    if (!subService) throw new Error(`no Subservice found for thirdPartyId:${thirdparty.id} and serviceId:${service.id}`);
+    if (!subService) throw `no Subservice found for thirdPartyId:${thirdparty.id} and serviceId:${service.id}`;
     return subService;
   };
 
@@ -151,7 +151,7 @@ export class MyGtsService {
     });
 
     if (!workload) {
-      throw new Error(`No Workload found for subnature ID ${subnature.id}, subservice ID ${subservice.id}, thirdParty ID ${thirdparty.id}`);
+      throw `No Workload found for subnature ID ${subnature.id}, subservice ID ${subservice.id}, thirdParty ID ${thirdparty.id}`;
     }
 
     return workload;
@@ -159,13 +159,13 @@ export class MyGtsService {
 
   getRate = async (thirdPartyId: number, periodId: number): Promise<any> => {
     const rate = await this.currencyRateService.getCurrencyRateByThirdpartyAndPeriod(thirdPartyId, periodId);
-    if (!rate) throw new Error(`no Rate found for thirdPartyId: ${thirdPartyId} and periodId: ${periodId}`);
+    if (!rate) throw `no Rate found for thirdPartyId: ${thirdPartyId} and periodId: ${periodId}`;
     return rate;
   };
 
   getPrices = async (workload: Workload, type: string): Promise<Price> => {
     const prices = await this.pricesService.getPricesFromWorkload(workload, type);
-    if (!prices) throw new Error(`no Prices found for workload: ${workload.id} and type: ${type}`);
+    if (!prices) throw `no Prices found for workload: ${workload.id} and type: ${type}`;
     return prices;
   };
 
