@@ -200,7 +200,6 @@ export class PyramidService {
         findOptions = { datalakename: parendDescrFiled };
         datalakeThirdParty = await this.datalakeGpcOrganizationService.findOne(findOptions);
       }
-
       if (datalakeThirdParty) {
         return this.thirdpartiesService.findOne({ radical: datalakeThirdParty.dpg });
       }
@@ -397,8 +396,9 @@ export class PyramidService {
     const subnature = await this.subnatureService.findByName(subnatureName.trim());
     if (!subnature) throw `subNature not found with name: "${subnatureName.trim()}"`;
 
+    const partner = await this.getGpcDatalakePartner(line, fields);
+    if (!partner) throw 'Partner not found in GPC database';
     const workloadsBySubserviceThirdpartySubnature = await this.findWorkloadBySubserviceThirdpartySubnature(subnature, subservice, thirdparty);
-
     if (!workloadsBySubserviceThirdpartySubnature.length) {
       Logger.warn(`workload not found  with subnature "${subnature.name}" and subservice "${subservice.code}" and thirdparty "${thirdparty.name}"`);
       const codeWorkload = await this.workloadsService.generateCode('AUTO');
@@ -410,15 +410,6 @@ export class PyramidService {
         subnature: subnature,
         subservice: subservice,
       });
-      const partner = await this.getGpcDatalakePartner(line, fields);
-      if (partner) {
-        this.subsidiaryallocationService.save({
-          thirdparty: partner,
-          weight: 1,
-          workload,
-          period: periodAppSettings.period,
-        });
-      }
       workloadsBySubserviceThirdpartySubnature.push(workload);
     }
     workload = workloadsBySubserviceThirdpartySubnature[0];
@@ -428,31 +419,27 @@ export class PyramidService {
         const subsidiaryAllocation = await this.getAllocations(workloadsBySubserviceThirdpartySubnature, line, fields, previousPeriodAppSettings);
         if (subsidiaryAllocation && subsidiaryAllocation.workload) {
           workload = subsidiaryAllocation.workload;
-          await this.subsidiaryallocationService.save({
-            thirdparty: subsidiaryAllocation.thirdparty,
-            weight: 1,
-            workload,
-            period: periodAppSettings.period,
-          });
         } else {
           Logger.warn(`partner not found for this line, an auto creation of workload an allocation will start`);
-          const partner = await this.getGpcDatalakePartner(line, fields);
-          if (!partner) throw 'Partner not found in GPC database';
           const code: string = await this.workloadsService.generateCode('AUTO');
           const tmpWorkload = { ...workload, thirdparty, subnature, subservice, code };
           delete tmpWorkload.id;
           workload = await this.workloadsService.save(tmpWorkload);
-          await this.subsidiaryallocationService.save({
-            thirdparty: partner,
-            weight: 1,
-            workload,
-            period: periodAppSettings.period,
-          });
         }
       }
     }
 
     const actualPeriod = periodAppSettings.period;
+    // update allocations
+    const allocation = await this.subsidiaryallocationService.findOne({period: actualPeriod, workload: workload});
+    if(!allocation) {
+      await this.subsidiaryallocationService.save({
+        thirdparty: partner,
+        weight: 1,
+        workload,
+        period: periodAppSettings.period,
+      });
+    }
 
     const prices = await this.pricesService.findOne({ where: { thirdparty: thirdparty.id, subnature: subnature.id, periodtype: actualPeriod.type } });
     const rate = await this.currencyRateService.getCurrencyRateByCountryAndPeriod(thirdparty.countryid, actualPeriod.id);

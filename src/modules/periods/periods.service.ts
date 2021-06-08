@@ -34,7 +34,6 @@ export class PeriodsService {
       .where('pas.gpcappsettingsid = :gpcappsettingsid', { gpcappsettingsid: appSettings })
       .andWhere('p.type = :type', { type: options.type })
       .andWhere('p.year = :year', { year: options.year })
-      .andWhere('p.month = :month', { month: options.month })
       .andWhere('p.month = :month', { month: options.month });
     if (options.endWith) query.andWhere('p.code like :code', { code: `%${options.endWith}%` });
 
