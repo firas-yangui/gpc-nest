@@ -29,7 +29,6 @@ export class EmployeesController {
   @ApiHeader({ name: 'X-BSC-SOA-CONSUMER-ORG', description: 'Consumer Organization' })
   @ApiOperation({
     description: 'Get one employee',
-    
   })
   @ApiResponse({ status: 401, description: 'Unauthorized', type: ErrorModel, isArray: false })
   @ApiResponse({ status: 403, description: 'Forbidden', type: ErrorModel, isArray: false })
@@ -52,7 +51,6 @@ export class EmployeesController {
   @ApiHeader({ name: 'X-BSC-SOA-CONSUMER-ORG', description: 'Consumer Organization' })
   @ApiOperation({
     description: 'Get all employees',
-    
   })
   @ApiResponse({
     status: 200,
@@ -91,7 +89,6 @@ export class EmployeesController {
   @ApiHeader({ name: 'X-BSC-SOA-CONSUMER-ORG', description: 'Consumer Organization' })
   @ApiOperation({
     description: 'Create employee',
-    
   })
   @HttpCode(201)
   @ApiResponse({
@@ -123,7 +120,6 @@ export class EmployeesController {
   @ApiHeader({ name: 'X-BSC-SOA-CONSUMER-ORG', description: 'Consumer Organization' })
   @ApiOperation({
     description: 'Update employee',
-    
   })
   @ApiResponse({ status: 200, description: 'Update employee' })
   @ApiResponse({ status: 400, description: 'Bad request', type: ErrorModel, isArray: false })
@@ -147,7 +143,6 @@ export class EmployeesController {
   @ApiHeader({ name: 'X-BSC-SOA-CONSUMER-ORG', description: 'Consumer Organization' })
   @ApiOperation({
     description: 'Delete employee',
-    
   })
   @ApiResponse({ status: 204, description: 'Delete employee', type: ErrorModel, isArray: false })
   @ApiResponse({ status: 401, description: 'Unauthorized', type: ErrorModel, isArray: false })

@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { In, Equal } from 'typeorm';
 import * as moment from 'moment';
-import { findKey, includes, join, map, startsWith } from 'lodash';
+import { findKey, includes, join, map } from 'lodash';
 
 import { RawAmountsService } from '../../rawamounts/rawamounts.service';
 import { AmountConverter } from '../../amounts/amounts.converter';
@@ -30,7 +30,6 @@ const intExtStaffType: string[] = ['internal', 'external'];
 const onshoreStaffType = 'onshore';
 const actualsValideStaffType = [...intExtStaffType, onshoreStaffType, 'nearshore', 'offshore'];
 const eacValideStaffType = ['outsourcing - consulting', 'outsourcing - fixed-price contract', 'restatement'];
-const staffTypeWithEnvCost = ['outsourcing - consulting'];
 const eacFields = {
   ProjectCode: 'Project_Code',
   ProjectName: 'Project_Name',
@@ -431,13 +430,13 @@ export class PyramidService {
 
     const actualPeriod = periodAppSettings.period;
     // update allocations
-    const allocation = await this.subsidiaryallocationService.findOne({period: actualPeriod, workload: workload});
-    if(!allocation) {
+    const allocation = await this.subsidiaryallocationService.findOne({ period: actualPeriod, workload: workload });
+    if (!allocation) {
       await this.subsidiaryallocationService.save({
         thirdparty: partner,
         weight: 1,
         workload,
-        period: periodAppSettings.period,
+        period: actualPeriod,
       });
     }
 

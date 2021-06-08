@@ -16,7 +16,6 @@ export class TransactionController {
   @Header('Accept-Charset', 'utf-8')
   @ApiOperation({
     description: 'Get all transactions',
-    
   })
   @ApiResponse({
     status: 200,
@@ -46,7 +45,6 @@ export class TransactionController {
   @Header('Accept-Charset', 'utf-8')
   @ApiOperation({
     description: 'Get all transactions',
-    
   })
   @ApiResponse({
     status: 200,
@@ -83,7 +81,6 @@ export class TransactionController {
   @ApiOperation({
     description: 'Get latest transactions which by default returns the 6 latest transactions but you could pass how many you would want to load',
     summary: 'Get latest transactions',
-    
   })
   @ApiResponse({
     status: 200,
@@ -103,7 +100,7 @@ export class TransactionController {
     type: ErrorModel,
     isArray: false,
   })
-  private async getLatestTransactions(@Param('count') count:number) {
+  private async getLatestTransactions(@Param('count') count: number) {
     try {
       Logger.log(`Get latest ${count} transactions`, 'TransactionController');
       return await this.transactionService.getLatestTransactions(count);

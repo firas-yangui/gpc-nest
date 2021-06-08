@@ -14,7 +14,6 @@ export class UserController {
   @Get('/whoami/:email')
   @ApiOperation({
     description: 'Get all employees',
-    
   })
   @ApiResponse({
     status: 200,
