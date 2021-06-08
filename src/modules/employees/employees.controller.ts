@@ -1,5 +1,5 @@
 import { Controller, Get, Logger, UseGuards, Post, HttpCode, Body, Put, Header, Param, Delete, ParseIntPipe, UsePipes } from '@nestjs/common';
-import { ApiUseTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiForbiddenResponse, ApiImplicitHeader } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiForbiddenResponse, ApiHeader } from '@nestjs/swagger';
 import { SgConnectGuard, SgConnectScopes } from '@societe-generale/nestjs-sg-connect';
 import { EmployeesService } from './employees.service';
 import { EmployeeEntity } from './employee.entity';
@@ -12,7 +12,7 @@ import { ErrorModel } from '../exceptions-handler/error-model';
 // @UseGuards(SgConnectGuard)
 // @SgConnectScopes('api.soapoc.v1')
 @ApiBearerAuth()
-@ApiUseTags('Employees')
+@ApiTags('Employees')
 export class EmployeesController {
   constructor(private readonly employeesService: EmployeesService) {}
 
@@ -22,15 +22,14 @@ export class EmployeesController {
   @Header('Content-Type', 'application/json')
   @Header('Accept-Charset', 'utf-8')
   // @SgConnectScopes('api.soapoc.read')
-  @ApiImplicitHeader({ name: 'X-BSC-SOA-CONSUMER-APP-CODE', description: 'Consumer App Code' })
-  @ApiImplicitHeader({ name: 'X-BSC-SOA-CONSUMER-APP-NAME', description: 'Consumer App Name' })
-  @ApiImplicitHeader({ name: 'X-BSC-SOA-CONSUMER-CODE', description: 'Consumer Code' })
-  @ApiImplicitHeader({ name: 'X-BSC-SOA-CONSUMER-NAME', description: 'Consumer Name' })
-  @ApiImplicitHeader({ name: 'X-BSC-SOA-CONSUMER-ORG', description: 'Consumer Organization' })
+  @ApiHeader({ name: 'X-BSC-SOA-CONSUMER-APP-CODE', description: 'Consumer App Code' })
+  @ApiHeader({ name: 'X-BSC-SOA-CONSUMER-APP-NAME', description: 'Consumer App Name' })
+  @ApiHeader({ name: 'X-BSC-SOA-CONSUMER-CODE', description: 'Consumer Code' })
+  @ApiHeader({ name: 'X-BSC-SOA-CONSUMER-NAME', description: 'Consumer Name' })
+  @ApiHeader({ name: 'X-BSC-SOA-CONSUMER-ORG', description: 'Consumer Organization' })
   @ApiOperation({
     description: 'Get one employee',
-    title: 'Get one',
-    operationId: 'GET /employees/id',
+    
   })
   @ApiResponse({ status: 401, description: 'Unauthorized', type: ErrorModel, isArray: false })
   @ApiResponse({ status: 403, description: 'Forbidden', type: ErrorModel, isArray: false })
@@ -46,15 +45,14 @@ export class EmployeesController {
   @Header('Content-Type', 'application/json')
   @Header('Accept-Charset', 'utf-8')
   // @SgConnectScopes('api.soapoc.read')
-  @ApiImplicitHeader({ name: 'X-BSC-SOA-CONSUMER-APP-CODE', description: 'Consumer App Code' })
-  @ApiImplicitHeader({ name: 'X-BSC-SOA-CONSUMER-APP-NAME', description: 'Consumer App Name' })
-  @ApiImplicitHeader({ name: 'X-BSC-SOA-CONSUMER-CODE', description: 'Consumer Code' })
-  @ApiImplicitHeader({ name: 'X-BSC-SOA-CONSUMER-NAME', description: 'Consumer Name' })
-  @ApiImplicitHeader({ name: 'X-BSC-SOA-CONSUMER-ORG', description: 'Consumer Organization' })
+  @ApiHeader({ name: 'X-BSC-SOA-CONSUMER-APP-CODE', description: 'Consumer App Code' })
+  @ApiHeader({ name: 'X-BSC-SOA-CONSUMER-APP-NAME', description: 'Consumer App Name' })
+  @ApiHeader({ name: 'X-BSC-SOA-CONSUMER-CODE', description: 'Consumer Code' })
+  @ApiHeader({ name: 'X-BSC-SOA-CONSUMER-NAME', description: 'Consumer Name' })
+  @ApiHeader({ name: 'X-BSC-SOA-CONSUMER-ORG', description: 'Consumer Organization' })
   @ApiOperation({
     description: 'Get all employees',
-    title: 'Get all',
-    operationId: 'GET /employees',
+    
   })
   @ApiResponse({
     status: 200,
@@ -86,15 +84,14 @@ export class EmployeesController {
   @Header('Content-Type', 'application/json')
   @Header('Accept-Charset', 'utf-8')
   // @SgConnectScopes('api.soapoc.write')
-  @ApiImplicitHeader({ name: 'X-BSC-SOA-CONSUMER-APP-CODE', description: 'Consumer App Code' })
-  @ApiImplicitHeader({ name: 'X-BSC-SOA-CONSUMER-APP-NAME', description: 'Consumer App Name' })
-  @ApiImplicitHeader({ name: 'X-BSC-SOA-CONSUMER-CODE', description: 'Consumer Code' })
-  @ApiImplicitHeader({ name: 'X-BSC-SOA-CONSUMER-NAME', description: 'Consumer Name' })
-  @ApiImplicitHeader({ name: 'X-BSC-SOA-CONSUMER-ORG', description: 'Consumer Organization' })
+  @ApiHeader({ name: 'X-BSC-SOA-CONSUMER-APP-CODE', description: 'Consumer App Code' })
+  @ApiHeader({ name: 'X-BSC-SOA-CONSUMER-APP-NAME', description: 'Consumer App Name' })
+  @ApiHeader({ name: 'X-BSC-SOA-CONSUMER-CODE', description: 'Consumer Code' })
+  @ApiHeader({ name: 'X-BSC-SOA-CONSUMER-NAME', description: 'Consumer Name' })
+  @ApiHeader({ name: 'X-BSC-SOA-CONSUMER-ORG', description: 'Consumer Organization' })
   @ApiOperation({
     description: 'Create employee',
-    title: 'Create',
-    operationId: 'POST /employees',
+    
   })
   @HttpCode(201)
   @ApiResponse({
@@ -119,15 +116,14 @@ export class EmployeesController {
   @Header('Content-Type', 'application/json')
   @Header('Accept-Charset', 'utf-8')
   // @SgConnectScopes('api.soapoc.write')
-  @ApiImplicitHeader({ name: 'X-BSC-SOA-CONSUMER-APP-CODE', description: 'Consumer App Code' })
-  @ApiImplicitHeader({ name: 'X-BSC-SOA-CONSUMER-APP-NAME', description: 'Consumer App Name' })
-  @ApiImplicitHeader({ name: 'X-BSC-SOA-CONSUMER-CODE', description: 'Consumer Code' })
-  @ApiImplicitHeader({ name: 'X-BSC-SOA-CONSUMER-NAME', description: 'Consumer Name' })
-  @ApiImplicitHeader({ name: 'X-BSC-SOA-CONSUMER-ORG', description: 'Consumer Organization' })
+  @ApiHeader({ name: 'X-BSC-SOA-CONSUMER-APP-CODE', description: 'Consumer App Code' })
+  @ApiHeader({ name: 'X-BSC-SOA-CONSUMER-APP-NAME', description: 'Consumer App Name' })
+  @ApiHeader({ name: 'X-BSC-SOA-CONSUMER-CODE', description: 'Consumer Code' })
+  @ApiHeader({ name: 'X-BSC-SOA-CONSUMER-NAME', description: 'Consumer Name' })
+  @ApiHeader({ name: 'X-BSC-SOA-CONSUMER-ORG', description: 'Consumer Organization' })
   @ApiOperation({
     description: 'Update employee',
-    title: 'Update',
-    operationId: 'PUT /employees',
+    
   })
   @ApiResponse({ status: 200, description: 'Update employee' })
   @ApiResponse({ status: 400, description: 'Bad request', type: ErrorModel, isArray: false })
@@ -144,15 +140,14 @@ export class EmployeesController {
   @Header('Cache-Control', 'none')
   @Header('Accept-Charset', 'utf-8')
   // @SgConnectScopes('api.soapoc.write')
-  @ApiImplicitHeader({ name: 'X-BSC-SOA-CONSUMER-APP-CODE', description: 'Consumer App Code' })
-  @ApiImplicitHeader({ name: 'X-BSC-SOA-CONSUMER-APP-NAME', description: 'Consumer App Name' })
-  @ApiImplicitHeader({ name: 'X-BSC-SOA-CONSUMER-CODE', description: 'Consumer Code' })
-  @ApiImplicitHeader({ name: 'X-BSC-SOA-CONSUMER-NAME', description: 'Consumer Name' })
-  @ApiImplicitHeader({ name: 'X-BSC-SOA-CONSUMER-ORG', description: 'Consumer Organization' })
+  @ApiHeader({ name: 'X-BSC-SOA-CONSUMER-APP-CODE', description: 'Consumer App Code' })
+  @ApiHeader({ name: 'X-BSC-SOA-CONSUMER-APP-NAME', description: 'Consumer App Name' })
+  @ApiHeader({ name: 'X-BSC-SOA-CONSUMER-CODE', description: 'Consumer Code' })
+  @ApiHeader({ name: 'X-BSC-SOA-CONSUMER-NAME', description: 'Consumer Name' })
+  @ApiHeader({ name: 'X-BSC-SOA-CONSUMER-ORG', description: 'Consumer Organization' })
   @ApiOperation({
     description: 'Delete employee',
-    title: 'Delete',
-    operationId: 'DELETE /employees',
+    
   })
   @ApiResponse({ status: 204, description: 'Delete employee', type: ErrorModel, isArray: false })
   @ApiResponse({ status: 401, description: 'Unauthorized', type: ErrorModel, isArray: false })

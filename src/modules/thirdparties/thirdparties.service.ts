@@ -4,8 +4,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import * as _ from 'lodash';
 import { Thirdparty } from './thirdparty.entity';
 import { Thirdparty as ThirdpartyInterface } from './../interfaces/common-interfaces';
-import { getConnection, getRepository } from 'typeorm';
-import { AmountStat } from '../amountstats/amountstat.entity';
+import { getManager, getRepository } from 'typeorm';
 import { isNull, isUndefined } from 'lodash';
 
 @Injectable()
@@ -33,7 +32,7 @@ export class ThirdpartiesService {
     // options.relations = ['thirdpartyappsettings', 'thirdpartyappsettings.gpcappsettings', 'country'];
 
     try {
-      const query = getConnection()
+      const query = getManager()
         .createQueryBuilder()
         .select('thirdparty')
         .from(Thirdparty, 'thirdparty')
@@ -92,7 +91,7 @@ export class ThirdpartiesService {
 
   async getHydratedThirdpartiesSkipTake(take = 10): Promise<any[]> {
     try {
-      const ids = await getConnection()
+      const ids = await getManager()
         .createQueryBuilder()
         .select(['thirdparty.id'])
         .from(Thirdparty, 'thirdparty')
@@ -134,7 +133,7 @@ export class ThirdpartiesService {
       this.buildTree(thirdparties, myThirdpartyRoot);
       const thirdpartyChildrenIds = this.getMyThirdPartiesChilds();
 
-      const query = getConnection()
+      const query = getManager()
         .createQueryBuilder()
         .select('thirdparty.id', 'id')
         .addSelect('thirdparty.name', 'name')

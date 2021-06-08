@@ -1,26 +1,26 @@
 import { IsString, Length, IsNumber, IsEmail, IsNotEmpty } from 'class-validator';
-import { ApiModelProperty } from '@nestjs/swagger';
+import { ApiProperty } from '@nestjs/swagger';
 
 export class EmployeeDto {
-  @ApiModelProperty()
+  @ApiProperty()
   @IsString()
   @Length(3, 50)
   @IsNotEmpty()
   public lastName: string;
 
-  @ApiModelProperty()
+  @ApiProperty()
   @IsString()
   @Length(3, 50)
   @IsNotEmpty()
   public firstName: string;
 
-  @ApiModelProperty()
+  @ApiProperty()
   @IsEmail()
   @Length(5, 50)
   @IsNotEmpty()
   public email: string;
 
-  @ApiModelProperty()
+  @ApiProperty()
   @IsNumber()
   @IsNotEmpty()
   public depId: number;

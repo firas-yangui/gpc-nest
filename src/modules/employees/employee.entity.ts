@@ -1,23 +1,23 @@
-import { ApiModelProperty } from '@nestjs/swagger';
+import { ApiProperty } from '@nestjs/swagger';
 
 export class EmployeeEntity {
   id: number;
 
-  @ApiModelProperty()
+  @ApiProperty()
   lastName: string;
 
-  @ApiModelProperty()
+  @ApiProperty()
   firstName: string;
 
-  @ApiModelProperty()
+  @ApiProperty()
   email: string;
 
-  @ApiModelProperty()
+  @ApiProperty()
   isActive: boolean;
 
-  @ApiModelProperty()
+  @ApiProperty()
   depId: number;
 
-  @ApiModelProperty()
+  @ApiProperty()
   salary: number;
 }

@@ -1,9 +1,9 @@
-import { ApiModelProperty } from '@nestjs/swagger';
+import { ApiProperty } from '@nestjs/swagger';
 export abstract class ErrorModel {
-  @ApiModelProperty()
+  @ApiProperty()
   public error: string;
-  @ApiModelProperty()
+  @ApiProperty()
   public message: string;
-  @ApiModelProperty()
+  @ApiProperty()
   public errors: Array<string>;
 }
