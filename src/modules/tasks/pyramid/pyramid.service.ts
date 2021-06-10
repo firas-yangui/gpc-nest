@@ -120,7 +120,7 @@ export class PyramidService {
     private readonly datalakeGpcPayorService: DatalakeGpcPayorService,
   ) {}
 
-  isValidParams = (requiredFileds: Record<string, any>, line: any, isActual = false) => {
+  isValidParams = (requiredFileds: Record<string, any>, line: any) => {
     requiredFileds.forEach(field => {
       if (!line[field]) return false;
     });
@@ -175,7 +175,7 @@ export class PyramidService {
     return this.servicesService.findByName(portfolioName);
   };
 
-  getThirdparty = async (line: Record<string, any>, fields: Record<string, any>, isActual: boolean): Promise<Thirdparty> => {
+  getThirdparty = async (line: Record<string, any>, fields: Record<string, any>): Promise<Thirdparty> => {
     const options: any = { name: line[fields.csm] };
     const thirdParty = await this.thirdpartiesService.findOne(options);
     if (!thirdParty) {
@@ -324,8 +324,13 @@ export class PyramidService {
     }
   };
 
+  createWorkload = async (workload): Promise<Workload> => {
+    workload.code = workload.description = await this.workloadsService.generateCode('AUTO');
+    return await this.workloadsService.save(workload);
+  };
+
   import = async (filename, line: any, isActuals = false, outsourcing = false, isV2 = false): Promise<any> => {
-    let workload: Workload;
+    let workload: any;
     let fields: Record<string, any> = pyramidFields.eac;
     let requiredParams;
     if (isActuals) fields = pyramidFields.actuals;
@@ -335,7 +340,7 @@ export class PyramidService {
     if (isActuals) requiredParams = requiredFileds.actuals;
     if (!isActuals) requiredParams = requiredFileds.eac;
 
-    if (!this.isValidParams(requiredParams, line, isActuals)) throw new Error('invalid line param');
+    if (!this.isValidParams(requiredParams, line)) throw new Error('invalid line param');
 
     if (!this.isParseableLine(line, fields, outsourcing)) throw new Error('line is not parseable');
 
@@ -356,6 +361,7 @@ export class PyramidService {
 
     const periodAppSettings = await this.getPeriodAppSettings(periodType, isActuals, outsourcing, false, isV2);
     if (!periodAppSettings) throw 'period not found';
+    const currentPeriod = periodAppSettings.period;
 
     if (!projectCode.trim()) throw 'Project code not defined';
 
@@ -370,7 +376,7 @@ export class PyramidService {
       throw `subTypology not found ${JSON.stringify(planCodes)}`;
     }
 
-    const thirdparty = await this.getThirdparty(line, fields, isActuals);
+    const thirdparty = await this.getThirdparty(line, fields);
     if (!thirdparty) {
       throw `thirdparty not found in line`;
     }
@@ -398,50 +404,49 @@ export class PyramidService {
     const partner = await this.getGpcDatalakePartner(line, fields);
     if (!partner) throw 'Partner not found in GPC database';
     const workloadsBySubserviceThirdpartySubnature = await this.findWorkloadBySubserviceThirdpartySubnature(subnature, subservice, thirdparty);
-    if (!workloadsBySubserviceThirdpartySubnature.length) {
+    let newWorkload = true;
+    if (workloadsBySubserviceThirdpartySubnature.length) {
+      // check allocations on the current period
+      const allocation = await this.getAllocations(workloadsBySubserviceThirdpartySubnature, line, fields, periodAppSettings);
+      if (allocation) {
+        workload = allocation.workload;
+        newWorkload = false;
+      } else {
+        // check allocations on the current period
+        const previousPeriodAppSettings = await this.getPeriodAppSettings(periodType, isActuals, outsourcing, true);
+        if (previousPeriodAppSettings) {
+          const prevAllocation = await this.getAllocations(workloadsBySubserviceThirdpartySubnature, line, fields, periodAppSettings);
+          if (prevAllocation) {
+            workload = prevAllocation.workload;
+            newWorkload = false;
+          }
+        }
+      }
+    }
+
+    if (newWorkload) {
       Logger.warn(`workload not found  with subnature "${subnature.name}" and subservice "${subservice.code}" and thirdparty "${thirdparty.name}"`);
-      const codeWorkload = await this.workloadsService.generateCode('AUTO');
-      const workload = await this.workloadsService.save({
-        code: codeWorkload,
-        description: codeWorkload,
+      workload = this.createWorkload({
         status: 'DRAFT',
         thirdparty: thirdparty,
         subnature: subnature,
         subservice: subservice,
       });
-      workloadsBySubserviceThirdpartySubnature.push(workload);
-    }
-    workload = workloadsBySubserviceThirdpartySubnature[0];
-    if (workloadsBySubserviceThirdpartySubnature.length > 1) {
-      const previousPeriodAppSettings = await this.getPeriodAppSettings(periodType, isActuals, outsourcing, true);
-      if (previousPeriodAppSettings) {
-        const subsidiaryAllocation = await this.getAllocations(workloadsBySubserviceThirdpartySubnature, line, fields, previousPeriodAppSettings);
-        if (subsidiaryAllocation && subsidiaryAllocation.workload) {
-          workload = subsidiaryAllocation.workload;
-        } else {
-          Logger.warn(`partner not found for this line, an auto creation of workload an allocation will start`);
-          const code: string = await this.workloadsService.generateCode('AUTO');
-          const tmpWorkload = { ...workload, thirdparty, subnature, subservice, code };
-          delete tmpWorkload.id;
-          workload = await this.workloadsService.save(tmpWorkload);
-        }
-      }
     }
 
-    const actualPeriod = periodAppSettings.period;
     // update allocations
-    const allocation = await this.subsidiaryallocationService.findOne({ period: actualPeriod, workload: workload });
+    const allocation = await this.subsidiaryallocationService.findOne({ period: currentPeriod, workload });
     if (!allocation) {
       await this.subsidiaryallocationService.save({
         thirdparty: partner,
         weight: 1,
         workload,
-        period: actualPeriod,
+        period: currentPeriod,
       });
     }
 
-    const prices = await this.pricesService.findOne({ where: { thirdparty: thirdparty.id, subnature: subnature.id, periodtype: actualPeriod.type } });
-    const rate = await this.currencyRateService.getCurrencyRateByCountryAndPeriod(thirdparty.countryid, actualPeriod.id);
+    const prices = await this.pricesService.findOne({ where: { thirdparty: thirdparty, subnature: subnature, periodtype: currentPeriod.type } });
+    const rate = await this.currencyRateService.getCurrencyRateByCountryAndPeriod(thirdparty.countryid, currentPeriod.id);
 
     if (!prices) throw `Price not found for thirdparty ${thirdparty.name} and subnature ${subnature.name}`;
 
@@ -453,6 +458,6 @@ export class PyramidService {
 
     createdAmount = { ...createdAmount, datasource: filename };
 
-    return this.rawAmountsService.save(createdAmount, workload, actualPeriod);
+    return this.rawAmountsService.save(createdAmount, workload, currentPeriod);
   };
 }
