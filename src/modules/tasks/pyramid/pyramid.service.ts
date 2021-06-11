@@ -426,7 +426,7 @@ export class PyramidService {
 
     if (newWorkload) {
       Logger.warn(`workload not found  with subnature "${subnature.name}" and subservice "${subservice.code}" and thirdparty "${thirdparty.name}"`);
-      workload = this.createWorkload({
+      workload = await this.createWorkload({
         status: 'DRAFT',
         thirdparty: thirdparty,
         subnature: subnature,

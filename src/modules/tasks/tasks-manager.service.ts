@@ -145,7 +145,7 @@ export class TasksService {
       if (!flowType) return;
       if (!this.constantService.GLOBAL_CONST.QUEUE[flowType]) return;
       if (existsSync(rejectedFile)) return;
-      const rawInProgress = this.rawAmountsService.findOne({ datasource: flow });
+      const rawInProgress = await this.rawAmountsService.findOne({ datasource: flow });
       if (rawInProgress && !isEmpty(rawInProgress)) return;
 
       const s3object = await this.S3.getObject(params).promise();
@@ -172,7 +172,7 @@ export class TasksService {
     map(files, async file => {
       const rejectedFile = `/tmp/${file.name}.REJECTED.csv`;
       if (existsSync(rejectedFile)) return;
-      const rawInProgress = this.rawAmountsService.findOne({ datasource: file.name });
+      const rawInProgress = await this.rawAmountsService.findOne({ datasource: file.name });
       if (rawInProgress && !isEmpty(rawInProgress)) return;
       const lines = readFileSync(path.join(receptiondir, file.name));
       await this.parseFile(lines, file.name);
