@@ -424,16 +424,6 @@ export class PyramidService {
       }
     }
 
-    if (newWorkload) {
-      Logger.warn(`workload not found  with subnature "${subnature.name}" and subservice "${subservice.code}" and thirdparty "${thirdparty.name}"`);
-      workload = await this.createWorkload({
-        status: 'DRAFT',
-        thirdparty: thirdparty,
-        subnature: subnature,
-        subservice: subservice,
-      });
-    }
-
     // update allocations
     const allocation = await this.subsidiaryallocationService.findOne({ period: currentPeriod, workload });
     if (!allocation) {
@@ -449,6 +439,16 @@ export class PyramidService {
     const rate = await this.currencyRateService.getCurrencyRateByCountryAndPeriod(thirdparty.countryid, currentPeriod.id);
 
     if (!prices) throw `Price not found for thirdparty ${thirdparty.name} and subnature ${subnature.name}`;
+
+    if (newWorkload) {
+      Logger.warn(`workload not found  with subnature "${subnature.name}" and subservice "${subservice.code}" and thirdparty "${thirdparty.name}"`);
+      workload = await this.createWorkload({
+        status: 'DRAFT',
+        thirdparty: thirdparty,
+        subnature: subnature,
+        subservice: subservice,
+      });
+    }
 
     const costPrice = prices.price;
     const salePrice = prices.saleprice;
