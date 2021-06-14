@@ -561,7 +561,8 @@ export class PyramidNewOrgasMappingV21620658072431 implements MigrationInterface
         ('SGSS','SGSS'),
         ('TRANSACTIS','TRANSACTIS'),
         ('WAAM','WAAM'),
-        ('Multi','Multi');
+        ('Multi','Multi'),
+        ('PRIV','PRIV');
         `);
     await queryRunner.query(`
         INSERT INTO datalake_gpc_payor (payorname, gpcpartnername)
@@ -604,7 +605,8 @@ export class PyramidNewOrgasMappingV21620658072431 implements MigrationInterface
         ('RESG/TPS/GDO/CTA','RESG/TPS'),
         ('RESG/TPS/ISR/RSW','RESG/TPS'),
         ('RESG/TPS/ISR/CTA','RESG/TPS'),
-        ('RESG/CFT/FAT/TSV/CFT','GSPR');
+        ('RESG/CFT/FAT/TSV/CFT','GSPR'),
+        ('RESG/CFT/ITO/ODS/LIF','CFT_OdS');
         `);
   }
 
