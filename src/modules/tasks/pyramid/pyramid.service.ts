@@ -424,17 +424,6 @@ export class PyramidService {
       }
     }
 
-    // update allocations
-    const allocation = await this.subsidiaryallocationService.findOne({ period: currentPeriod, workload });
-    if (!allocation) {
-      await this.subsidiaryallocationService.save({
-        thirdparty: partner,
-        weight: 1,
-        workload,
-        period: currentPeriod,
-      });
-    }
-
     const prices = await this.pricesService.findOne({ where: { thirdparty: thirdparty, subnature: subnature, periodtype: currentPeriod.type } });
     const rate = await this.currencyRateService.getCurrencyRateByCountryAndPeriod(thirdparty.countryid, currentPeriod.id);
 
@@ -447,6 +436,17 @@ export class PyramidService {
         thirdparty: thirdparty,
         subnature: subnature,
         subservice: subservice,
+      });
+    }
+
+    // update allocations
+    const allocation = await this.subsidiaryallocationService.findOne({ period: currentPeriod, workload });
+    if (!allocation) {
+      await this.subsidiaryallocationService.save({
+        thirdparty: partner,
+        weight: 1,
+        workload,
+        period: currentPeriod,
       });
     }
 
