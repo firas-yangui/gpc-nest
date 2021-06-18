@@ -4,7 +4,7 @@ export class DatasForNewMappingStrategy1623937606570 implements MigrationInterfa
 
     public async up(queryRunner: QueryRunner): Promise<any> {
         await queryRunner.query(`
-        INSERT INTO importmapping (importname, mappingname, modelname, modelcolumn, mappedvalue, modelvalue )
+        INSERT INTO importmapping (importname, mappingname, modelname, modelcolumn, modelvalue, mappedvalue)
         VALUES
         ('PYRAMID', 'ORGA', 'Thirdparty', 'radical', 'ARC/AEA','5555514907'),
         ('PYRAMID', 'ORGA', 'Thirdparty', 'radical', 'ARC/COO','5555571696'),
