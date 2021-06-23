@@ -146,7 +146,6 @@ export class PyramidService {
       line[fields.cds].trim() !== 'RESG/TPS/API' &&
       line[fields.cds].trim() !== 'RESG/TPS/GDO' &&
       line[fields.cds].trim() !== 'RISQ/DTO' &&
-      line[fields.cds].trim() !== 'Global Solution Services SG GSC India (SSBU)' &&
       line[fields.caPayor].trim() !== '3000324000' &&
       line[fields.activityType].trim() !== 'Absence';
 
