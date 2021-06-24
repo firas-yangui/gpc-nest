@@ -22,10 +22,17 @@ import { ConstantService } from '../../constants/constants';
 import { DatalakeGpcOrganizationService } from '../../datalakemapping/datalakegpcorganization.service';
 import { DatalakeGpcPartnerService } from '../../datalakemapping/datalakegpcpartner.service';
 import { DatalakeGpcPayorService } from '../../datalakemapping/datalakegpcpayor.service';
+import { ImportMappingService } from '../../importmapping/importmapping.service';
 
 import { PeriodType as PeriodTypeInterface } from '../../interfaces/common-interfaces';
 import { Subtypology } from 'src/modules/subtypologies/subtypology.entity';
 
+const importName = 'PYRAMID';
+const mappingTypes = {
+  orga: 'ORGA',
+  partner: 'PARTNER',
+  payor: 'PAYOR',
+};
 const intExtStaffType: string[] = ['internal', 'external'];
 const onshoreStaffType = 'onshore';
 const actualsValideStaffType = [...intExtStaffType, onshoreStaffType, 'nearshore', 'offshore'];
@@ -118,6 +125,7 @@ export class PyramidService {
     private readonly datalakeGpcOrganizationService: DatalakeGpcOrganizationService,
     private readonly datalakeGpcPartnerService: DatalakeGpcPartnerService,
     private readonly datalakeGpcPayorService: DatalakeGpcPayorService,
+    private readonly importMappingService: ImportMappingService,
   ) {}
 
   isValidParams = (requiredFileds: Record<string, any>, line: any) => {
@@ -177,34 +185,22 @@ export class PyramidService {
 
   getThirdparty = async (line: Record<string, any>, fields: Record<string, any>): Promise<Thirdparty> => {
     const options: any = { name: line[fields.csm] };
-    const thirdParty = await this.thirdpartiesService.findOne(options);
-    if (!thirdParty) {
-      let parendDescrFiled = line[fields.parentDescr].slice(0, 15);
+    let thirdParty = await this.thirdpartiesService.findOne(options);
+    if (thirdParty) return thirdParty;
 
-      // if (!startsWith(line[fields.parentDescr], 'HRCO/')) {
-      //   parendDescrFiled = line[fields.parentDescr].slice(0, 11);
-      // }
+    let parendDescrFiled = line[fields.parentDescr].slice(0, 15);
+    thirdParty = await this.importMappingService.getMapping(importName, mappingTypes.orga, parendDescrFiled.trim());
+    if (thirdParty) return thirdParty;
 
-      let findOptions: any = { datalakename: parendDescrFiled };
-      let datalakeThirdParty = await this.datalakeGpcOrganizationService.findOne(findOptions);
+    parendDescrFiled = line[fields.parentDescr].slice(0, 11);
+    thirdParty = await this.importMappingService.getMapping(importName, mappingTypes.orga, parendDescrFiled.trim());
+    if (thirdParty) return thirdParty;
 
-      if (!datalakeThirdParty) {
-        parendDescrFiled = line[fields.parentDescr].slice(0, 11);
-        findOptions = { datalakename: parendDescrFiled };
-        datalakeThirdParty = await this.datalakeGpcOrganizationService.findOne(findOptions);
-      }
+    parendDescrFiled = line[fields.parentDescr].slice(0, 7);
+    thirdParty = await this.importMappingService.getMapping(importName, mappingTypes.orga, parendDescrFiled.trim());
+    if (thirdParty) return thirdParty;
 
-      if (!datalakeThirdParty) {
-        parendDescrFiled = line[fields.parentDescr].slice(0, 7);
-        findOptions = { datalakename: parendDescrFiled };
-        datalakeThirdParty = await this.datalakeGpcOrganizationService.findOne(findOptions);
-      }
-      if (datalakeThirdParty) {
-        return this.thirdpartiesService.findOne({ radical: datalakeThirdParty.dpg });
-      }
-    }
-
-    return thirdParty;
+    return null;
   };
 
   getPeriodAppSettings = async (type: string, isActual: boolean, outsourcing: boolean, previous: boolean, isV2 = false) => {
@@ -245,18 +241,16 @@ export class PyramidService {
   };
 
   getGpcDatalakePartner = async (line: Record<string, any>, fields: Record<string, any>) => {
-    let partner: string;
-    if (line[fields.partner]) {
-      const datalakePartner = await this.datalakeGpcPartnerService.findOne({ datalakename: line[fields.partner] });
-      if (datalakePartner) {
-        partner = datalakePartner.gpcname;
-      } else {
-        const datalakePayor = await this.datalakeGpcPayorService.findByPayorName(line[fields.payor].trim());
-        if (datalakePayor) partner = datalakePayor.gpcpartnername;
+    const partnerValue = line[fields.partner].trim();
+    if (partnerValue) {
+      let partner = await this.importMappingService.getMapping(importName, mappingTypes.partner, partnerValue);
+      if (partner) return partner;
+      const payorValue = line[fields.payor].trim();
+      if (payorValue) {
+        partner = await this.importMappingService.getMapping(importName, mappingTypes.payor, payorValue);
+        if (partner) return partner;
       }
     }
-
-    if (partner) return this.thirdpartiesService.findOne({ trigram: partner });
     return null;
   };
 
