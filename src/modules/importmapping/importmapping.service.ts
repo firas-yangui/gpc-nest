@@ -16,7 +16,7 @@ export class ImportMappingService {
   async getMapping(importName: string, mappingName: string, mappedValue: string): Promise<any> {
     const mapping: ImportMapping = await this.importMappingRepository.findOne({ where: { importName, mappingName, mappedValue } });
     if (!mapping) {
-      return null;
+      throw `Mapping not found for import ${importName} mappingName ${mappingName} and mappedValue ${mappedValue}`;
     }
 
     const entities = {
