@@ -17,6 +17,7 @@ import { SubtypologiesModule } from './../../subtypologies/subtypologies.module'
 import { SubtypologyAppSettingsModule } from './../../subTypologyAppSettings/subtypologyappsettings.module';
 import { SubnatureModule } from './../../subnature/subnature.module';
 import { DatalakeMappingModule } from '../../datalakemapping/datalakemapping.module';
+import { ImportMappingModule } from '../../importmapping/importmapping.module';
 @Module({
   imports: [
     AmountsModule,
@@ -36,6 +37,7 @@ import { DatalakeMappingModule } from '../../datalakemapping/datalakemapping.mod
     SubnatureModule,
     WorkloadsModule,
     DatalakeMappingModule,
+    ImportMappingModule,
   ],
   providers: [PyramidService],
   exports: [PyramidService],
