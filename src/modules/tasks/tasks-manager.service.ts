@@ -3,6 +3,7 @@ import { NosicaService } from './nosica/nosica.service';
 import { ProductService } from './nosica/product.service';
 import { PyramidService } from './pyramid/pyramid.service';
 import { MyGtsService } from './mgts/mygts.service';
+import { LicenceMaintenanceService } from './licence_maintenance/licence_maintenance.service';
 import { ConstantService } from '../constants/constants';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { readFileSync, readdirSync, existsSync, unlinkSync } from 'fs';
@@ -28,6 +29,7 @@ export class TasksService {
     private pyramidService: PyramidService,
     private constantService: ConstantService,
     private myGtsService: MyGtsService,
+    private licenceMaintenanceService: LicenceMaintenanceService,
     private productService: ProductService,
     private amountsService: AmountsService,
     private rawAmountsService: RawAmountsService,
@@ -38,7 +40,7 @@ export class TasksService {
   getFlowType(flow: string): string {
     const datas = flow.split('.');
     if (datas.length !== 5) return undefined;
-    return datas[3];
+    return datas[3].toUpperCase();
   }
 
   importLine(filename, flow, line): Promise<any> {
@@ -55,6 +57,8 @@ export class TasksService {
         return this.nosicaService.import(filename, line);
       case this.constantService.GLOBAL_CONST.QUEUE.MYGTS.NAME:
         return this.myGtsService.import(filename, line);
+      case this.constantService.GLOBAL_CONST.QUEUE.LICENCE_MAINTENANCE.NAME:
+        return this.licenceMaintenanceService.import(filename, line);
       case this.constantService.GLOBAL_CONST.QUEUE.NOSICAPRD.NAME:
         return this.productService.import(filename, line);
     }
