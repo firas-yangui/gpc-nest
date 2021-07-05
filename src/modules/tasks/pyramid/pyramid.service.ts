@@ -29,10 +29,9 @@ import { Subtypology } from 'src/modules/subtypologies/subtypology.entity';
 const intExtStaffType: string[] = ['internal', 'external'];
 const onshoreStaffType = 'onshore';
 const actualsValideStaffType = [...intExtStaffType, onshoreStaffType, 'nearshore', 'offshore'];
+const outsourcingValideStaffType = ['outsourcing - consulting', 'outsourcing - fixed-price contract', 'restatement'];
 const eacValideStaffType = [
-  'outsourcing - consulting',
-  'outsourcing - fixed-price contract',
-  'restatement',
+  ...outsourcingValideStaffType,
   'gbsu - contribution',
   'itim - contribution',
   'other - contribution',
@@ -75,7 +74,7 @@ const pyramidFields = {
   },
   pmd: {
     ...eacFields,
-    valideStaffType: [...eacValideStaffType],
+    valideStaffType: [...outsourcingValideStaffType],
   },
   actuals: {
     amount: 'standard_actuals_integrated_md',
