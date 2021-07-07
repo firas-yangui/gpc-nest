@@ -18,6 +18,7 @@ import { SubtypologyAppSettingsModule } from '../../subTypologyAppSettings/subty
 import { SubnatureModule } from '../../subnature/subnature.module';
 import { DatalakeMappingModule } from '../../datalakemapping/datalakemapping.module';
 import { SubnatureappsettingsModule } from '../../subnatureappsettings/subnatureappsettings.module';
+import { ImportMappingModule } from '../../importmapping/importmapping.module';
 @Module({
   imports: [
     AmountsModule,
@@ -38,6 +39,7 @@ import { SubnatureappsettingsModule } from '../../subnatureappsettings/subnature
     WorkloadsModule,
     DatalakeMappingModule,
     SubnatureappsettingsModule,
+    ImportMappingModule,
   ],
   providers: [MyGtsService],
   exports: [MyGtsService],
