@@ -20,6 +20,8 @@ import { Price } from '../../prices/prices.entity';
 import { SubService } from '../../subservices/subservice.entity';
 import { Service } from '../../services/services.entity';
 import { SubNature } from '../../subnature/subnature.entity';
+import { SubtypologiesService } from '../../subtypologies/subtypologies.service';
+import { ImportMappingService } from '../../importmapping/importmapping.service';
 
 const REJECTED_FILENAME = `myGTS-rejected-preparedLines-${Date.now()}.csv`;
 const writeStream = createWriteStream(`/tmp/${REJECTED_FILENAME}`);
@@ -37,7 +39,8 @@ export class MyGtsService {
     private readonly constantService: ConstantService,
     private readonly subnatureService: SubnatureService,
     private readonly subServiceService: SubservicesService,
-    private readonly servicesService: ServicesService,
+    private readonly subtypologiesService: SubtypologiesService,
+    private readonly importMappingService: ImportMappingService,
   ) {}
 
   private writeInRejectedFile = (line: string, separator: string, error: string) => {
@@ -120,28 +123,30 @@ export class MyGtsService {
     return thirdParty;
   };
 
-  getService = async (serviceName: string): Promise<Service> => {
-    const service = await this.servicesService.findOne({ where: { name: Like(serviceName) } });
-    if (!service) throw `No service found for ServiceName: ${serviceName}`;
+  getService = async (thirdParty: Thirdparty): Promise<Service> => {
+    const MYGTS = 'MYGTS';
+    const ORGA = 'ORGA';
+    const service = await this.importMappingService.getMapping(MYGTS, ORGA, thirdParty.trigram);
+    if (!service) throw `No service found for thirdparty: ${thirdParty.trigram}`;
     return service;
   };
 
   getSubservice = async (thirdparty: Thirdparty): Promise<SubService> => {
-    const SERVICE_NAME = '%Activités Transverses%';
-    const service = await this.getService(SERVICE_NAME);
+    const service = await this.getService(thirdparty);
     const subService = await this.subServiceService.findOne({
       where: { service: Equal(service.id), thirdpPartyId: Equal(thirdparty.id) },
     });
-    if (!subService) throw `no Subservice found for thirdPartyId:${thirdparty.id} and serviceId:${service.id}`;
+    if (!subService) {
+      throw `No Subservice found for thirdPartyId:${thirdparty.id} and serviceId:${service.id}`;
+    }
     return subService;
   };
-
   getWorkload = async (thirdPartyName: string, subnatureName: string): Promise<Workload> => {
     const thirdparty = await this.getThirdParty(thirdPartyName);
     const subnature = await this.getSubnature(subnatureName);
     const subservice = await this.getSubservice(thirdparty);
 
-    const workload = await this.workloadsService.findOne({
+    let workload = await this.workloadsService.findOne({
       relations: ['subnature', 'thirdparty', 'subservice'],
       where: {
         subnature,
@@ -151,10 +156,24 @@ export class MyGtsService {
     });
 
     if (!workload) {
-      throw `No Workload found for subnature ID ${subnature.id}, subservice ID ${subservice.id}, thirdParty ID ${thirdparty.id}`;
+      workload = await this.createWorkload(subnature, thirdparty, subservice).catch(() => {
+        throw `Cannot create workload for subnature ID ${subnature.id}, subservice ID ${subservice.id}, thirdParty ID ${thirdparty.id}`;
+      });
     }
 
     return workload;
+  };
+
+  createWorkload = async (subnature: SubNature, thirdparty: Thirdparty, subservice: SubService): Promise<Workload> => {
+    const code: string = await this.workloadsService.generateCode('AUTO');
+    return this.workloadsService.save({
+      code: code,
+      description: code,
+      status: 'DRAFT',
+      thirdparty,
+      subnature,
+      subservice,
+    });
   };
 
   getRate = async (thirdPartyId: number, periodId: number): Promise<any> => {
