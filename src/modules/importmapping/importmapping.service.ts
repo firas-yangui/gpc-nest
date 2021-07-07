@@ -5,6 +5,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { createQueryBuilder, Like } from 'typeorm';
 import { Thirdparty } from '../thirdparties/thirdparty.entity';
 import { SubNature } from '../subnature/subnature.entity';
+import { Service } from '../services/services.entity';
 
 @Injectable()
 export class ImportMappingService {
@@ -22,6 +23,7 @@ export class ImportMappingService {
     const entities = {
       Thirdparty: Thirdparty,
       SubNature: SubNature,
+      Service: Service,
     };
 
     return await createQueryBuilder()
