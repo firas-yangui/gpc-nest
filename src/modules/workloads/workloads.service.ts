@@ -240,6 +240,11 @@ export class WorkloadsService {
       assertOnlyNumbers(filter.portfolios);
       subquery += ` AND p.id in (${filter.portfolios.join(',')}) `;
     }
+    if (filter.code && filter.code.length > 0) {
+      //assertOnlyNumbers(filter.portfolios);
+      //To Do sql inject check for string
+      subquery += ` AND w.code like (${filter.code} OR ss.`;
+    }
 
     /*
     --       AND srv.name = 'Activités de RSC/DIR'

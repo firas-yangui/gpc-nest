@@ -1,7 +1,8 @@
-import { Controller, Get, HttpException, HttpStatus, Logger, Param, Query } from '@nestjs/common';
+import {Body, Controller, Get, HttpException, HttpStatus, Logger, Param, Query} from '@nestjs/common';
 import { WorkloadsService } from './workloads.service';
 import { ApiTags } from '@nestjs/swagger';
 import { Workload } from './workload.entity';
+import {SynthesisFilter} from "./interface/synthesis-filter.interface";
 
 @Controller('workloads')
 @ApiTags('Workloads')
@@ -37,5 +38,24 @@ export class WorkloadsController {
     return this.workloadsService.findOne({ id }).catch(err => {
       throw new HttpException(err, HttpStatus.BAD_REQUEST);
     });
+  }
+
+  @Get('porfolio-view/portofolios')
+  async getWorkloadPortofolioViewLevelPorfolioWithFilter(@Body()synthesisFilter: SynthesisFilter): Promise<any> {
+    //const columns =
+   // return await this.workloadsService.getWorkloadPortofolioViewTreeDataWithFilter(columns, synthesisFilter);
+    return ;
+  }
+
+  @Get('porfolio-view/portofolio/:portofolioId/subservices')
+  async getWorkloadPortofolioViewLevelSubServiceWithFilter(@Param ('portofolioId')portofolioId:number , @Body()sythesisFilter: SynthesisFilter): Promise<any> {
+    //return await this.workloadsService.getWorkloadsWithAmounts(query);
+    return ;
+  }
+
+  @Get('porfolio-view/portofolio/:portofolioId/subservice/:subServiceId')
+  async getWorkloadPortofolioViewLevelWorkloadWithFilter(@Param ('portofolioId')portofolioId:number , @Param ('subServiceId')subServiceId:number, @Body()sythesisFilter: SynthesisFilter): Promise<any> {
+    //return await this.workloadsService.getWorkloadsWithAmounts(query);
+    return ;
   }
 }
