@@ -428,7 +428,7 @@ export class PyramidService {
         // check allocations on the current period
         const previousPeriodAppSettings = await this.getPeriodAppSettings(periodType, isActuals, outsourcing, true);
         if (previousPeriodAppSettings) {
-          const prevAllocation = await this.getAllocations(workloadsBySubserviceThirdpartySubnature, line, fields, periodAppSettings);
+          const prevAllocation = await this.getAllocations(workloadsBySubserviceThirdpartySubnature, line, fields, previousPeriodAppSettings);
           if (prevAllocation) {
             workload = prevAllocation.workload;
             newWorkload = false;
