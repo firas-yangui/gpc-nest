@@ -20,9 +20,9 @@ import { SubservicesService } from './../subservices/subservices.service';
 import { ServicesService } from './../services/services.service';
 import { AmountStat } from '../amountstats/amountstat.entity';
 import { isNull, isUndefined } from 'lodash';
-import { SynthesisFilter } from './interface/synthesis-filter.interface';
 import { WorkloadTreeDataItem } from './interface/workload-tree-data-item.interface';
 import { assertOnlyNumbers } from '../../utils/utils';
+import {SynthesisFilterDto} from "./dto/synthesis-filter.dto";
 
 @Injectable()
 export class WorkloadsService {
@@ -208,25 +208,25 @@ export class WorkloadsService {
     }
   }
 
-  getWorkloadSubQuery(filter: SynthesisFilter) {
+  getWorkloadSubQuery(filter: SynthesisFilterDto) {
     let subquery = `
     select
            stas.id as stasId,
-           stas.plan as stasPlan,
+           stas.plan as stasPlanName,
            
-           ss.id  as ssId,
-           ss.name  as ssName,
-           ss.code  as ssCode,
+           ss.id  as subserviceId,
+           ss.name  as subserviceName,
+           ss.code  as subserviceCode,
            
-           sn.name  as snName,
-           sn.id    as snId,
+           sn.name  as subnatureName,
+           sn.id    as subnatureId,
            
-           srv.name as svrName,
-           srv.id as svrId,
+           srv.name as serviceName,
+           srv.id as serviceId,
            
-           w.code   as wCode,
-           w.status as wStatus,
-           w.id as wId    
+           w.code   as workloadCode,
+           w.status as workloadStatus,
+           w.id as workloadId    
     from subservice ss
              left outer JOIN service srv on ss.serviceid = srv.id
              left outer join workload w on w.subserviceid = ss.id
@@ -251,7 +251,7 @@ export class WorkloadsService {
     --       AND ss.code = 'FASTENTRY'
     --          AND sts.plan = 'Code plan'
     --       AND ss.name = 'PLUG - RUN'
-    --       AND w.code like 'Z14184%'
+    --       AND w.code like 'Z14184%'SynthesisFilter
     --       AND sn.name = 'SG PARIS'
     */
     return subquery;
@@ -260,7 +260,7 @@ export class WorkloadsService {
   async getWorkloadPortofolioViewTreeDataWithFilter(
     columns: Array<keyof WorkloadTreeDataItem>,
     parentTreeNode: WorkloadTreeDataItem,
-    syntheseFilter: SynthesisFilter,
+    syntheseFilter: SynthesisFilterDto,
   ) {
     //todo validate column names to prevent SQL Injection
     const entityManager = getManager();
@@ -269,15 +269,18 @@ export class WorkloadsService {
     with treeData as (${subquery}) SELECT distinct ${columns.join(',')}/*exemple :svrName, ssCode, ssName, plan*/ 
     from treeData t where 1=1 `;
 
-    Object.keys(parentTreeNode).forEach(parentColumn => {
-      const id = parentTreeNode[parentColumn];
-      assertOnlyNumbers(id);
-      fullSQL += ` AND ${parentColumn} = ${id}`;
-    });
+    if (parentTreeNode!=null) {
+      Object.keys(parentTreeNode).forEach(parentColumn => {
+        const id = parentTreeNode[parentColumn];
+        assertOnlyNumbers(id);
+        fullSQL += ` AND ${parentColumn} = ${id}`;
+      });
+    }
 
     const result = entityManager.query(
       fullSQL,
       // [syntheseFilter],
     );
+    return result;
   }
 }

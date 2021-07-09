@@ -1,8 +1,9 @@
 import {Body, Controller, Get, HttpException, HttpStatus, Logger, Param, Query} from '@nestjs/common';
 import { WorkloadsService } from './workloads.service';
-import { ApiTags } from '@nestjs/swagger';
+import {ApiOperation, ApiTags} from '@nestjs/swagger';
 import { Workload } from './workload.entity';
-import {SynthesisFilter} from "./interface/synthesis-filter.interface";
+import {SynthesisFilterDto} from "./dto/synthesis-filter.dto";
+import {WorkloadTreeDataItem} from "./interface/workload-tree-data-item.interface";
 
 @Controller('workloads')
 @ApiTags('Workloads')
@@ -41,20 +42,23 @@ export class WorkloadsController {
   }
 
   @Get('porfolio-view/portofolios')
-  async getWorkloadPortofolioViewLevelPorfolioWithFilter(@Body()synthesisFilter: SynthesisFilter): Promise<any> {
-    //const columns =
-   // return await this.workloadsService.getWorkloadPortofolioViewTreeDataWithFilter(columns, synthesisFilter);
-    return ;
+  @ApiOperation({ summary: 'get workload for portofolio view of the first level portofolios with filters' })
+  async getWorkloadPortofolioViewLevelPorfolioWithFilter(@Body()synthesisFilter: SynthesisFilterDto): Promise<any> {
+    const columns = ['serviceName' as keyof WorkloadTreeDataItem];
+    const parentTreeNode = null;  //no parent for first level
+    return await this.workloadsService.getWorkloadPortofolioViewTreeDataWithFilter(columns, parentTreeNode,synthesisFilter);
   }
 
   @Get('porfolio-view/portofolio/:portofolioId/subservices')
-  async getWorkloadPortofolioViewLevelSubServiceWithFilter(@Param ('portofolioId')portofolioId:number , @Body()sythesisFilter: SynthesisFilter): Promise<any> {
+  @ApiOperation({ summary: 'get workload for portofolio view of the second level sub-service with filters' })
+  async getWorkloadPortofolioViewLevelSubServiceWithFilter(@Param ('portofolioId')portofolioId:number , @Body()sythesisFilter: SynthesisFilterDto): Promise<any> {
     //return await this.workloadsService.getWorkloadsWithAmounts(query);
     return ;
   }
 
   @Get('porfolio-view/portofolio/:portofolioId/subservice/:subServiceId')
-  async getWorkloadPortofolioViewLevelWorkloadWithFilter(@Param ('portofolioId')portofolioId:number , @Param ('subServiceId')subServiceId:number, @Body()sythesisFilter: SynthesisFilter): Promise<any> {
+  @ApiOperation({ summary: 'get workload for portofolio view of the third level workload with filters' })
+  async getWorkloadPortofolioViewLevelWorkloadWithFilter(@Param ('portofolioId')portofolioId:number , @Param ('subServiceId')subServiceId:number, @Body()sythesisFilter: SynthesisFilterDto): Promise<any> {
     //return await this.workloadsService.getWorkloadsWithAmounts(query);
     return ;
   }

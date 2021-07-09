@@ -1,19 +1,25 @@
 export interface WorkloadTreeDataItem {
   //Portofolio View
-  stasPlan: string;
+
+  stasPlanName: string;
   stasId: number;
 
-  ssName: string;
-  ssCode: string;
-  ssId: number;
+  subserviceName: string;
+  subserviceCode: string;
+  subserviceId: number;
 
-  snName: string;
-  snId: number;
+  subnatureName: string;
+  subnatureId: number;
 
-  svrName: string;
-  svrId: number;
+  serviceName: string;
+  serviceId: number;
 
-  wCode: string;
-  wStatus: string;
-  wId: number;
+  workloadCode: string;
+  workloadStatus: string;
+  workloadId: number;
+
+
+  //Entity View, ToDo
+
+  //Partner View, ToDo
 }
