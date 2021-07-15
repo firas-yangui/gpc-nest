@@ -7,6 +7,7 @@ export class ConstantService {
     'emilie.nuon@socgen.com',
     'alban.a.kosak-ext@socgen.com',
     'rodolphe.poon-ext@socgen.com',
+    'laure.tellier@socgen.com',
   ];
   public GLOBAL_CONST = Object.freeze({
     AMOUNT_UNITS: Object.freeze({
