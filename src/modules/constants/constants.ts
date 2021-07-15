@@ -2,7 +2,13 @@ import { Global } from '@nestjs/common';
 
 @Global()
 export class ConstantService {
-  private defaultEmailTo: string[] = ['anouer.hammami-ext@socgen.com', 'emilie.nuon@socgen.com', 'alban.a.kosak-ext@socgen.com'];
+  private defaultEmailTo: string[] = [
+    'anouer.hammami-ext@socgen.com',
+    'emilie.nuon@socgen.com',
+    'alban.a.kosak-ext@socgen.com',
+    'rodolphe.poon-ext@socgen.com',
+    'laure.tellier@socgen.com',
+  ];
   public GLOBAL_CONST = Object.freeze({
     AMOUNT_UNITS: Object.freeze({
       KLC: 'klocalcurrency',
