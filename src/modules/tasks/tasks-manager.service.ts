@@ -127,6 +127,7 @@ export class TasksService {
    */
   @Cron(CronExpression.EVERY_30_MINUTES)
   async importFromS3() {
+    this.logger.log(`Start Import from AWS S3`);
     if (!includes(secureEnvs, process.env.NODE_ENV)) return false;
     const inProgressImports = await this.rawAmountsService.findAll();
     if (inProgressImports.length) return false;
@@ -156,6 +157,7 @@ export class TasksService {
       const parsed = await this.parseFile(s3object.Body, flow);
       if (parsed) this.S3.deleteObject(params).promise();
     });
+    this.logger.log(`End Import from AWS S3`);
   }
 
   /**
