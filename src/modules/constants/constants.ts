@@ -250,7 +250,7 @@ export class ConstantService {
           'Payor',
           'amount_final_by_csm_partner',
           'amount_initial_nosica',
-          'total_cost_by_NRG_CSD',
+          'total_cost_by_NRG_CDS',
           'expense_ratio',
         ],
       }),
