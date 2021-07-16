@@ -165,7 +165,6 @@ export class TasksService {
    */
   @Cron(CronExpression.EVERY_10_SECONDS)
   async importFromLocal() {
-    this.logger.log(`Start Import from Local`);
     if (includes(secureEnvs, process.env.NODE_ENV)) return false;
     const inProgressImports = await this.rawAmountsService.findAll();
     if (inProgressImports.length) return false;
@@ -184,6 +183,5 @@ export class TasksService {
       const lines = readFileSync(path.join(receptiondir, file.name));
       await this.parseFile(lines, file.name);
     });
-    this.logger.log(`end Import`);
   }
 }
