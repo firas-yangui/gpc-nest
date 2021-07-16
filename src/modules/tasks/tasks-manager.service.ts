@@ -141,6 +141,8 @@ export class TasksService {
       return;
     }
 
+    this.logger.log(`found ${objects.Contents.length} files in S3: [${objects.Contents.map(({ Key }) => Key).join(', ')}]`);
+
     map(objects.Contents, async file => {
       const flow = file.Key;
       const flowType = this.getFlowType(flow);
