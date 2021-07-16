@@ -57,12 +57,12 @@ export class LicenceMaintenanceService {
     const headers = this.constantService.GLOBAL_CONST.QUEUE.LICENCE_MAINTENANCE.HEADER;
 
     const subnatureappsetting = await this.subnatureappsettingsService.findOne({
-      where: { nrgcode: Like(`%${line[headers[9]]}%`), gpcappsettingsid: this.constantService.GLOBAL_CONST.SCOPES.BSC },
+      where: { nrgcode: Like(`%${line[headers[8]]}%`), gpcappsettingsid: this.constantService.GLOBAL_CONST.SCOPES.BSC },
       relations: ['subnature'],
     });
-    if (!subnatureappsetting) throw `No Subnature found with NRG Code : ${line[headers[9]]}`;
+    if (!subnatureappsetting) throw `No Subnature found with NRG Code : ${line[headers[8]]}`;
 
-    const thirdPartyTrigram = chain(line[headers[8]])
+    const thirdPartyTrigram = chain(line[headers[11]])
       .split('/')
       .first()
       .value();
