@@ -125,12 +125,19 @@ export class TasksService {
   /**
    * This cron will be executed in a secure environment [HML, PRD]
    */
-  @Cron(CronExpression.EVERY_30_MINUTES)
+  @Cron(CronExpression.EVERY_MINUTE)
   async importFromS3() {
     this.logger.log(`Start Import from AWS S3`);
-    if (!includes(secureEnvs, process.env.NODE_ENV)) return false;
+    if (!includes(secureEnvs, process.env.NODE_ENV)) {
+      this.logger.log(`Not a secure environnement END Import from AWS S3`);
+      return false;
+    }
     const inProgressImports = await this.rawAmountsService.findAll();
-    if (inProgressImports.length) return false;
+    if (inProgressImports.length) {
+      this.logger.log(`An import is already running END Import from AWS S3`);
+      return false;
+    }
+
     let params: any = {
       Bucket: `${process.env.AWS_BUCKET_PREFIX}gpc-set`,
     };
