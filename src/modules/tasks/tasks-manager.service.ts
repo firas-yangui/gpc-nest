@@ -150,7 +150,7 @@ export class TasksService {
 
     this.logger.log(`found ${objects.Contents.length} files in S3: [${objects.Contents.map(({ Key }) => Key).join(', ')}]`);
 
-    map(objects.Contents, async file => {
+    for await (const file of objects.Contents) {
       const flow = file.Key;
       const flowType = this.getFlowType(flow);
       params = { ...params, Key: flow };
@@ -165,7 +165,7 @@ export class TasksService {
       const s3object = await this.S3.getObject(params).promise();
       const parsed = await this.parseFile(s3object.Body, flow);
       if (parsed) this.S3.deleteObject(params).promise();
-    });
+    }
     this.logger.log(`End Import from AWS S3`);
   }
 
