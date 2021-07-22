@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { AmountsModule } from '../../amounts/amounts.module';
 import { RawAmountsModule } from '../../rawamounts/rawamounts.module';
-import { MyGtsService } from './mygts.service';
+import { LicenceMaintenanceService } from './licence_maintenance.service';
 import { ConstantsModule } from '../../constants/constants.module';
 import { CurrencyRateModule } from '../../currency-rate/currency-rate.module';
 import { NosicaModule } from '../nosica/nosica.module';
@@ -41,7 +41,7 @@ import { ImportMappingModule } from '../../importmapping/importmapping.module';
     SubnatureappsettingsModule,
     ImportMappingModule,
   ],
-  providers: [MyGtsService],
-  exports: [MyGtsService],
+  providers: [LicenceMaintenanceService],
+  exports: [LicenceMaintenanceService],
 })
-export class MyGTSModule {}
+export class LicenceMaintenanceModule {}

@@ -3,6 +3,7 @@ import { NosicaService } from './nosica/nosica.service';
 import { ProductService } from './nosica/product.service';
 import { PyramidService } from './pyramid/pyramid.service';
 import { MyGtsService } from './mgts/mygts.service';
+import { LicenceMaintenanceService } from './licence_maintenance/licence_maintenance.service';
 import { ConstantService } from '../constants/constants';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { readFileSync, readdirSync, existsSync, unlinkSync } from 'fs';
@@ -28,6 +29,7 @@ export class TasksService {
     private pyramidService: PyramidService,
     private constantService: ConstantService,
     private myGtsService: MyGtsService,
+    private licenceMaintenanceService: LicenceMaintenanceService,
     private productService: ProductService,
     private amountsService: AmountsService,
     private rawAmountsService: RawAmountsService,
@@ -38,7 +40,7 @@ export class TasksService {
   getFlowType(flow: string): string {
     const datas = flow.split('.');
     if (datas.length !== 5) return undefined;
-    return datas[3];
+    return datas[3].toUpperCase();
   }
 
   importLine(filename, flow, line): Promise<any> {
@@ -55,6 +57,8 @@ export class TasksService {
         return this.nosicaService.import(filename, line);
       case this.constantService.GLOBAL_CONST.QUEUE.MYGTS.NAME:
         return this.myGtsService.import(filename, line);
+      case this.constantService.GLOBAL_CONST.QUEUE.LICENCE_MAINTENANCE.NAME:
+        return this.licenceMaintenanceService.import(filename, line);
       case this.constantService.GLOBAL_CONST.QUEUE.NOSICAPRD.NAME:
         return this.productService.import(filename, line);
     }
@@ -121,11 +125,19 @@ export class TasksService {
   /**
    * This cron will be executed in a secure environment [HML, PRD]
    */
-  @Cron(CronExpression.EVERY_30_MINUTES)
+  @Cron(CronExpression.EVERY_MINUTE)
   async importFromS3() {
-    if (!includes(secureEnvs, process.env.NODE_ENV)) return false;
+    this.logger.log(`Start Import from AWS S3`);
+    if (!includes(secureEnvs, process.env.NODE_ENV)) {
+      this.logger.log(`Not a secure environnement END Import from AWS S3`);
+      return false;
+    }
     const inProgressImports = await this.rawAmountsService.findAll();
-    if (inProgressImports.length) return false;
+    if (inProgressImports.length) {
+      this.logger.log(`An import is already running END Import from AWS S3`);
+      return false;
+    }
+
     let params: any = {
       Bucket: `${process.env.AWS_BUCKET_PREFIX}gpc-set`,
     };
@@ -136,7 +148,9 @@ export class TasksService {
       return;
     }
 
-    map(objects.Contents, async file => {
+    this.logger.log(`found ${objects.Contents.length} files in S3: [${objects.Contents.map(({ Key }) => Key).join(', ')}]`);
+
+    for await (const file of objects.Contents) {
       const flow = file.Key;
       const flowType = this.getFlowType(flow);
       params = { ...params, Key: flow };
@@ -151,7 +165,8 @@ export class TasksService {
       const s3object = await this.S3.getObject(params).promise();
       const parsed = await this.parseFile(s3object.Body, flow);
       if (parsed) this.S3.deleteObject(params).promise();
-    });
+    }
+    this.logger.log(`End Import from AWS S3`);
   }
 
   /**
