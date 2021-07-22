@@ -64,6 +64,12 @@ export class TasksService {
     }
   }
 
+  sleep(ms) {
+    return new Promise(resolve => {
+      setTimeout(resolve, ms);
+    });
+  }
+
   parseFile(buffer, filename): Promise<string> {
     const readable = stringToStream(buffer.toString());
     const flowType = this.getFlowType(filename);
@@ -86,6 +92,7 @@ export class TasksService {
           }
         })
         .on('end', async () => {
+          await this.sleep(500); //sometime 'end' is fired before last line is fully parsed
           this.amountsService.synchronizeFromRawAmounts(filename);
           await this.sendRejectedFile(filename, flowType);
           resolve('end');
@@ -125,16 +132,11 @@ export class TasksService {
   /**
    * This cron will be executed in a secure environment [HML, PRD]
    */
-  @Cron(CronExpression.EVERY_MINUTE)
+  @Cron(CronExpression.EVERY_30_MINUTES)
   async importFromS3() {
     this.logger.log(`Start Import from AWS S3`);
     if (!includes(secureEnvs, process.env.NODE_ENV)) {
       this.logger.log(`Not a secure environnement END Import from AWS S3`);
-      return false;
-    }
-    const inProgressImports = await this.rawAmountsService.findAll();
-    if (inProgressImports.length) {
-      this.logger.log(`An import is already running END Import from AWS S3`);
       return false;
     }
 
@@ -160,11 +162,18 @@ export class TasksService {
       if (!this.constantService.GLOBAL_CONST.QUEUE[flowType]) return;
       if (existsSync(rejectedFile)) return;
       const rawInProgress = await this.rawAmountsService.findOne({ datasource: flow });
-      if (rawInProgress && !isEmpty(rawInProgress)) return;
+      if (rawInProgress && !isEmpty(rawInProgress)) {
+        this.logger.log(`${flow} is currently being processed`);
+        return;
+      }
 
       const s3object = await this.S3.getObject(params).promise();
       const parsed = await this.parseFile(s3object.Body, flow);
-      if (parsed) this.S3.deleteObject(params).promise();
+      this.logger.log(`${flow} processing finished ${parsed}`);
+      if (parsed) {
+        this.logger.log(`deleting ${flow}`);
+        this.S3.deleteObject(params).promise();
+      }
     }
     this.logger.log(`End Import from AWS S3`);
   }
