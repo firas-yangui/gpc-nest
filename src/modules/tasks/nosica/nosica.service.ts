@@ -12,22 +12,7 @@ import { PricesService } from '../../prices/prices.service';
 import { CurrencyRateService } from '../../currency-rate/currency-rate.service';
 import { ConstantService } from '../../constants/constants';
 import { AmountConverter } from '../../amounts/amounts.converter';
-
-const nosicaField = {
-  trigram: 'cds',
-  year: 'fiscal_year',
-  period: 'accounting_period',
-  NRG: 'code_snrg',
-  amount: 'ytd_amount_eur_currency_wi_adjust',
-};
-
-const cdsType = {
-  coo: 'RESG/BSC/COO',
-  dir: 'RESG/BSC/DIR',
-  fat: 'RESG/BSC/FAT',
-  fae: 'RESG/BSC/FAE',
-  PRF: 'RESG/BSC/PRF',
-};
+import { ImportMappingService } from 'src/modules/importmapping/importmapping.service';
 
 const serviceName = '%Activités Transverses%';
 @Injectable()
@@ -42,31 +27,22 @@ export class NosicaService {
     private readonly pricesService: PricesService,
     private readonly currencyRateService: CurrencyRateService,
     private readonly constantService: ConstantService,
+    private readonly importMappingService: ImportMappingService,
   ) {}
 
-  private cdsToCsm = (cds: string) => {
-    switch (cds) {
-      case cdsType.coo:
-        return cdsType.coo.concat('/PRF');
-      case cdsType.fat:
-        return cdsType.coo.concat('/PRF');
-      case cdsType.fae:
-        return cdsType.coo.concat('/PRF');
-      case cdsType.PRF:
-        return cdsType.coo.concat('/PRF');
-      case cdsType.dir:
-        return cdsType.dir.concat('/DIR');
-      default:
-        return cds.concat('/COO');
-    }
+  getThirdParty = async (trigram: string): Promise<Thirdparty> => {
+    const thirdparty = await this.importMappingService.getMapping('NOSICA', 'THIRDPARTY', trigram);
+    if (!thirdparty) throw `No Thirdparty found for Trigram Code : ${trigram}`;
+    return thirdparty;
   };
 
   import = async (filename, line: Record<string, any>): Promise<Record<string, any>> => {
-    const receivedTrigram = this.cdsToCsm(line[nosicaField.trigram].trim());
-    const receivedYear = line[nosicaField.year].trim();
-    const receivedNRGCode = line[nosicaField.NRG].trim();
-    const receivedMonth = line[nosicaField.period].trim();
-    let amount = line[nosicaField.amount].trim();
+    const nosicaField = this.constantService.GLOBAL_CONST.QUEUE.NOSICA.HEADER;
+    const receivedTrigram = line[nosicaField[8]].trim();
+    const receivedYear = line[nosicaField[0]].trim();
+    const receivedNRGCode = line[nosicaField[6]].trim();
+    const receivedMonth = line[nosicaField[1]].trim();
+    let amount = line[nosicaField[14]].trim();
 
     const actualPeriodAppSettings = await this.periodsService.findOneInAppSettings(this.constantService.GLOBAL_CONST.SCOPES.BSC, {
       year: receivedYear,
@@ -80,8 +56,7 @@ export class NosicaService {
     if (!amount || !Number(amount)) throw `No amount defined for this line :${JSON.stringify(line)}`;
     amount = (amount * -1) / 1000;
 
-    const thirdparty: Thirdparty = await this.thirdpartiesService.findOne({ name: Like(receivedTrigram) });
-    if (!thirdparty) throw `No Thirdparty found for Trigram Code : ${receivedTrigram}`;
+    const thirdparty: Thirdparty = await this.getThirdParty(receivedTrigram);
 
     const subnatureappsetting = await this.subnatureappsettingsService.findOne({
       where: { nrgcode: Like(`%${receivedNRGCode}%`), gpcappsettingsid: this.constantService.GLOBAL_CONST.SCOPES.BSC },
