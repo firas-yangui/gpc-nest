@@ -13,6 +13,7 @@ import { ThirdpartiesModule } from './../../../modules/thirdparties/thirdparties
 import { ConstantsModule } from './../../constants/constants.module';
 import { CurrencyRateModule } from './../../currency-rate/currency-rate.module';
 import { PricesModule } from './../../prices/prices.module';
+import { ImportMappingModule } from '../../importmapping/importmapping.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { PricesModule } from './../../prices/prices.module';
     SubservicesModule,
     SubnatureappsettingsModule,
     WorkloadsModule,
+    ImportMappingModule,
   ],
   providers: [NosicaService, ProductService],
   exports: [NosicaService, ProductService],
