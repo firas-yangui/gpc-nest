@@ -12,7 +12,7 @@ import { PricesService } from '../../prices/prices.service';
 import { CurrencyRateService } from '../../currency-rate/currency-rate.service';
 import { ConstantService } from '../../constants/constants';
 import { AmountConverter } from '../../amounts/amounts.converter';
-import { ImportMappingService } from 'src/modules/importmapping/importmapping.service';
+import { ImportMappingService } from '../../importmapping/importmapping.service';
 
 const serviceName = '%Activités Transverses%';
 @Injectable()
