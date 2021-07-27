@@ -99,12 +99,12 @@ export class LicenceMaintenanceService {
     return subnature;
   };
 
-  getThirdPartyByTrigram = async (thirdPartyTrigram: string): Promise<Thirdparty> => {
-    const thirdParty = await this.thirdpartiesService.findOne({ trigram: Like('%' + thirdPartyTrigram + '%') });
-    if (!thirdParty) {
-      throw `No Thirdparty found for trigram like : ${thirdPartyTrigram}`;
-    }
-    return thirdParty;
+  getPayorThirdparty = async (thirdPartyTrigram: string): Promise<Thirdparty> => {
+    const LICENCE_MAINTENANCE = 'LICENCE & MAINTENANCE';
+    const PAYOR = 'PAYOR';
+    const thirdparty = await this.importMappingService.getMapping(LICENCE_MAINTENANCE, PAYOR, thirdPartyTrigram);
+    if (!thirdparty) throw `No payor thirdparty found for thirdparty trigram: ${thirdPartyTrigram}`;
+    return thirdparty;
   };
 
   getThirdPartyByName = async (thirdpartyName: string): Promise<Thirdparty> => {
@@ -159,7 +159,7 @@ export class LicenceMaintenanceService {
   };
 
   getSubservice = async (payorTrigram: string): Promise<SubService> => {
-    const payor = await this.getThirdPartyByTrigram(payorTrigram);
+    const payor = await this.getPayorThirdparty(payorTrigram);
     const service = await this.getService(payor);
     const subService = await this.subServiceService.findOne({
       where: { service, thirdparty: payor },
