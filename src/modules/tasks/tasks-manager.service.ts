@@ -132,7 +132,7 @@ export class TasksService {
   /**
    * This cron will be executed in a secure environment [HML, PRD]
    */
-  @Cron(CronExpression.EVERY_30_MINUTES)
+  @Cron(CronExpression.EVERY_MINUTE)
   async importFromS3() {
     this.logger.log(`Start Import from AWS S3`);
     if (!includes(secureEnvs, process.env.NODE_ENV)) {
@@ -158,18 +158,32 @@ export class TasksService {
       params = { ...params, Key: flow };
       const rejectedFile = `/tmp/${flow}.REJECTED.csv`;
 
-      if (!flowType) return;
-      if (!this.constantService.GLOBAL_CONST.QUEUE[flowType]) return;
-      if (existsSync(rejectedFile)) return;
+      if (!flowType) {
+        this.logger.log(`${flow} cannot get flowtype`);
+        this.S3.deleteObject(params).promise();
+        return;
+      }
+      if (!this.constantService.GLOBAL_CONST.QUEUE[flowType]) {
+        this.logger.log(`${flowType} doesn't exist in GPC`);
+        this.S3.deleteObject(params).promise();
+        return;
+      }
+      if (existsSync(rejectedFile)) {
+        this.logger.log(`${rejectedFile} already exist`);
+        this.S3.deleteObject(params).promise();
+        return;
+      }
       const rawInProgress = await this.rawAmountsService.findOne({ datasource: flow });
       if (rawInProgress && !isEmpty(rawInProgress)) {
         this.logger.log(`${flow} is currently being processed`);
+        this.S3.deleteObject(params).promise();
         return;
       }
 
       const s3object = await this.S3.getObject(params).promise();
+      this.logger.log(`${flow} start processing at ${Date.now()}`);
       const parsed = await this.parseFile(s3object.Body, flow);
-      this.logger.log(`${flow} processing finished ${parsed}`);
+      this.logger.log(`${flow} processing finished at ${Date.now()}`);
       if (parsed) {
         this.logger.log(`deleting ${flow}`);
         this.S3.deleteObject(params).promise();
