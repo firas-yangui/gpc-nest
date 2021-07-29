@@ -154,36 +154,38 @@ export class TasksService {
 
     for await (const file of objects.Contents) {
       const flow = file.Key;
+      let process = true;
       const flowType = this.getFlowType(flow);
       params = { ...params, Key: flow };
       const rejectedFile = `/tmp/${flow}.REJECTED.csv`;
 
       if (!flowType) {
         this.logger.log(`${flow} cannot get flowtype`);
-        this.S3.deleteObject(params).promise();
-        break;
+        process = false;
       }
       if (!this.constantService.GLOBAL_CONST.QUEUE[flowType]) {
         this.logger.log(`${flowType} doesn't exist in GPC`);
-        break;
+        process = false;
       }
       if (existsSync(rejectedFile)) {
         this.logger.log(`${rejectedFile} already exist`);
-        this.S3.deleteObject(params).promise();
-        break;
+        process = false;
       }
       const rawInProgress = await this.rawAmountsService.findOne({ datasource: flow });
       if (rawInProgress && !isEmpty(rawInProgress)) {
         this.logger.log(`${flow} is currently being processed`);
-        this.S3.deleteObject(params).promise();
-        break;
+        process = false;
       }
-
-      const s3object = await this.S3.getObject(params).promise();
-      this.logger.log(`${flow} start processing at ${Date.now().toString()}`);
-      const parsed = await this.parseFile(s3object.Body, flow);
-      this.logger.log(`${flow} processing finished at ${Date.now().toString()}`);
-      if (parsed) {
+      if (process) {
+        const s3object = await this.S3.getObject(params).promise();
+        this.logger.log(`${flow} start processing at ${Date.now().toString()}`);
+        const parsed = await this.parseFile(s3object.Body, flow);
+        this.logger.log(`${flow} processing finished at ${Date.now().toString()}`);
+        if (parsed) {
+          this.logger.log(`deleting ${flow}`);
+          this.S3.deleteObject(params).promise();
+        }
+      } else {
         this.logger.log(`deleting ${flow}`);
         this.S3.deleteObject(params).promise();
       }
