@@ -161,29 +161,28 @@ export class TasksService {
       if (!flowType) {
         this.logger.log(`${flow} cannot get flowtype`);
         this.S3.deleteObject(params).promise();
-        return;
+        break;
       }
       if (!this.constantService.GLOBAL_CONST.QUEUE[flowType]) {
         this.logger.log(`${flowType} doesn't exist in GPC`);
-        this.S3.deleteObject(params).promise();
-        return;
+        break;
       }
       if (existsSync(rejectedFile)) {
         this.logger.log(`${rejectedFile} already exist`);
         this.S3.deleteObject(params).promise();
-        return;
+        break;
       }
       const rawInProgress = await this.rawAmountsService.findOne({ datasource: flow });
       if (rawInProgress && !isEmpty(rawInProgress)) {
         this.logger.log(`${flow} is currently being processed`);
         this.S3.deleteObject(params).promise();
-        return;
+        break;
       }
 
       const s3object = await this.S3.getObject(params).promise();
-      this.logger.log(`${flow} start processing at ${Date.now()}`);
+      this.logger.log(`${flow} start processing at ${Date.now().toString()}`);
       const parsed = await this.parseFile(s3object.Body, flow);
-      this.logger.log(`${flow} processing finished at ${Date.now()}`);
+      this.logger.log(`${flow} processing finished at ${Date.now().toString()}`);
       if (parsed) {
         this.logger.log(`deleting ${flow}`);
         this.S3.deleteObject(params).promise();
