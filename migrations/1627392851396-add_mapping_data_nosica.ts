@@ -766,7 +766,7 @@ export class addMappingDataNosica1627392851396 implements MigrationInterface {
         ('LICENCE & MAINTENANCE', 'ORGA', 'Service', 'name','SGEG_BSC', 'SGEF'),
         ('LICENCE & MAINTENANCE', 'ORGA', 'Service', 'name','SGSS', 'SGSS'),
         ('LICENCE & MAINTENANCE', 'ORGA', 'Service', 'name','TRS', 'Transactis'),
-        ('LICENCE & MAINTENANCE', 'ORGA', 'Service', 'name','WAAM', 'WAAM');
+        ('LICENCE & MAINTENANCE', 'ORGA', 'Service', 'name','WAAM', 'WAAM'),
 
         ('LICENCE & MAINTENANCE', 'PAYOR', 'Thirdparty', 'trigram','AFMO','AFMO_BSC'),
         ('LICENCE & MAINTENANCE', 'PAYOR', 'Thirdparty', 'trigram','ALDA','ALDA'),
@@ -1606,7 +1606,7 @@ export class addMappingDataNosica1627392851396 implements MigrationInterface {
         ('LICENCE & MAINTENANCE', 'ORGA', 'Service', 'name','SGEG_BSC', 'SGEF'),
         ('LICENCE & MAINTENANCE', 'ORGA', 'Service', 'name','SGSS', 'SGSS'),
         ('LICENCE & MAINTENANCE', 'ORGA', 'Service', 'name','TRS', 'Transactis'),
-        ('LICENCE & MAINTENANCE', 'ORGA', 'Service', 'name','WAAM', 'WAAM');
+        ('LICENCE & MAINTENANCE', 'ORGA', 'Service', 'name','WAAM', 'WAAM'),
 
         ('LICENCE & MAINTENANCE', 'PAYOR', 'Thirdparty', 'trigram','AFMO','AFMO_BSC'),
         ('LICENCE & MAINTENANCE', 'PAYOR', 'Thirdparty', 'trigram','ALDA','ALDA'),
