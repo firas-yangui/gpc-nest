@@ -812,7 +812,7 @@ export class fixMigration1628243991638 implements MigrationInterface {
         ('LICENCE & MAINTENANCE', 'PAYOR', 'Thirdparty', 'trigram','DRHG','HRCO'),
         ('LICENCE & MAINTENANCE', 'PAYOR', 'Thirdparty', 'trigram','SGEB','RESG_EBS'),
         ('LICENCE & MAINTENANCE', 'PAYOR', 'Thirdparty', 'trigram','RESG/BSC','CFT_AC'),
-        ('LICENCE & MAINTENANCE', 'PAYOR', 'Thirdparty', 'trigram','DIR','RESG_DIR'),
+        ('LICENCE & MAINTENANCE', 'PAYOR', 'Thirdparty', 'trigram','DIR','RESG/DIR'),
         ('LICENCE & MAINTENANCE', 'PAYOR', 'Thirdparty', 'trigram','RESG/TPS','RESG/TPS'),
 
         ('NOSICA', 'THIRDPARTY', 'Thirdparty', 'name', 'RESG/CFT/FAT','RESG/CFT/MGT/MGT'),
