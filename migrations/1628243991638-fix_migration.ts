@@ -1,6 +1,6 @@
 import {MigrationInterface, QueryRunner} from "typeorm";
 
-export class addMappingDataNosica1627392851396 implements MigrationInterface {
+export class fixMigration1628243991638 implements MigrationInterface {
 
     public async up(queryRunner: QueryRunner): Promise<any> {
         await queryRunner.query(`TRUNCATE TABLE importmapping`);
@@ -715,7 +715,7 @@ export class addMappingDataNosica1627392851396 implements MigrationInterface {
         ('PYRAMID', 'PAYOR', 'Thirdparty', 'trigram', 'RESG/TPS/GDO/CTA','RESG/TPS'),
         ('PYRAMID', 'PAYOR', 'Thirdparty', 'trigram', 'RESG/TPS/ISR/RSW','RESG/TPS'),
         ('PYRAMID', 'PAYOR', 'Thirdparty', 'trigram', 'RESG/TPS/ISR/CTA','RESG/TPS'),
-        ('PYRAMID', 'PAYOR', 'Thirdparty', 'trigram', 'RESG/CFT/FAT/TSV/CFT  ','GSPR'),
+        ('PYRAMID', 'PAYOR', 'Thirdparty', 'trigram', 'RESG/CFT/FAT/TSV/CFT','GSPR'),
         ('PYRAMID', 'PAYOR', 'Thirdparty', 'trigram', 'RESG/CFT/ITO/ODS/LIF','CFT_OdS'),
         ('PYRAMID', 'PAYOR', 'Thirdparty', 'trigram', 'RESG/DDS/FAT/TPS/GDO','DDS_AC'),
         ('PYRAMID', 'PAYOR', 'Thirdparty', 'trigram', 'RESG/CFT/H2R/ODS/LIF    ','CFT_OdS'),
@@ -812,7 +812,7 @@ export class addMappingDataNosica1627392851396 implements MigrationInterface {
         ('LICENCE & MAINTENANCE', 'PAYOR', 'Thirdparty', 'trigram','DRHG','HRCO'),
         ('LICENCE & MAINTENANCE', 'PAYOR', 'Thirdparty', 'trigram','SGEB','RESG_EBS'),
         ('LICENCE & MAINTENANCE', 'PAYOR', 'Thirdparty', 'trigram','RESG/BSC','CFT_AC'),
-        ('LICENCE & MAINTENANCE', 'PAYOR', 'Thirdparty', 'trigram','DIR','RESG_DIR'),
+        ('LICENCE & MAINTENANCE', 'PAYOR', 'Thirdparty', 'trigram','DIR','RESG/DIR'),
         ('LICENCE & MAINTENANCE', 'PAYOR', 'Thirdparty', 'trigram','RESG/TPS','RESG/TPS'),
 
         ('NOSICA', 'THIRDPARTY', 'Thirdparty', 'name', 'RESG/CFT/FAT','RESG/CFT/MGT/MGT'),
@@ -1653,7 +1653,32 @@ export class addMappingDataNosica1627392851396 implements MigrationInterface {
         ('LICENCE & MAINTENANCE', 'PAYOR', 'Thirdparty', 'trigram','SGEB','RESG_EBS'),
         ('LICENCE & MAINTENANCE', 'PAYOR', 'Thirdparty', 'trigram','RESG/BSC','CFT_AC'),
         ('LICENCE & MAINTENANCE', 'PAYOR', 'Thirdparty', 'trigram','DIR','RESG_DIR'),
-        ('LICENCE & MAINTENANCE', 'PAYOR', 'Thirdparty', 'trigram','RESG/TPS','RESG/TPS');
+        ('LICENCE & MAINTENANCE', 'PAYOR', 'Thirdparty', 'trigram','RESG/TPS','RESG/TPS'),
+
+        ('NOSICA', 'THIRDPARTY', 'Thirdparty', 'name', 'RESG/CFT/FAT','RESG/CFT/MGT/MGT'),
+        ('NOSICA', 'THIRDPARTY', 'Thirdparty', 'name', 'RESG/DDS/FAT','RESG/DDS/MGT/MGT'),
+        ('NOSICA', 'THIRDPARTY', 'Thirdparty', 'name', 'RESG/CFT/FAE','RESG/CFT/MGT/MGT'),
+        ('NOSICA', 'THIRDPARTY', 'Thirdparty', 'name', 'RESG/DDS/FAE','RESG/DDS/MGT/MGT'),
+        ('NOSICA', 'THIRDPARTY', 'Thirdparty', 'name', 'RESG/CFT/COO','RESG/CFT/COO/MGT'),
+        ('NOSICA', 'THIRDPARTY', 'Thirdparty', 'name', 'RESG/CFT/ARC','RESG/CFT/ARC/MGT'),
+        ('NOSICA', 'THIRDPARTY', 'Thirdparty', 'name', 'RESG/CFT/COO','RESG/CFT/COO/MGT'),
+        ('NOSICA', 'THIRDPARTY', 'Thirdparty', 'name', 'RESG/CFT/CRL','RESG/CFT/CRL/MGT'),
+        ('NOSICA', 'THIRDPARTY', 'Thirdparty', 'name', 'RESG/CFT/FIN','RESG/CFT/FIN/MGT'),
+        ('NOSICA', 'THIRDPARTY', 'Thirdparty', 'name', 'RESG/CFT/H2R','RESG/CFT/H2R/MGT'),
+        ('NOSICA', 'THIRDPARTY', 'Thirdparty', 'name', 'RESG/CFT/ITO','RESG/CFT/ITO/MGT'),
+        ('NOSICA', 'THIRDPARTY', 'Thirdparty', 'name', 'RESG/CFT/MGT','RESG/CFT/MGT/MGT'),
+        ('NOSICA', 'THIRDPARTY', 'Thirdparty', 'name', 'RESG/CFT/SCR','RESG/CFT/SCR/MGT'),
+        ('NOSICA', 'THIRDPARTY', 'Thirdparty', 'name', 'RESG/CFT/SEC','RESG/CFT/SEC/MGT'),
+        ('NOSICA', 'THIRDPARTY', 'Thirdparty', 'name', 'RESG/CFT/TSR','RESG/CFT/TSR/MGT'),
+        ('NOSICA', 'THIRDPARTY', 'Thirdparty', 'name', 'RESG/DDS/ARC','RESG/DDS/ARC/MGT'),
+        ('NOSICA', 'THIRDPARTY', 'Thirdparty', 'name', 'RESG/DDS/DCS','RESG/DDS/DCS/MGT'),
+        ('NOSICA', 'THIRDPARTY', 'Thirdparty', 'name', 'RESG/DDS/DAT','RESG/DDS/DAT/MGT'),
+        ('NOSICA', 'THIRDPARTY', 'Thirdparty', 'name', 'RESG/DDS/GSO','RESG/DDS/GSO/MGT'),
+        ('NOSICA', 'THIRDPARTY', 'Thirdparty', 'name', 'RESG/DDS/ITF','RESG/DDS/ITF/MGT'),
+        ('NOSICA', 'THIRDPARTY', 'Thirdparty', 'name', 'RESG/DDS/MGT','RESG/DDS/MGT/MGT'),
+        ('NOSICA', 'THIRDPARTY', 'Thirdparty', 'name', 'RESG/DDS/REF','RESG/DDS/REF/MGT'),
+        ('NOSICA', 'THIRDPARTY', 'Thirdparty', 'name', 'RESG/CFT/MGT','RESG/CFT/MGT/MGT'),
+        ('NOSICA', 'THIRDPARTY', 'Thirdparty', 'name', 'RESG/DDS/MGT','RESG/DDS/MGT/MGT');
         `);
     }
 
