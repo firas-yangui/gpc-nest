@@ -269,7 +269,7 @@ export class WorkloadsService {
     with treeData as (${subquery}) SELECT distinct ${columns.join(',')}/*exemple :svrName, ssCode, ssName, plan*/ 
     from treeData t where 1=1 `;
 
-    if (parentTreeNode!=null) {
+    if (parentTreeNode != null) {
       Object.keys(parentTreeNode).forEach(parentColumn => {
         const id = parentTreeNode[parentColumn];
         assertOnlyNumbers(id);
