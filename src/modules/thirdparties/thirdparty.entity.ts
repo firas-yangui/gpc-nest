@@ -10,6 +10,7 @@ import { Price } from './../prices/prices.entity';
 import { Workload } from '../workloads/workload.entity';
 import { SubsidiaryAllocation } from './../subsidiaryallocation/subsidiaryallocation.entity';
 import { AmountStat } from '../amountstats/amountstat.entity';
+import { Activity } from '../activity/activity.entity';
 
 @Entity('thirdparty')
 export class Thirdparty {
@@ -136,4 +137,11 @@ export class Thirdparty {
   )
   @JoinColumn({ name: 'countryid' })
   country: Country;
+
+  @OneToMany(
+    () => Thirdparty,
+    (thirdparty: Thirdparty) => thirdparty.activity,
+    { onDelete: 'CASCADE' },
+  )
+  activity: Activity[];
 }
