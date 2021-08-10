@@ -15,6 +15,10 @@ export class ActivityService {
     return this.activityRepository.findOne(options);
   }
 
+  async find(options: Record<string, any> = {}): Promise<Activity[]> {
+    return this.activityRepository.find(options);
+  }
+
   save = async (activity: object = {}): Promise<Activity> => {
     return this.activityRepository.save(activity);
   };
