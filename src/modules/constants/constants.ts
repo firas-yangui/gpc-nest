@@ -270,4 +270,6 @@ export class ConstantService {
     }),
     S3_BUCKET: 'bsc-fin-fpm-gpc-a2870-',
   });
+
+  public ACTIVIT_THIRDPARTY_KEYS = ['startDate', 'endDate', 'partnerPercentages', 'activity'];
 }

@@ -9,4 +9,14 @@ export const ERRORS = Object.freeze({
     TYPE: 'Not Found',
     DESCRIPTION: 'Not Found',
   }),
+  PERCENTAGE_KO: Object.freeze({
+    CODE: 3,
+    TYPE: 'PERCENTAGE KO',
+    DESCRIPTION: 'THE SUM OF PERCENTAGES OF PARTNERS SHOULD BE UP TO 100',
+  }),
+  DATES_KO: Object.freeze({
+    CODE: 4,
+    TYPE: 'DATES KO',
+    DESCRIPTION: 'END DATE SHOULD BE AFTER THAN START DATE',
+  }),
 });

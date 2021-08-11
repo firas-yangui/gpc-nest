@@ -2,7 +2,7 @@ import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn } 
 import { Thirdparty } from '../thirdparties/thirdparty.entity';
 import { Activity } from '../activity/activity.entity';
 
-@Entity('activity-thirdparty')
+@Entity('activity_thirdparty')
 export class ActivityThirdParty {
   @PrimaryGeneratedColumn({
     type: 'integer',
@@ -16,12 +16,24 @@ export class ActivityThirdParty {
   })
   percent: number;
 
+  @Column('date', {
+    nullable: true,
+    name: 'start_date',
+  })
+  startDate: Date;
+
+  @Column('date', {
+    nullable: true,
+    name: 'end_date',
+  })
+  endDate: Date;
+
   @ManyToOne(
     () => Activity,
     (activity: Activity) => activity.thirdParty,
     { nullable: false, onUpdate: 'CASCADE' },
   )
-  @JoinColumn({ name: 'activity' })
+  @JoinColumn({ name: 'activity_id' })
   activity: Activity | null;
 
   @ManyToOne(
@@ -29,6 +41,6 @@ export class ActivityThirdParty {
     (thirdParty: Thirdparty) => thirdParty.activity,
     { nullable: false, onUpdate: 'CASCADE' },
   )
-  @JoinColumn({ name: 'periodid' })
+  @JoinColumn({ name: 'thirdparty_id' })
   thirdParty: Thirdparty | null;
 }
