@@ -1,4 +1,4 @@
-import { Get, Query, Header, Controller, Post, Body, Res, HttpStatus, Param } from '@nestjs/common';
+import { Get, Query, Header, Controller, Post, Body, Res, HttpStatus, Param, Logger } from '@nestjs/common';
 import { ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { ErrorModel } from './../exceptions-handler/error-model';
 import { SUCCESS } from '../success-handler/success.constatns';
@@ -14,6 +14,7 @@ import { ConstantService } from '../constants/constants';
 
 @Controller('activitythirdparty')
 export class ActivityThirdPartyController {
+  private logger = new Logger(ActivityThirdPartyController.name);
   constructor(private readonly activityThirdPartyService: ActivityThirdPartyService, private readonly constantService: ConstantService) {}
 
   @Post()
@@ -49,25 +50,41 @@ export class ActivityThirdPartyController {
     isArray: false,
   })
   async addConversionRate(@Body() activityThirdPartyDto: ActivityThirdPartyDto, @Res() response: Response) {
-    const structureErrors = [];
-    this.constantService.ACTIVIT_THIRDPARTY_KEYS.map(attribute => {
-      if (!activityThirdPartyDto[attribute] || activityThirdPartyDto[attribute] == null) {
-        structureErrors.push(`${attribute} ${ERRORS.MISSING.TYPE}`);
+    try {
+      const structureErrors = [];
+      this.constantService.ACTIVIT_THIRDPARTY_KEYS.map(attribute => {
+        if (!activityThirdPartyDto[attribute] || activityThirdPartyDto[attribute] == null) {
+          structureErrors.push(`${attribute} ${ERRORS.MISSING.TYPE}`);
+        }
+      });
+      if (structureErrors.length != 0) {
+        const exception = new CustomBadRequestException(ERRORS.MISSING.CODE, ERRORS.MISSING.DESCRIPTION, structureErrors);
+        return exception.toHttpException(response);
       }
-    });
-    if (structureErrors.length != 0) {
-      const exception = new CustomBadRequestException(ERRORS.MISSING.CODE, ERRORS.MISSING.DESCRIPTION, structureErrors);
-      return exception.toHttpException(response);
-    }
-    const activityThirdParty = new ActivityThirdPartyDto(activityThirdPartyDto);
-    const percentageValide = this.activityThirdPartyService.percentageValidation(activityThirdParty.getPartnerPercentages());
-    if (!percentageValide) {
-      const exception = new CustomBadRequestException(ERRORS.PERCENTAGE_KO.CODE, ERRORS.PERCENTAGE_KO.DESCRIPTION);
-      return exception.toHttpException(response);
-    }
-    if (activityThirdParty.getStartDate() > activityThirdParty.getEndDate()) {
-      const exception = new CustomBadRequestException(ERRORS.DATES_KO.CODE, ERRORS.DATES_KO.DESCRIPTION);
-      return exception.toHttpException(response);
+      const activityThirdParty = new ActivityThirdPartyDto(activityThirdPartyDto);
+      const percentageValide = this.activityThirdPartyService.percentageValidation(activityThirdParty.getThirdPartyPercentages());
+      if (!percentageValide) {
+        const exception = new CustomBadRequestException(ERRORS.PERCENTAGE_KO.CODE, ERRORS.PERCENTAGE_KO.DESCRIPTION);
+        return exception.toHttpException(response);
+      }
+      if (activityThirdParty.getStartDate() > activityThirdParty.getEndDate()) {
+        const exception = new CustomBadRequestException(ERRORS.DATES_KO.CODE, ERRORS.DATES_KO.DESCRIPTION);
+        return exception.toHttpException(response);
+      }
+      const result = await this.activityThirdPartyService.linkActivityToThirdParty(activityThirdParty);
+      if (result == ERRORS.ACTIVITY_NOT_FOUND) {
+        const exception = new CustomBadRequestException(ERRORS.ACTIVITY_NOT_FOUND.CODE, ERRORS.ACTIVITY_NOT_FOUND.DESCRIPTION);
+        return exception.toHttpException(response);
+      }
+      if (result == ERRORS.THIRDPARTY_NOT_FOUND) {
+        const exception = new CustomBadRequestException(ERRORS.THIRDPARTY_NOT_FOUND.CODE, ERRORS.THIRDPARTY_NOT_FOUND.DESCRIPTION);
+        return exception.toHttpException(response);
+      }
+      if (result == SUCCESS.CREATE) {
+        return response.status(SUCCESS.CREATE.STATUS).json(SUCCESS.CREATE);
+      }
+    } catch (error) {
+      this.logger.log(error);
     }
   }
 }

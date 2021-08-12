@@ -5,8 +5,10 @@ import { ActivityThirdParty } from './activity-thirdparty.entity';
 import { ActivityService } from '../activity/activity.service';
 import { ThirdpartiesService } from '../thirdparties/thirdparties.service';
 import { ActivityThirdPartyDto } from './activity-thirdparty.dto';
-import { PartnerPercentage } from './partner-percentage.dto';
+import { ThirdPartyPercentage } from './thirdParty-percentage.dto';
 import * as _ from 'lodash';
+import { ERRORS } from '../exceptions-handler/errors.constants';
+import { SUCCESS } from '../success-handler/success.constatns';
 
 @Injectable()
 export class ActivityThirdPartyService {
@@ -35,7 +37,69 @@ export class ActivityThirdPartyService {
     const total = _.sumBy(partnerPercentages, partnerPercentage => partnerPercentage.percent);
     return total == 100 ? true : false;
   }
-  // async addActivityThirdParty(ActivityThirdPartyDto): Promise<ActivityThirdParty[]> {
-  //   return activityThirdParty = new ActivityThirdParty
-  // }
+
+  async linkActivityToThirdParty(activityThirdPartyDto: ActivityThirdPartyDto): Promise<any> {
+    try {
+      const startDate = activityThirdPartyDto.getStartDate();
+      const endDate = activityThirdPartyDto.getEndDate();
+      const activityOptions = {
+        where: {
+          activityCode: activityThirdPartyDto.getActivity(),
+        },
+      };
+      const activity = await this.activityService.findOne(activityOptions);
+      if (!activity) {
+        this.logger.log(ERRORS.ACTIVITY_NOT_FOUND.DESCRIPTION);
+        return ERRORS.ACTIVITY_NOT_FOUND;
+      }
+      const thirdPartyPercentages = activityThirdPartyDto.getThirdPartyPercentages();
+      for (const thirdPartyPercentage of thirdPartyPercentages) {
+        const id = thirdPartyPercentage['thirdParty'] ? thirdPartyPercentage['thirdParty'] : null;
+        const options = {
+          where: {
+            id,
+          },
+        };
+        const thirdParty = await this.thirdpartiesService.findOne(options);
+        if (!thirdParty) {
+          this.logger.log(ERRORS.THIRDPARTY_NOT_FOUND.DESCRIPTION);
+          return ERRORS.THIRDPARTY_NOT_FOUND;
+        } else {
+          const percent = thirdPartyPercentage['percent'];
+          const activitythirdpartyEntity = {
+            startDate,
+            endDate,
+            activity,
+            thirdParty,
+          };
+          const options = {
+            where: {
+              ...activitythirdpartyEntity,
+            },
+          };
+          const activitythirdpartyExists = await this.activityThirdPartyRepository.findOne(options);
+          if (activitythirdpartyExists) {
+            this.logger.log(activitythirdpartyExists);
+            this.logger.log('ACTIVITY THIRDPARTY PERCENTAGE FOUND');
+            const id = activitythirdpartyExists['id'];
+            await this.activityThirdPartyRepository.save({
+              id,
+              percent,
+              ...activitythirdpartyEntity,
+            });
+          } else {
+            this.logger.log(activitythirdpartyExists);
+            this.logger.log('ACTIVITY THIRDPARTY PERCENTAGE NOT FOUND');
+            await this.activityThirdPartyRepository.save({
+              percent,
+              ...activitythirdpartyEntity,
+            });
+          }
+        }
+      }
+      return SUCCESS.CREATE;
+    } catch (error) {
+      this.logger.log(error);
+    }
+  }
 }

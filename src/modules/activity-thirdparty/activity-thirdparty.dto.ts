@@ -1,15 +1,15 @@
-import { PartnerPercentage } from './partner-percentage.dto';
+import { ThirdPartyPercentage } from './thirdParty-percentage.dto';
 export class ActivityThirdPartyDto {
   private startDate: Date;
   private endDate: Date;
   private activity: number;
-  private partnerPercentages: PartnerPercentage[];
+  private thirdPartyPercentages: ThirdPartyPercentage[];
 
   constructor(activityThirdPartyDto: ActivityThirdPartyDto) {
     this.startDate = activityThirdPartyDto.startDate;
     this.endDate = activityThirdPartyDto.endDate;
     this.activity = activityThirdPartyDto.activity;
-    this.partnerPercentages = activityThirdPartyDto.partnerPercentages;
+    this.thirdPartyPercentages = activityThirdPartyDto.thirdPartyPercentages;
   }
 
   public getStartDate(): Date {
@@ -24,7 +24,7 @@ export class ActivityThirdPartyDto {
     return this.activity;
   }
 
-  public getPartnerPercentages(): PartnerPercentage[] {
-    return this.partnerPercentages;
+  public getThirdPartyPercentages(): ThirdPartyPercentage[] {
+    return this.thirdPartyPercentages;
   }
 }
