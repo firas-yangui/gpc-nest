@@ -12,6 +12,10 @@ export class createMappingCaPayorPartnerTrigramTable1629109896119 implements Mig
             generationStrategy: 'increment',
           },
           {
+            name: 'code_ca_payor',
+            type: 'varchar',
+          },
+          {
             name: 'libelle_ca_payor',
             type: 'varchar',
           },

@@ -10,9 +10,15 @@ export class MappingCaPayor {
 
   @Column('text', {
     nullable: false,
+    name: 'code_ca_payor',
+  })
+  codeCaPayor: string;
+
+  @Column('text', {
+    nullable: false,
     name: 'libelle_ca_payor',
   })
-  caPayor: string;
+  libelleCaPayor: string;
 
   @Column('text', {
     nullable: false,
