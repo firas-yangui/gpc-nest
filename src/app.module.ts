@@ -29,6 +29,7 @@ import { IrtApplicationModule } from './modules/irtapplication/irtapplication.mo
 import { ImportMappingModule } from './modules/importmapping/importmapping.module';
 import { ActivityThirdPartyModule } from './modules/activity-thirdparty/activity-thirdparty.module';
 import { ActivitModule } from './modules/activity/activity.module';
+import { MappingCaPayorModule } from './modules/mappingcapayor/mappingcapayor.module';
 
 import DbLoader from './loader';
 
@@ -88,6 +89,7 @@ const mailerOptions: MailerOptions = {
     TasksModule,
     SchedulerModule,
     AmountStatsModule,
+    MappingCaPayorModule,
     IrtApplicationModule,
     ImportMappingModule,
     ActivityThirdPartyModule,
