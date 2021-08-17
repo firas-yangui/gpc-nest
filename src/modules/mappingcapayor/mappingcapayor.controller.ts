@@ -1,6 +1,7 @@
-import { Controller, Get, Logger, Post, Body, Res } from '@nestjs/common';
+import { Get, Controller, Post, Body, Res, Logger } from '@nestjs/common';
 import { MappingCaPayorService } from './mappingcapayor.service';
 import { ApiTags } from '@nestjs/swagger';
+import { Response } from 'express';
 
 @Controller('mapping-ca-payor')
 @ApiTags('mapping-ca-payor')
@@ -25,5 +26,10 @@ export class MappingCaPayorController {
       Logger.error(error);
       return [];
     }
+  }
+
+  @Get('/export')
+  async exportMappingCaPayor(@Res() response: Response): Promise<any> {
+    return await this.MappingCaPayorService.exportMappingCaPayor(response);
   }
 }
