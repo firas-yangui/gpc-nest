@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { MappingCaPayorRepository } from './mappingcapayor.repository';
 import { MappingCaPayor } from './mappingcapayor.entity';
-import nodeExcel from 'excel-export-next';
+const nodeExcel = require('excel-export-next');
 
 @Injectable()
 export class MappingCaPayorService {
