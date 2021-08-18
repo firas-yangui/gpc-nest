@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { MappingCaPayorRepository } from './mappingcapayor.repository';
 import { MappingCaPayor } from './mappingcapayor.entity';
+/* eslint @typescript-eslint/no-var-requires: "off" */
 const nodeExcel = require('excel-export-next');
 
 @Injectable()
@@ -16,8 +17,9 @@ export class MappingCaPayorService {
   }
 
   async setMappingCaPayor(newMappingCaPayor: MappingCaPayor[]) {
-    await this.mappingCaPayorRepository.clear();
-
+    await this.mappingCaPayorRepository.query(`
+      TRUNCATE TABLE mapping_ca_payor_partner_trigram RESTART IDENTITY RESTRICT;
+    `);
     return await this.mappingCaPayorRepository.insert(newMappingCaPayor);
   }
 
