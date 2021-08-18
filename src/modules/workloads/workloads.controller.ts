@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpException, HttpStatus, Logger, Param, Query } from '@nestjs/common';
+import { Body, Controller, Get, HttpException, HttpStatus, Logger, Param, Post, Query } from '@nestjs/common';
 import { WorkloadsService } from './workloads.service';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Workload } from './workload.entity';
@@ -41,15 +41,19 @@ export class WorkloadsController {
     });
   }
 
-  @Get('porfolio-view/portofolios')
+  @Post('porfolio-view/portofolios/byGpcAppSettingsId/:gpcAppSettingsId')
   @ApiOperation({ summary: 'get workload for portofolio view of the first level portofolios with filters' })
-  async getWorkloadPortofolioViewLevelPorfolioWithFilter(@Body() synthesisFilter: SynthesisFilterDto): Promise<any> {
+  async getWorkloadPortofolioViewLevelPorfolioWithFilter(
+    @Param('gpcAppSettingsId') gpcAppSettingsId: number,
+    @Body() synthesisFilter: SynthesisFilterDto,
+  ): Promise<any> {
     const columns = ['serviceName' as keyof WorkloadTreeDataItem];
     const parentTreeNode = null; //no parent for first level
-    return await this.workloadsService.getWorkloadPortofolioViewTreeDataWithFilter(columns, parentTreeNode, synthesisFilter);
+    return await this.workloadsService.getWorkloadPortofolioViewTreeDataWithFilter(gpcAppSettingsId, columns, parentTreeNode, synthesisFilter);
   }
 
-  @Get('porfolio-view/portofolio/:portofolioId/subservices')
+  //to do
+  @Post('porfolio-view/portofolio/:portofolioId/subservices')
   @ApiOperation({ summary: 'get workload for portofolio view of the second level sub-service with filters' })
   async getWorkloadPortofolioViewLevelSubServiceWithFilter(
     @Param('portofolioId') portofolioId: number,
@@ -59,7 +63,8 @@ export class WorkloadsController {
     return;
   }
 
-  @Get('porfolio-view/portofolio/:portofolioId/subservice/:subServiceId')
+  //to do
+  @Post('porfolio-view/portofolio/:portofolioId/subservice/:subServiceId')
   @ApiOperation({ summary: 'get workload for portofolio view of the third level workload with filters' })
   async getWorkloadPortofolioViewLevelWorkloadWithFilter(
     @Param('portofolioId') portofolioId: number,

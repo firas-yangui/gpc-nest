@@ -208,7 +208,7 @@ export class WorkloadsService {
     }
   }
 
-  getWorkloadSubQuery(filter: SynthesisFilterDto) {
+  getWorkloadSubQuery(gpcAppSettingsId: number, filter: SynthesisFilterDto) {
     let subquery = `
     select
            stas.id as stasId,
@@ -234,7 +234,8 @@ export class WorkloadsService {
              left outer join subtypology st on ss.subtypologyid = st.id
              left outer join subtypologyappsettings stas on st.id = stas.modelid
              left outer join subnature sn on w.subnatureid = sn.id
-    where 1 = 1 `;
+             left outer join serviceappsettings sas on srv.id = sas.modelid
+    where sas.gpcappsettingsid = 2 `; //Todo: < where sas.gpcappsettingsid =` + gpcAppSettingsId > not working .....
 
     if (filter.portfolios && filter.portfolios.length > 0) {
       assertOnlyNumbers(filter.portfolios);
@@ -258,13 +259,14 @@ export class WorkloadsService {
   }
 
   async getWorkloadPortofolioViewTreeDataWithFilter(
+    gpcAppSettingsId: number,
     columns: Array<keyof WorkloadTreeDataItem>,
     parentTreeNode: WorkloadTreeDataItem,
     syntheseFilter: SynthesisFilterDto,
   ) {
     //todo validate column names to prevent SQL Injection
     const entityManager = getManager();
-    const subquery = this.getWorkloadSubQuery(syntheseFilter);
+    const subquery = this.getWorkloadSubQuery(gpcAppSettingsId, syntheseFilter);
     let fullSQL = `
     with treeData as (${subquery}) SELECT distinct ${columns.join(',')}/*exemple :svrName, ssCode, ssName, plan*/ 
     from treeData t where 1=1 `;
