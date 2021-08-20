@@ -7,24 +7,24 @@ import { RemoveEvent } from 'typeorm/subscriber/event/RemoveEvent';
 import { Audit } from '../audit/audit.entity';
 import { AuditService } from '../audit/audit.service';
 import { UserService } from '../user/user.service';
-import { Service } from './services.entity';
+import { ServiceDto } from './services.entity';
 
 @EventSubscriber()
-export class ServiceSubscriber implements EntitySubscriberInterface<Service> {
+export class ServiceSubscriber implements EntitySubscriberInterface<ServiceDto> {
   constructor(private auditService: AuditService, private userService: UserService) {}
 
   listenTo() {
-    return Service;
+    return ServiceDto;
   }
 
   /**
    * Called before post insertion.
    */
-  beforeInsert(event: InsertEvent<Service>) {
+  beforeInsert(event: InsertEvent<ServiceDto>) {
     try {
       const audit = new Audit();
       audit.methodName = 'create';
-      audit.modelName = Service.name;
+      audit.modelName = ServiceDto.name;
       audit.newObject = event.entity;
       // audit.user = await this.userService.getUserById(event.queryRunner.data.userId);
 
@@ -34,11 +34,11 @@ export class ServiceSubscriber implements EntitySubscriberInterface<Service> {
     }
   }
 
-  beforeUpdate(event: UpdateEvent<Service>) {
+  beforeUpdate(event: UpdateEvent<ServiceDto>) {
     try {
       const audit = new Audit();
       audit.methodName = 'update';
-      audit.modelName = Service.name;
+      audit.modelName = ServiceDto.name;
       audit.oldObject = event.databaseEntity;
       audit.newObject = event.entity;
       // audit.user = await this.userService.getUserById(event.queryRunner.data.userId);
@@ -49,11 +49,11 @@ export class ServiceSubscriber implements EntitySubscriberInterface<Service> {
     }
   }
 
-  beforeRemove(event: RemoveEvent<Service>) {
+  beforeRemove(event: RemoveEvent<ServiceDto>) {
     try {
       const audit = new Audit();
       audit.methodName = 'delete';
-      audit.modelName = Service.name;
+      audit.modelName = ServiceDto.name;
       audit.oldObject = event.databaseEntity;
       // audit.user = await this.userService.getUserById(event.queryRunner.data.userId);
 

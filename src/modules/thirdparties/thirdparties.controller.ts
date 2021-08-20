@@ -1,5 +1,5 @@
 import { Controller, Get, Header, Logger, Query, UseFilters } from '@nestjs/common';
-import { ApiResponse, ApiHeader, ApiTags } from '@nestjs/swagger';
+import { ApiResponse, ApiHeader, ApiTags, ApiOperation } from '@nestjs/swagger';
 
 import { Thirdparty } from './thirdparty.entity';
 import { ThirdpartiesService } from './thirdparties.service';
@@ -88,5 +88,24 @@ export class ThirdpartiesController {
     } catch (error) {
       Logger.error(error, 'ThirdpartiesController');
     }
+  }
+  @Get('/get-thirdParty')
+  @Header('Cache-Control', 'none')
+  @Header('Content-Type', 'application/json')
+  @Header('Accept-Charset', 'utf-8')
+  @ApiResponse({
+    status: 200,
+    description: 'getThirdparty',
+    isArray: true,
+    type: Thirdparty,
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'Internal server error',
+    type: ErrorModel,
+    isArray: false,
+  })
+  async getThirdParty(): Promise<any[]> {
+    return await this.thirdpartiesService.getThirdParty();
   }
 }
