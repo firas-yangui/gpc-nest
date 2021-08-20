@@ -22,13 +22,26 @@ export class ActivityThirdPartyService {
   private readonly logger = new Logger(ActivityThirdPartyService.name);
 
   async findOne(options: Record<string, any> = {}): Promise<ActivityThirdParty> {
-    return this.activityThirdPartyRepository.findOne(options);
+    return await this.activityThirdPartyRepository.findOne(options);
   }
 
   async find(options: Record<string, any> = {}): Promise<ActivityThirdParty[]> {
     return this.activityThirdPartyRepository.find(options);
   }
 
+  deleteActivityThirdPartyRepository = async (id: number): Promise<any> => {
+    return await this.activityThirdPartyRepository
+      .createQueryBuilder('activity_thirdparty')
+      .delete()
+      .where('id=:id', { id: id })
+      .execute();
+  };
+  async update(id: number, percent: number): Promise<any> {
+    const activityThirdParty = {
+      percent: percent,
+    };
+    return await this.activityThirdPartyRepository.update({ id }, activityThirdParty);
+  }
   async save(activity: object = {}): Promise<ActivityThirdParty> {
     return this.activityThirdPartyRepository.save(activity);
   }

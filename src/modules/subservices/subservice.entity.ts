@@ -2,7 +2,7 @@ import { Column, Entity, ManyToOne, OneToMany, JoinColumn, PrimaryGeneratedColum
 import { TransactionEntity } from '../transactions/transaction.entity';
 import { Workload } from './../workloads/workload.entity';
 import { Subtypology } from './../subtypologies/subtypology.entity';
-import { Service } from './../services/services.entity';
+import { ServiceDto } from './../services/services.entity';
 import { Portfolio } from './../portfolio/portfolio.entity';
 import { AmountStat } from '../amountstats/amountstat.entity';
 import { IrtApplication } from '../irtapplication/irtapplication.entity';
@@ -267,12 +267,12 @@ export class SubService {
   subtypology: Subtypology;
 
   @ManyToOne(
-    () => Service,
-    (service: Service) => service.subservices,
+    () => ServiceDto,
+    (service: ServiceDto) => service.subservices,
     { nullable: false, onUpdate: 'CASCADE' },
   )
   @JoinColumn({ name: 'serviceid' })
-  service: Service | null;
+  service: ServiceDto | null;
 
   @ManyToOne(
     () => Portfolio,
@@ -280,7 +280,7 @@ export class SubService {
     { nullable: false, onUpdate: 'CASCADE' },
   )
   @JoinColumn({ name: 'portfolioid' })
-  portfolio: Service | null;
+  portfolio: ServiceDto | null;
 
   @OneToMany(
     () => AmountStat,

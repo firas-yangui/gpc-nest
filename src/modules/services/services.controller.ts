@@ -1,6 +1,6 @@
 import { Controller, Get, HttpException, HttpStatus, Param, Query } from '@nestjs/common';
 import { SubService } from '../subservices/subservice.entity';
-import { Service } from './services.entity';
+import { ServiceDto } from './services.entity';
 import { ServicesService } from './services.service';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
 
@@ -10,7 +10,7 @@ export class ServicesController {
   constructor(private servicesService: ServicesService) {}
 
   @Get() // TO BE REMOVED : REPLACED BY findByGpcAppSettingsId
-  async findAll(@Query() query): Promise<Service[]> {
+  async findAll(@Query() query): Promise<ServiceDto[]> {
     return await this.servicesService.find(query);
   }
 
@@ -18,10 +18,10 @@ export class ServicesController {
   @ApiResponse({
     status: 200,
     description: 'Return all services for by gpcAppSettingsId',
-    type: Service,
+    type: ServiceDto,
     isArray: true,
   })
-  async findByGpcAppSettingsId(@Param('gpcAppSettingsId') gpcAppSettingsId: number): Promise<Service[]> {
+  async findByGpcAppSettingsId(@Param('gpcAppSettingsId') gpcAppSettingsId: number): Promise<ServiceDto[]> {
     return await this.servicesService.find({ gpcAppSettingsId });
   }
 
@@ -34,10 +34,10 @@ export class ServicesController {
   @ApiResponse({
     status: 200,
     description: 'Return all thirdparties',
-    type: Service,
+    type: ServiceDto,
     isArray: false,
   })
-  findById(@Param('id') id: number): Promise<Service> {
+  findById(@Param('id') id: number): Promise<ServiceDto> {
     return this.servicesService.findOne({ id }).catch(err => {
       throw new HttpException(err, HttpStatus.BAD_REQUEST);
     });

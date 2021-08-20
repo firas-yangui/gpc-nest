@@ -1,5 +1,5 @@
 import { Get, Query, Header, Controller, Post, Body, Res, HttpStatus, Param } from '@nestjs/common';
-import { ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ActivityService } from './activity.service';
 import { Activity } from './activity.entity';
 import { ErrorModel } from './../exceptions-handler/error-model';
@@ -10,6 +10,7 @@ import { CustomBadRequestException } from '../exceptions-handler/bad-request.exc
 import { ERRORS } from '../exceptions-handler/errors.constants';
 import { Response } from 'express';
 
+@ApiTags('activity')
 @Controller('activity')
 export class ActivityController {
   constructor(private readonly activityService: ActivityService) {}
