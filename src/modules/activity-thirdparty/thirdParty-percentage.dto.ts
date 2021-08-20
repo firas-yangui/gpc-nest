@@ -1,4 +1,4 @@
-export class ThirdPartyPercentage {
-  private percent: number;
-  private thirdParty: number;
+export interface ThirdPartyPercentage {
+  percent: number;
+  thirdParty: number;
 }

@@ -1,11 +1,17 @@
 import { ThirdPartyPercentage } from './thirdParty-percentage.dto';
+export interface ActivityThirdParty {
+  startDate: Date;
+  endDate: Date;
+  activity: number;
+  thirdPartyPercentages: ThirdPartyPercentage[];
+}
 export class ActivityThirdPartyDto {
   private startDate: Date;
   private endDate: Date;
   private activity: number;
   private thirdPartyPercentages: ThirdPartyPercentage[];
 
-  constructor(activityThirdPartyDto: ActivityThirdPartyDto) {
+  constructor(activityThirdPartyDto: ActivityThirdParty) {
     this.startDate = activityThirdPartyDto.startDate;
     this.endDate = activityThirdPartyDto.endDate;
     this.activity = activityThirdPartyDto.activity;

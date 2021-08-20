@@ -272,4 +272,6 @@ export class ConstantService {
   });
 
   public ACTIVIT_THIRDPARTY_KEYS = ['startDate', 'endDate', 'thirdPartyPercentages', 'activity'];
+
+  public ACTIVITY_THIRPARTY_HEADERS = ['activity', 'startDate', 'endDate', 'percentage', 'thirdpartyTrigram'];
 }
