@@ -1,27 +1,27 @@
-import {ApiProperty} from "@nestjs/swagger";
+import { ApiProperty } from '@nestjs/swagger';
 
-export class SynthesisFilterDto {
-    @ApiProperty()
-    code: string;
+export class SynthesisFilterDTO {
+  @ApiProperty()
+  code: string;
 
-    @ApiProperty()
-    description: string;
+  @ApiProperty()
+  description: string;
 
-    @ApiProperty()
-    domaine: string;
+  @ApiProperty()
+  domaine: string;
 
-    @ApiProperty()
-    thirdparties: number[];
+  @ApiProperty()
+  thirdparties: number[];
 
-    @ApiProperty()
-    portfolios: number[];
+  @ApiProperty()
+  portfolios: number[];
 
-    @ApiProperty()
-    plans: number[];
+  @ApiProperty()
+  plans: number[];
 
-    @ApiProperty()
-    subnatures: number[];
+  @ApiProperty()
+  subnatures: number[];
 
-    @ApiProperty()
-    partners: number[];
+  @ApiProperty()
+  partners: number[];
 }

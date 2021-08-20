@@ -22,7 +22,7 @@ import { AmountStat } from '../amountstats/amountstat.entity';
 import { isNull, isUndefined } from 'lodash';
 import { WorkloadTreeDataItem } from './interface/workload-tree-data-item.interface';
 import { assertOnlyNumbers } from '../../utils/utils';
-import {SynthesisFilterDto} from "./dto/synthesis-filter.dto";
+import { SynthesisFilterDTO } from './dto/synthesis-filter.dto';
 
 @Injectable()
 export class WorkloadsService {
@@ -208,25 +208,57 @@ export class WorkloadsService {
     }
   }
 
-  getWorkloadSubQuery(gpcAppSettingsId: number, filter: SynthesisFilterDto) {
+  getWorkloadSubQuery(gpcAppSettingsId: number, filter: SynthesisFilterDTO, periodIds: number[]) {
+    const asserNumber = num => (typeof num === 'number' ? num : 0); // sql injection protection
+    const includePeriodFields = (periodIds: number[]) =>
+      periodIds
+        ? periodIds
+            .map(
+              (pId, i) => `
+           , sum(a${i}.keurossales) as keurossalesP${i}
+           , sum(a${i}.keuros) as keurosP${i}
+           , sum(a${i}.klocalcurrency) as klocalcurrencyP${i}
+           , sum(a${i}.mandays) as mandaysP${i}
+        `,
+            )
+            .join('')
+        : '';
+
+    const includePeriodJoins = (periodIds: number[]) =>
+      periodIds
+        ? periodIds
+            .map(
+              (pId, i) => `
+           left outer join amount a${i} on w.id = a${i}.workloadid and a${i}.periodid = ${asserNumber(pId)}
+        `,
+            )
+            .join('')
+        : '';
+
+    const validProp = (prop: keyof WorkloadTreeDataItem) => prop;
+
     let subquery = `
     select
-           stas.id as stasId,
-           stas.plan as stasPlanName,
+           stas.id as ${validProp('stasId')},
+           stas.plan as ${validProp('stasPlanName')},
            
-           ss.id  as subserviceId,
-           ss.name  as subserviceName,
-           ss.code  as subserviceCode,
+           ss.id  as ${validProp('ssId')},
+           ss.name  as ${validProp('ssName')},
+           ss.code  as ${validProp('ssCode')},
            
-           sn.name  as subnatureName,
-           sn.id    as subnatureId,
+           sn.name  as ${validProp('snName')},
+           sn.id    as ${validProp('snId')},
            
-           srv.name as serviceName,
-           srv.id as serviceId,
-           
-           w.code   as workloadCode,
-           w.status as workloadStatus,
-           w.id as workloadId    
+           srv.name as ${validProp('sName')},
+           srv.id as ${validProp('sId')},
+           srv.code as ${validProp('sCode')},
+           srv.description as ${validProp('sDescr')},
+           srv.lastupdatedate as ${validProp('sLastUpt')},
+              
+           w.code   as ${validProp('wlCode')},
+           w.status as ${validProp('wlStatus')},
+           w.id as ${validProp('wlId')}
+           ${includePeriodFields(periodIds)}
     from subservice ss
              left outer JOIN service srv on ss.serviceid = srv.id
              left outer join workload w on w.subserviceid = ss.id
@@ -235,7 +267,11 @@ export class WorkloadsService {
              left outer join subtypologyappsettings stas on st.id = stas.modelid
              left outer join subnature sn on w.subnatureid = sn.id
              left outer join serviceappsettings sas on srv.id = sas.modelid
-    where sas.gpcappsettingsid = 2 `; //Todo: < where sas.gpcappsettingsid =` + gpcAppSettingsId > not working .....
+           ${includePeriodJoins(periodIds)}
+
+    where sas.gpcappsettingsid = ${gpcAppSettingsId}
+    group by stas.id, stas.plan, ss.id, ss.name, ss.code, sn.name, sn.id, srv.name, srv.id, srv.code,srv.description,srv.lastupdatedate, w.code, w.status, w.id
+    `;
 
     if (filter.portfolios && filter.portfolios.length > 0) {
       assertOnlyNumbers(filter.portfolios);
@@ -258,17 +294,23 @@ export class WorkloadsService {
     return subquery;
   }
 
-  async getWorkloadPortofolioViewTreeDataWithFilter(
+  async getWorkloadPortfolioViewTreeDataWithFilter(
     gpcAppSettingsId: number,
     columns: Array<keyof WorkloadTreeDataItem>,
     parentTreeNode: WorkloadTreeDataItem,
-    syntheseFilter: SynthesisFilterDto,
+    syntheseFilter: SynthesisFilterDTO,
+    periodIds: number[],
   ) {
     //todo validate column names to prevent SQL Injection
     const entityManager = getManager();
-    const subquery = this.getWorkloadSubQuery(gpcAppSettingsId, syntheseFilter);
+    const subquery = this.getWorkloadSubQuery(gpcAppSettingsId, syntheseFilter, periodIds);
+    const allColumns: string[] = [...columns];
+    periodIds.forEach((pId, i) => allColumns.push('keurossalesP' + i, 'keurosP' + i, 'klocalcurrencyP' + i, 'mandaysP' + i));
+
     let fullSQL = `
-    with treeData as (${subquery}) SELECT distinct ${columns.join(',')}/*exemple :svrName, ssCode, ssName, plan*/ 
+    with treeData as (${subquery}) 
+    SELECT distinct 
+                    ${allColumns.join(',')}/*exemple :svrName, ssCode, ssName, plan*/ 
     from treeData t where 1=1 `;
 
     if (parentTreeNode != null) {
@@ -278,7 +320,7 @@ export class WorkloadsService {
         fullSQL += ` AND ${parentColumn} = ${id}`;
       });
     }
-
+    console.log(fullSQL);
     const result = entityManager.query(
       fullSQL,
       // [syntheseFilter],
