@@ -287,13 +287,16 @@ export class ActivityThirdPartyController {
             break;
         }
       } catch (error) {
-        errors.push({
-          activity,
-          endDate,
-          startDate,
-          thirdPartyPercentages,
-          error,
-        });
+        for (const { thirdpartyTrigram, percentage } of thirdPartyPercentages) {
+          errors.push({
+            activity,
+            endDate,
+            startDate,
+            thirdpartyTrigram,
+            percentage,
+            error,
+          });
+        }
       }
     }
 
