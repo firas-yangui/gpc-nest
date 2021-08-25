@@ -19,9 +19,6 @@ import { SubnatureService } from '../../subnature/subnature.service';
 import { ServicesService } from '../../services/services.service';
 import { PricesService } from '../../prices/prices.service';
 import { ConstantService } from '../../constants/constants';
-import { DatalakeGpcOrganizationService } from '../../datalakemapping/datalakegpcorganization.service';
-import { DatalakeGpcPartnerService } from '../../datalakemapping/datalakegpcpartner.service';
-import { DatalakeGpcPayorService } from '../../datalakemapping/datalakegpcpayor.service';
 import { ImportMappingService } from '../../importmapping/importmapping.service';
 
 import { PeriodType as PeriodTypeInterface } from '../../interfaces/common-interfaces';
@@ -140,9 +137,6 @@ export class PyramidService {
     private readonly constantService: ConstantService,
     private readonly currencyRateService: CurrencyRateService,
     private readonly pricesService: PricesService,
-    private readonly datalakeGpcOrganizationService: DatalakeGpcOrganizationService,
-    private readonly datalakeGpcPartnerService: DatalakeGpcPartnerService,
-    private readonly datalakeGpcPayorService: DatalakeGpcPayorService,
     private readonly importMappingService: ImportMappingService,
     private readonly activityThirdPartyService: ActivityThirdPartyService,
     private readonly activityService: ActivityService,
