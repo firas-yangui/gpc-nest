@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { getManager } from 'typeorm';
 import { SubService } from '../subservices/subservice.entity';
 import { ServiceRepository } from './../services/services.repository';
-import { Service } from './services.entity';
+import { ServiceDto } from './services.entity';
 
 @Injectable()
 export class ServicesService {
@@ -12,13 +12,13 @@ export class ServicesService {
     private serviceRepository: ServiceRepository,
   ) {}
 
-  async find(options: { gpcAppSettingsId?: number }): Promise<Service[]> {
+  async find(options: { gpcAppSettingsId?: number }): Promise<ServiceDto[]> {
     const manager = getManager();
     try {
       const query = manager
         .createQueryBuilder()
         .select('service')
-        .from(Service, 'service')
+        .from(ServiceDto, 'service')
         .innerJoin('service.serviceAppSettings', 'serviceAppSettings')
         .innerJoin('serviceAppSettings.gpcAppSettings', 'gpcAppSettings');
 
@@ -36,7 +36,7 @@ export class ServicesService {
     try {
       const query = manager
         .createQueryBuilder()
-        .from(Service, 'service')
+        .from(ServiceDto, 'service')
         .select('service.id', 'serviceId')
         .addSelect('amount.periodId', 'periodId')
         .addSelect('SUM(amount.mandays)', 'mandays')
@@ -59,7 +59,7 @@ export class ServicesService {
     }
   }
 
-  async findOne(options: object = {}): Promise<Service> {
+  async findOne(options: object = {}): Promise<ServiceDto> {
     return await this.serviceRepository.findOne(options);
   }
 
@@ -79,7 +79,7 @@ export class ServicesService {
     return await query.execute();
   }
 
-  async findByName(name: string): Promise<Service> {
+  async findByName(name: string): Promise<ServiceDto> {
     return await this.serviceRepository
       .createQueryBuilder()
       .where('LOWER(name) = LOWER(:name)', { name })

@@ -17,10 +17,8 @@ export class AllExceptionsFilter implements ExceptionFilter {
     };
 
     if (exception instanceof BusinessException) {
-      Logger.error('exception', JSON.stringify(exception));
-      const e: BusinessException = exception;
-      const statusMsg = e.getStatus();
-      const msg = e.getMessage();
+      const statusMsg = exception.getStatus();
+      const msg = exception.getMessage();
       errorResponse = {
         code: statusMsg,
         message: msg,
@@ -28,14 +26,12 @@ export class AllExceptionsFilter implements ExceptionFilter {
       };
     }
     if (exception instanceof CustomBadRequestException) {
-      Logger.error('exception', JSON.stringify(exception));
-      const e: CustomBadRequestException = exception;
-      const statusMsg = e.getStatus();
-      const msg = e.getMessage();
+      const statusMsg = exception.getStatus();
+      const msg = exception.getMessage();
       errorResponse = {
         code: statusMsg,
         message: msg,
-        errors: e.getErrors() || [] || undefined,
+        errors: exception.getErrors() || [] || undefined,
       };
     }
     Logger.error(`${request.method} ${request.url}`, JSON.stringify(errorResponse), 'ExceptionFilter');

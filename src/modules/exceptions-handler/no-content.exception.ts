@@ -1,11 +1,11 @@
 import { BusinessException } from './business.exception';
 import { HttpStatus } from '@nestjs/common';
 
-// BadRequestException extend BusinessException
-export class CustomBadRequestException extends BusinessException {
+// NoContent extend BusinessException
+export class NoContent extends BusinessException {
   constructor(code, message: string, errors?) {
     /*eslint-disable*/
-    super(HttpStatus.BAD_REQUEST, code, message, errors);
+    super(HttpStatus.NO_CONTENT, code, message, errors);
     /*eslint-disable*/
 
   }

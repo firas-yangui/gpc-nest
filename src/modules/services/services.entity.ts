@@ -6,7 +6,7 @@ import { ApiProperty } from '@nestjs/swagger';
 
 @Entity('service')
 @Index('service_code_unique_idx', ['code'], { unique: true })
-export class Service {
+export class ServiceDto {
   @ApiProperty()
   @PrimaryGeneratedColumn({
     type: 'integer',

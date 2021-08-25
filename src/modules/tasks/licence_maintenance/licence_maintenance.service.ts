@@ -19,7 +19,7 @@ import { Period } from '../../periods/period.entity';
 import { Price } from '../../prices/prices.entity';
 import { SubNature } from '../../subnature/subnature.entity';
 import { SubService } from '../../subservices/subservice.entity';
-import { Service } from '../../services/services.entity';
+import { ServiceDto } from '../../services/services.entity';
 import { ImportMappingService } from '../../importmapping/importmapping.service';
 import { SubnatureappsettingsService } from '../../subnatureappsettings/subnatureappsettings.service';
 import moment = require('moment');
@@ -150,7 +150,7 @@ export class LicenceMaintenanceService {
     });
   };
 
-  getService = async (payor: Thirdparty): Promise<Service> => {
+  getService = async (payor: Thirdparty): Promise<ServiceDto> => {
     const LICENCE_MAINTENANCE = 'LICENCE & MAINTENANCE';
     const ORGA = 'ORGA';
     const service = await this.importMappingService.getMapping(LICENCE_MAINTENANCE, ORGA, payor.trigram);
