@@ -475,7 +475,7 @@ export class PyramidService {
 
       const amountData = this.getAmountData(line, isActuals);
       let createdAmount = this.amountConverter.createAmountEntity(
-        (parseFloat(amountData.amount) * 100) / percent,
+        (parseFloat(amountData.amount) * percent) / 100,
         amountData.unit,
         rate.value,
         costPrice,
