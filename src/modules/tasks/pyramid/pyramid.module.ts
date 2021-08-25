@@ -18,6 +18,8 @@ import { SubtypologyAppSettingsModule } from './../../subTypologyAppSettings/sub
 import { SubnatureModule } from './../../subnature/subnature.module';
 import { DatalakeMappingModule } from '../../datalakemapping/datalakemapping.module';
 import { ImportMappingModule } from '../../importmapping/importmapping.module';
+import { ActivityThirdPartyModule } from '../../activity-thirdparty/activity-thirdparty.module';
+import { ActivitModule } from '../../activity/activity.module';
 @Module({
   imports: [
     AmountsModule,
@@ -38,6 +40,8 @@ import { ImportMappingModule } from '../../importmapping/importmapping.module';
     WorkloadsModule,
     DatalakeMappingModule,
     ImportMappingModule,
+    ActivityThirdPartyModule,
+    ActivitModule,
   ],
   providers: [PyramidService],
   exports: [PyramidService],
