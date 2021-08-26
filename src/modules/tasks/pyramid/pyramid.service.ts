@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { In, Equal } from 'typeorm';
 import * as moment from 'moment';
-import { findKey, includes, join, map, sumBy } from 'lodash';
+import * as _ from 'lodash';
 
 import { RawAmountsService } from '../../rawamounts/rawamounts.service';
 import { AmountConverter } from '../../amounts/amounts.converter';
@@ -165,15 +165,15 @@ export class PyramidService {
   };
 
   isChargeableLine = (line: any, fields: Record<string, any>): boolean => {
-    return includes(fields.valideStaffType, line[fields.staffType].toLocaleLowerCase());
+    return _.includes(fields.valideStaffType, line[fields.staffType].toLocaleLowerCase());
   };
 
   isJH = (subnature: string) => {
-    return includes(actualsValideStaffType, subnature.toLocaleLowerCase());
+    return _.includes(actualsValideStaffType, subnature.toLocaleLowerCase());
   };
 
   isKLC = (subnature: string) => {
-    return includes(eacValideStaffType, subnature.toLocaleLowerCase());
+    return _.includes(eacValideStaffType, subnature.toLocaleLowerCase());
   };
 
   getSubtypologyByCode = async (codes: string[]) => {
@@ -189,7 +189,7 @@ export class PyramidService {
       13: 'Tech Plan',
     };
     if (plan === 'Project') return ['P1', 'T1'];
-    return [findKey(plans, value => value === plan)];
+    return [_.findKey(plans, value => value === plan)];
   };
 
   getServiceByPortfolioName = async (portfolioName: string) => {
@@ -233,7 +233,7 @@ export class PyramidService {
 
   findSubService = async (service: Record<string, any>, subtypologies: Subtypology[], projectCode: string) => {
     return this.subservicesService.findOne({
-      where: { service: Equal(service.id), subtypology: In(map(subtypologies, 'id')), code: Equal(projectCode) },
+      where: { service: Equal(service.id), subtypology: In(_.map(subtypologies, 'id')), code: Equal(projectCode) },
     });
   };
 
@@ -357,7 +357,7 @@ export class PyramidService {
 
     if (!this.isChargeableLine(line, fields)) throw new Error('Unkown subnature for line');
 
-    if (includes(intExtStaffType, line[fields.staffType].toLocaleLowerCase())) {
+    if (_.includes(intExtStaffType, line[fields.staffType].toLocaleLowerCase())) {
       line[fields.staffType] = onshoreStaffType;
     }
 
@@ -394,9 +394,9 @@ export class PyramidService {
 
     let subservice: any = await this.findSubService(service, subtypologies, projectCode);
     if (!subservice) {
-      const subtypologiesCodes = map(subtypologies, 'code');
+      const subtypologiesCodes = _.map(subtypologies, 'code');
       Logger.warn(
-        `subservice not found for service "${service.name}" and subtypology "${join(subtypologiesCodes, ',')}" and projectCode "${projectCode}"`,
+        `subservice not found for service "${service.name}" and subtypology "${_.join(subtypologiesCodes, ',')}" and projectCode "${projectCode}"`,
       );
       const owner = await this.thirdpartiesService.findOne({ name: 'RESG/BSC' });
       if (!owner) throw 'subservice owner "RESG/BSC" not found';
