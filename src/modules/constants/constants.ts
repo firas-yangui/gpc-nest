@@ -276,7 +276,7 @@ export class ConstantService {
     S3_BUCKET: 'bsc-fin-fpm-gpc-a2870-',
   });
 
-  public ACTIVIT_THIRDPARTY_KEYS = ['startDate', 'endDate', 'thirdPartyPercentages', 'activity'];
+  public ACTIVIT_THIRDPARTY_KEYS = ['thirdPartyPercentages', 'activity'];
 
   public ACTIVITY_THIRPARTY_HEADERS = ['activity', 'startDate', 'endDate', 'percentage', 'thirdpartyTrigram'];
 }

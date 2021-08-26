@@ -77,10 +77,6 @@ export class ActivityThirdPartyController {
         const exception = new CustomBadRequestException(ERRORS.PERCENTAGE_KO.CODE, ERRORS.PERCENTAGE_KO.DESCRIPTION);
         return exception.toHttpException(response);
       }
-      if (activityThirdParty.getStartDate() > activityThirdParty.getEndDate()) {
-        const exception = new CustomBadRequestException(ERRORS.DATES_KO.CODE, ERRORS.DATES_KO.DESCRIPTION);
-        return exception.toHttpException(response);
-      }
       const result = await this.activityThirdPartyService.linkActivityToThirdParty(activityThirdParty);
       if (result == ERRORS.ACTIVITY_NOT_FOUND) {
         const exception = new CustomBadRequestException(ERRORS.ACTIVITY_NOT_FOUND.CODE, ERRORS.ACTIVITY_NOT_FOUND.DESCRIPTION);
@@ -126,7 +122,7 @@ export class ActivityThirdPartyController {
     };
     return await this.activityThirdPartyService.find(options);
   }
-
+  /*
   @Get('delete-activityThirdparty/:id')
   @ApiResponse({
     status: SUCCESS.OK.STATUS,
@@ -160,7 +156,7 @@ export class ActivityThirdPartyController {
   async updateActivityThirdParty(@Param('id') id: number, @Param('percent') percent: number): Promise<any> {
     return await this.activityThirdPartyService.update(id, percent);
   }
-
+  */
   @Header('Cache-Control', 'none')
   @Header('Content-Type', 'multipart/form-data')
   @Header('Accept-Charset', 'utf-8')
@@ -260,9 +256,9 @@ export class ActivityThirdPartyController {
 
         const activityThirdParty: ActivityThirdPartyInterface = {
           activity: parseInt(activity),
-          startDate: new Date(startDate),
-          endDate: new Date(endDate),
           thirdPartyPercentages: thirdPartyPercentages.map(({ thirdParty, percentage }) => ({
+            startDate: new Date(startDate),
+            endDate: new Date(endDate),
             thirdParty,
             percent: parseInt(percentage),
           })),
@@ -273,7 +269,6 @@ export class ActivityThirdPartyController {
         //functionnal check
         if (!this.activityThirdPartyService.percentageValidation(activityThirdPartyDto.getThirdPartyPercentages()))
           throw ERRORS.PERCENTAGE_KO.DESCRIPTION;
-        if (activityThirdPartyDto.getStartDate() > activityThirdPartyDto.getEndDate()) throw ERRORS.DATES_KO.DESCRIPTION;
 
         //add
         const result = await this.activityThirdPartyService.linkActivityToThirdParty(activityThirdPartyDto);
