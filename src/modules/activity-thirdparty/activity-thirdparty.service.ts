@@ -46,15 +46,24 @@ export class ActivityThirdPartyService {
     return this.activityThirdPartyRepository.save(activity);
   }
 
-  percentageValidation(partnerPercentages: Record<string, any>[]): boolean {
-    const total = _.sumBy(partnerPercentages, partnerPercentage => partnerPercentage.percent);
-    return total == 100 ? true : false;
+  percentageValidation(thirdPartyPercentages: Record<string, any>[]): boolean {
+    const groupedByPeriod = _.chain(thirdPartyPercentages)
+      .groupBy('startDate')
+      .map((value, key) => ({ resource: value }))
+      .value();
+    let valide = true;
+    _.forEach(groupedByPeriod, partnerPercentagesGrouped => {
+      const total = _.sumBy(partnerPercentagesGrouped.resource, partnerPercentage => partnerPercentage.percent);
+      valide = total == 100 ? true : false;
+      if (!valide) return valide;
+    });
+    return valide;
   }
 
   async linkActivityToThirdParty(activityThirdPartyDto: ActivityThirdPartyDto): Promise<any> {
     try {
-      const startDate = activityThirdPartyDto.getStartDate();
-      const endDate = activityThirdPartyDto.getEndDate();
+      //const startDate = activityThirdPartyDto.getThirdPartyPercentages.;
+      //const endDate = activityThirdPartyDto.getEndDate();
       const activityOptions = {
         where: {
           activityCode: activityThirdPartyDto.getActivity(),
@@ -79,6 +88,8 @@ export class ActivityThirdPartyService {
           return ERRORS.THIRDPARTY_NOT_FOUND;
         } else {
           const percent = thirdPartyPercentage['percent'];
+          const startDate = thirdPartyPercentage['startDate'];
+          const endDate = new Date('12/31/2099');
           const activitythirdpartyEntity = {
             startDate,
             endDate,
