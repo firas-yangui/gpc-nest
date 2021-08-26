@@ -94,7 +94,7 @@ describe('Pyramid.service', () => {
     });
   });
 
-  describe.only('isParseableLine', () => {
+  describe('isParseableLine', () => {
     const fields = { cds: 'cds', caPayor: 'caPayor', activityType: 'activityType', curveType: 'curveType' };
     let line, outsourcing;
     it('should return true', () => {
@@ -154,10 +154,58 @@ describe('Pyramid.service', () => {
     });
 
     it('outsourcing false and curveType is actuals, should return true', () => {
-      line = { cds: 'cds', caPayor: 'caPayor', activityType: 'activityType', curveType: 'actuals' };
+      line = { cds: 'cds', caPayor: 'caPayor', activityType: 'activityType', curveType: 'ACTUALS' };
       outsourcing = false;
       const res = service.isParseableLine(line, fields, outsourcing);
       expect(res).toBe(true);
+    });
+  });
+
+  describe('isKLC', () => {
+    const validStaffTypes = [
+      'gbsu - contribution',
+      'itim - contribution',
+      'other - contribution',
+      'gts - hosting and client request',
+      'irbs - contribution',
+      'software acquisition',
+      'gts - client projects',
+      'it rental and maintenance',
+      'travels',
+      'other',
+      'outsourcing - consulting',
+      'outsourcing - fixed-price contract',
+      'restatement',
+    ];
+
+    for (const staffType of validStaffTypes) {
+      it(`${staffType} is valid, should return true`, () => {
+        const res = service.isKLC(staffType);
+        expect(res).toBe(true);
+      });
+    }
+
+    it(' unvalidStaffType is unvalid, should return false', () => {
+      const unvalidStaffType = 'unvalidStaffType';
+      const res = service.isKLC(unvalidStaffType);
+      expect(res).toBe(false);
+    });
+  });
+
+  describe('isJH', () => {
+    const validStaffTypes = ['internal', 'external', 'onshore', 'nearshore', 'offshore'];
+
+    for (const staffType of validStaffTypes) {
+      it(`${staffType} is valid, should return true`, () => {
+        const res = service.isJH(staffType);
+        expect(res).toBe(true);
+      });
+    }
+
+    it('unvalidStaffType is unvalid, should return false', () => {
+      const unvalidStaffType = 'unvalidStaffType';
+      const res = service.isJH(unvalidStaffType);
+      expect(res).toBe(false);
     });
   });
 });
