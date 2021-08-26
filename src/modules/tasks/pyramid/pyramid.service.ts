@@ -150,18 +150,16 @@ export class PyramidService {
     return true;
   };
 
-  isParseableLine = (line: any, fields: Record<string, any>, outsourcing: boolean): boolean => {
-    let isParseable: boolean =
-      line[fields.cds].trim() !== 'RESG/TPS/API' &&
-      line[fields.cds].trim() !== 'RESG/TPS/GDO' &&
-      line[fields.cds].trim() !== 'RISQ/DTO' &&
-      line[fields.caPayor].trim() !== '3000324000' &&
-      line[fields.activityType].trim() !== 'Absence';
-
-    if (outsourcing) {
-      isParseable = isParseable && line[fields.curveType].trim().toLocaleLowerCase() === 'actuals';
+  isParseableLine = (line: any, { cds, caPayor, activityType, curveType }: Record<string, any>, outsourcing: boolean): boolean => {
+    switch (true) {
+      case ['RESG/TPS/API', 'RESG/TPS/GDO', 'RISQ/DTO'].includes(line[cds]):
+      case ['3000324000'].includes(line[caPayor]):
+      case ['Absence'].includes(line[activityType]):
+      case outsourcing && !line[curveType]?.match(/actuals/i)?.length:
+        return false;
+      default:
+        return true;
     }
-    return isParseable;
   };
 
   isChargeableLine = (line: any, fields: Record<string, any>): boolean => {
