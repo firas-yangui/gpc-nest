@@ -142,10 +142,10 @@ export class PyramidService {
     private readonly activityService: ActivityService,
   ) {}
 
-  isValidParams = (requiredFileds: Record<string, any>, line: any) => {
-    requiredFileds.forEach(field => {
+  isValidParams = (requiredFileds: string[], line: any) => {
+    for (const field of requiredFileds) {
       if (!line[field]) return false;
-    });
+    }
 
     return true;
   };
