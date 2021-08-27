@@ -16,11 +16,19 @@ export class MappingCaPayorService {
     return this.mappingCaPayorRepository.find();
   }
 
-  async setMappingCaPayor(newMappingCaPayor: MappingCaPayor[]) {
+  async setMappingCaPayor(newMappingCaPayors: MappingCaPayor[]) {
     await this.mappingCaPayorRepository.query(`
       TRUNCATE TABLE mapping_ca_payor_partner_trigram RESTART IDENTITY RESTRICT;
     `);
-    return await this.mappingCaPayorRepository.insert(newMappingCaPayor);
+
+    for (const { codeCaPayor, id, libelleCaPayor, partnerTrigram } of newMappingCaPayors) {
+      await this.mappingCaPayorRepository.query(`
+        INSERT INTO public.mapping_ca_payor_partner_trigram (${id ? 'id,' : ''}code_ca_payor,libelle_ca_payor,partner_trigram)
+        VALUES (${id ? id + ',' : ''}'${codeCaPayor}','${libelleCaPayor}','${partnerTrigram}');
+      `);
+    }
+
+    return this.getMappingCaPayor();
   }
 
   async exportMappingCaPayor(res) {
