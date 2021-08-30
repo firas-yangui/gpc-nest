@@ -2,7 +2,7 @@ import {MigrationInterface, QueryRunner,Table} from "typeorm";
 
 export class createMappingCaPayorPartnerTrigramTable1629109896119 implements MigrationInterface {
     mappingTable = new Table({
-        name: 'mapping_ca_payor_partner_trigram',
+        name: 'ca_payor',
         columns: [
           {
             name: 'id',
@@ -25,12 +25,12 @@ export class createMappingCaPayorPartnerTrigramTable1629109896119 implements Mig
           }
         ],
       });
-    
+
       public async up(queryRunner: QueryRunner): Promise<any> {
         await queryRunner.createTable(this.mappingTable, true);
 
         return await queryRunner.query(`
-        INSERT INTO mapping_ca_payor_partner_trigram (code_ca_payor, libelle_ca_payor, partner_trigram)
+        INSERT INTO ca_payor (code_ca_payor, libelle_ca_payor, partner_trigram)
         VALUES
           ('3000387925','YOGA IT CTA CONSOLIDATION','NB25'),
           ('3000387933','YOGA IT CTA DIRECTION DE PROGRAMME','NB25'),
@@ -341,7 +341,7 @@ export class createMappingCaPayorPartnerTrigramTable1629109896119 implements Mig
           ('3000377777','RESG/CFT/multipayeur','RESG/CFT');
         `)
       }
-    
+
       public async down(queryRunner: QueryRunner): Promise<any> {
         return await queryRunner.dropTable(this.mappingTable, true);
       }

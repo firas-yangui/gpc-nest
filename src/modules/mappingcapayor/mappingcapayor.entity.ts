@@ -1,6 +1,6 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
-@Entity('mapping_ca_payor_partner_trigram')
+@Entity('ca_payor')
 export class MappingCaPayor {
   @PrimaryGeneratedColumn({
     type: 'integer',
