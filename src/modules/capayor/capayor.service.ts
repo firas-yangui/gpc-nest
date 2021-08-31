@@ -1,37 +1,41 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { MappingCaPayorRepository } from './mappingcapayor.repository';
-import { MappingCaPayor } from './mappingcapayor.entity';
+import { CaPayorRepository } from './capayor.repository';
+import { CaPayor } from './capayor.entity';
 /* eslint @typescript-eslint/no-var-requires: "off" */
 const nodeExcel = require('excel-export-next');
 
 @Injectable()
-export class MappingCaPayorService {
+export class CaPayorService {
   constructor(
-    @InjectRepository(MappingCaPayorRepository)
-    private mappingCaPayorRepository: MappingCaPayorRepository,
+    @InjectRepository(CaPayorRepository)
+    private caPayorRepository: CaPayorRepository,
   ) {}
 
-  getMappingCaPayor() {
-    return this.mappingCaPayorRepository.find();
+  async getCaPayor() {
+    return this.caPayorRepository.find();
   }
 
-  async setMappingCaPayor(newMappingCaPayors: MappingCaPayor[]) {
-    await this.mappingCaPayorRepository.query(`
+  async findOne(options: object = {}): Promise<CaPayor> {
+    return await this.caPayorRepository.findOne(options);
+  }
+
+  async setCaPayor(newCaPayors: CaPayor[]) {
+    await this.caPayorRepository.query(`
       TRUNCATE TABLE ca_payor RESTART IDENTITY RESTRICT;
     `);
 
-    for (const { codeCaPayor, id, libelleCaPayor, partnerTrigram } of newMappingCaPayors) {
-      await this.mappingCaPayorRepository.query(`
+    for (const { codeCaPayor, id, libelleCaPayor, partnerTrigram } of newCaPayors) {
+      await this.caPayorRepository.query(`
         INSERT INTO public.ca_payor (${id ? 'id,' : ''}code_ca_payor,libelle_ca_payor,partner_trigram)
         VALUES (${id ? id + ',' : ''}'${codeCaPayor}','${libelleCaPayor}','${partnerTrigram}');
       `);
     }
 
-    return this.getMappingCaPayor();
+    return this.getCaPayor();
   }
 
-  async exportMappingCaPayor(res) {
+  async exportCaPayor(res) {
     try {
       const fileName = 'mapping_ca_payor.xlsx';
       const sheetName = 'mapping_ca_payor';
@@ -42,7 +46,7 @@ export class MappingCaPayorService {
         type: 'string',
       }));
 
-      const data = await this.getMappingCaPayor().then(res => res.map(line => MAPPINGCAPAYORCOLUMNS.map(header => line[header])));
+      const data = await this.getCaPayor().then(res => res.map(line => MAPPINGCAPAYORCOLUMNS.map(header => line[header])));
       const result = nodeExcel.execute({
         name: sheetName,
         cols: columns,

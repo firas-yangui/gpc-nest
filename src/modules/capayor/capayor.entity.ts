@@ -1,7 +1,8 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
+import { Activity } from '../activity/activity.entity';
 
 @Entity('ca_payor')
-export class MappingCaPayor {
+export class CaPayor {
   @PrimaryGeneratedColumn({
     type: 'integer',
     name: 'id',
@@ -25,4 +26,11 @@ export class MappingCaPayor {
     name: 'partner_trigram',
   })
   partnerTrigram: string;
+
+  @OneToMany(
+    () => CaPayor,
+    (caPayor: CaPayor) => caPayor.activity,
+    { onDelete: 'CASCADE' },
+  )
+  activity: Activity[];
 }
