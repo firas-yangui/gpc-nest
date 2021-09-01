@@ -219,7 +219,7 @@ export class ActivityCapayorController {
 
     //check headers
     for (const header of headers)
-      if (!this.constantService.ACTIVITY_THIRPARTY_HEADERS.includes(header)) structureErrors.push(`${header} ${ERRORS.MISSING.TYPE}`);
+      if (!this.constantService.ACTIVITY_CAPAYOR_HEADERS.includes(header)) structureErrors.push(`${header} ${ERRORS.MISSING.TYPE}`);
     if (structureErrors.length != 0) {
       const exception = new CustomBadRequestException(ERRORS.MISSING.CODE, ERRORS.MISSING.DESCRIPTION, structureErrors);
       return exception.toHttpException(response);
@@ -228,7 +228,7 @@ export class ActivityCapayorController {
     //parse Array
     const data: any[] = _.chain(rows)
       .map(row => _.zipObject(headers, row))
-      .groupBy(this.constantService.ACTIVITY_THIRPARTY_HEADERS[0]) //groupBy activity
+      .groupBy(this.constantService.ACTIVITY_CAPAYOR_HEADERS[0]) //groupBy activity
       .map(activityCapayor => {
         const { activity, startDate, endDate } = activityCapayor[0];
         return {
@@ -244,22 +244,22 @@ export class ActivityCapayorController {
       .value();
 
     //processData
-    for (const { activity, endDate, startDate, thirdPartyPercentages } of data) {
+    for (const { activity, endDate, startDate, capayorPercentages } of data) {
       try {
         //convert thirpartyTrigram to thirdPartyId
-        for (const index in thirdPartyPercentages) {
-          const { thirdpartyTrigram } = thirdPartyPercentages[index];
-          const thirdparty = await this.thirdpartiesService.findOne({ trigram: thirdpartyTrigram });
-          if (!thirdparty) throw `Third Party not found with trigram ${thirdpartyTrigram}`;
-          thirdPartyPercentages[index].thirdParty = thirdparty.id;
-        }
+        //for (const index in capayorPercentages) {
+        //  const { thirdpartyTrigram } = capayorPercentages[index];
+        //  const thirdparty = await this.thirdpartiesService.findOne({ trigram: thirdpartyTrigram });
+        //  if (!thirdparty) throw `Third Party not found with trigram ${thirdpartyTrigram}`;
+        //  thirdPartyPercentages[index].thirdParty = thirdparty.id;
+        //}
 
         const activityCapayor: ActivityCapayorInterface = {
           activity: parseInt(activity),
-          capayorPercentages: thirdPartyPercentages.map(({ thirdParty, percentage }) => ({
+          capayorPercentages: capayorPercentages.map(({ capayor, percentage }) => ({
             startDate: new Date(startDate),
             endDate: new Date(endDate),
-            thirdParty,
+            capayor,
             percent: parseInt(percentage),
           })),
         };
@@ -281,12 +281,12 @@ export class ActivityCapayorController {
             break;
         }
       } catch (error) {
-        for (const { thirdpartyTrigram, percentage } of thirdPartyPercentages) {
+        for (const { capayor, percentage } of capayorPercentages) {
           errors.push({
             activity,
             endDate,
             startDate,
-            thirdpartyTrigram,
+            capayor,
             percentage,
             error,
           });
