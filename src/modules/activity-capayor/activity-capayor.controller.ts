@@ -115,7 +115,7 @@ export class ActivityCapayorController {
     };
     const activity = await this.activityService.findOne(optionsActivity);
     const options = {
-      relations: ['thirdParty', 'activity'],
+      relations: ['capayor', 'activity'],
       where: {
         activity,
       },

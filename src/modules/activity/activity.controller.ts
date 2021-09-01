@@ -42,4 +42,55 @@ export class ActivityController {
       return response.status(SUCCESS.NOCONTENT.STATUS).json(activity);
     }
   }
+
+  @Post()
+  @Header('Cache-Control', 'none')
+  @Header('Content-Type', 'application/json')
+  @Header('Accept-Charset', 'utf-8')
+  @ApiOperation({
+    description: 'add activity partners with percentage',
+    operationId: 'POST /activitythirdparty',
+  })
+  @ApiResponse({
+    status: SUCCESS.CREATE.STATUS,
+    description: 'activity partners created',
+    isArray: true,
+    type: Activity,
+  })
+  @ApiResponse({
+    status: SUCCESS.OK.STATUS,
+    description: 'activity partners updated',
+    isArray: true,
+    type: Activity,
+  })
+  async addActivity(@Body() activityDto: Activity, @Res() response: Response): Promise<any> {
+    await this.activityService.save(activityDto);
+  }
+
+  @Get('get-activity/:projectCode')
+  @ApiResponse({
+    status: SUCCESS.OK.STATUS,
+    description: SUCCESS.OK.DESCRIPTION,
+    isArray: true,
+    type: Activity,
+  })
+  @ApiResponse({
+    status: SUCCESS.NOCONTENT.STATUS,
+    description: SUCCESS.NOCONTENT.DESCRIPTION,
+    isArray: false,
+    type: Activity,
+  })
+  async getActivityByProjectCode(@Param('projectCode') projectCode: string, @Res() response: Response): Promise<any> {
+    const options = {
+      where: {
+        projectCode,
+      },
+    };
+    const activity = await this.activityService.find(options);
+    if (activity) {
+      return response.status(SUCCESS.OK.STATUS).json(activity);
+    } else {
+      return response.status(SUCCESS.NOCONTENT.STATUS).json(activity);
+    }
+  }
 }
