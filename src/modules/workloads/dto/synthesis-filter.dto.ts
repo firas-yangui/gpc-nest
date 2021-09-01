@@ -1,27 +1,27 @@
 import { ApiProperty } from '@nestjs/swagger';
 
 export class SynthesisFilterDTO {
-  @ApiProperty()
-  code: string;
+  @ApiProperty({ nullable: true })
+  code?: string;
 
-  @ApiProperty()
-  description: string;
+  @ApiProperty({ nullable: true })
+  description?: string;
 
-  @ApiProperty()
-  domaine: string;
+  @ApiProperty({ nullable: true })
+  domaine?: string;
 
-  @ApiProperty()
-  thirdparties: number[];
+  @ApiProperty({ nullable: true })
+  thirdparties?: number[];
 
-  @ApiProperty()
-  portfolios: number[];
+  @ApiProperty({ nullable: true })
+  portfolios?: number[];
 
-  @ApiProperty()
-  plans: number[];
+  @ApiProperty({ nullable: true })
+  plans?: number[];
 
-  @ApiProperty()
-  subnatures: number[];
+  @ApiProperty({ nullable: true })
+  subnatures?: number[];
 
-  @ApiProperty()
-  partners: number[];
+  @ApiProperty({ nullable: true })
+  partners?: number[];
 }

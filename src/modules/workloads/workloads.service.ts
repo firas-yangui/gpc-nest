@@ -5,22 +5,22 @@ import { ThirdpartiesService } from './../thirdparties/thirdparties.service';
 import { PeriodsService } from './../periods/periods.service';
 import { UpdateResult } from 'typeorm/query-builder/result/UpdateResult';
 import * as _ from 'lodash';
+import { isNull, isUndefined } from 'lodash';
 import * as moment from 'moment';
 
 import {
-  PeriodTypeAmount,
   BusinessPlanAmount,
   MonthlyBusinessPlanAmount,
-  Thirdparty as ThirdpartyInterface,
+  PeriodTypeAmount,
   SumAmountByPeriodTypeAndBusinessPlan,
+  Thirdparty as ThirdpartyInterface,
 } from './../interfaces/common-interfaces';
 import { getManager, Like } from 'typeorm';
 import { Workload } from './workload.entity';
 import { SubservicesService } from './../subservices/subservices.service';
 import { ServicesService } from './../services/services.service';
 import { AmountStat } from '../amountstats/amountstat.entity';
-import { isNull, isUndefined } from 'lodash';
-import { WorkloadTreeDataItem } from './interface/workload-tree-data-item.interface';
+import { WorkloadTreeDataItemDTO } from './dto/workload-tree-data-item.dto';
 import { assertOnlyNumbers } from '../../utils/utils';
 import { SynthesisFilterDTO } from './dto/synthesis-filter.dto';
 
@@ -215,10 +215,10 @@ export class WorkloadsService {
         ? periodIds
             .map(
               (pId, i) => `
-           , sum(a${i}.keurossales) as keurossalesP${i}
-           , sum(a${i}.keuros) as keurosP${i}
-           , sum(a${i}.klocalcurrency) as klocalcurrencyP${i}
-           , sum(a${i}.mandays) as mandaysP${i}
+           , sum(a${i}.keurossales) as "keurossalesP${i}"
+           , sum(a${i}.keuros) as "keurosP${i}"
+           , sum(a${i}.klocalcurrency) as "klocalcurrencyP${i}"
+           , sum(a${i}.mandays) as "mandaysP${i}"
         `,
             )
             .join('')
@@ -235,8 +235,7 @@ export class WorkloadsService {
             .join('')
         : '';
 
-    const validProp = (prop: keyof WorkloadTreeDataItem) => prop;
-
+    const validProp = (prop: keyof WorkloadTreeDataItemDTO) => '"' + prop + '"';
     let subquery = `
     select
            stas.id as ${validProp('stasId')},
@@ -257,7 +256,10 @@ export class WorkloadsService {
               
            w.code   as ${validProp('wlCode')},
            w.status as ${validProp('wlStatus')},
-           w.id as ${validProp('wlId')}
+           w.description as ${validProp('wlDescription')},
+           w.id as ${validProp('wlId')},
+
+           tp.trigram as ${validProp('tpTrigram')} 
            ${includePeriodFields(periodIds)}
     from subservice ss
              left outer JOIN service srv on ss.serviceid = srv.id
@@ -267,17 +269,18 @@ export class WorkloadsService {
              left outer join subtypologyappsettings stas on st.id = stas.modelid
              left outer join subnature sn on w.subnatureid = sn.id
              left outer join serviceappsettings sas on srv.id = sas.modelid
+             left outer join thirdparty tp on w.thirdpartyid = tp.id
            ${includePeriodJoins(periodIds)}
 
     where sas.gpcappsettingsid = ${gpcAppSettingsId}
-    group by stas.id, stas.plan, ss.id, ss.name, ss.code, sn.name, sn.id, srv.name, srv.id, srv.code,srv.description,srv.lastupdatedate, w.code, w.status, w.id
+    group by stas.id, stas.plan, ss.id, ss.name, ss.code, sn.name, sn.id, srv.name, srv.id, srv.code,srv.description,srv.lastupdatedate, w.code, w.status, w.id, tp.trigram, w.description
     `;
 
-    if (filter.portfolios && filter.portfolios.length > 0) {
+    if (filter && filter.portfolios && filter.portfolios.length > 0) {
       assertOnlyNumbers(filter.portfolios);
       subquery += ` AND p.id in (${filter.portfolios.join(',')}) `;
     }
-    if (filter.code && filter.code.length > 0) {
+    if (filter && filter.code && filter.code.length > 0) {
       //assertOnlyNumbers(filter.portfolios);
       //To Do sql inject check for string
       subquery += ` AND w.code like (${filter.code} OR ss.`;
@@ -296,35 +299,100 @@ export class WorkloadsService {
 
   async getWorkloadPortfolioViewTreeDataWithFilter(
     gpcAppSettingsId: number,
-    columns: Array<keyof WorkloadTreeDataItem>,
-    parentTreeNode: WorkloadTreeDataItem,
+    columns: Array<keyof WorkloadTreeDataItemDTO>,
+    parentTreeNode: Partial<WorkloadTreeDataItemDTO>,
     syntheseFilter: SynthesisFilterDTO,
     periodIds: number[],
-  ) {
+  ): Promise<WorkloadTreeDataItemDTO[]> {
     //todo validate column names to prevent SQL Injection
     const entityManager = getManager();
     const subquery = this.getWorkloadSubQuery(gpcAppSettingsId, syntheseFilter, periodIds);
-    const allColumns: string[] = [...columns];
-    periodIds.forEach((pId, i) => allColumns.push('keurossalesP' + i, 'keurosP' + i, 'klocalcurrencyP' + i, 'mandaysP' + i));
+
+    const quotedColumns: string[] = columns.map(c => '"' + c + '"');
+    const periodSums: string[] = [];
+    periodIds.forEach((pId, i) =>
+      periodSums.push(
+        `, SUM("keurossalesP${i}") as "keurossalesP${i}"`,
+        `, SUM("keurosP${i}") as "keurosP${i}"`,
+        `, SUM("klocalcurrencyP${i}") as "klocalcurrencyP${i}"`,
+        `, SUM("mandaysP${i}") as "mandaysP${i}"`,
+      ),
+    );
 
     let fullSQL = `
     with treeData as (${subquery}) 
-    SELECT distinct 
-                    ${allColumns.join(',')}/*exemple :svrName, ssCode, ssName, plan*/ 
+    SELECT  
+                    ${quotedColumns.join(',')}
+                    ${periodSums.join('')} 
     from treeData t where 1=1 `;
 
     if (parentTreeNode != null) {
       Object.keys(parentTreeNode).forEach(parentColumn => {
         const id = parentTreeNode[parentColumn];
         assertOnlyNumbers(id);
-        fullSQL += ` AND ${parentColumn} = ${id}`;
+        fullSQL += ` AND "${parentColumn}" = ${id} `;
       });
     }
+    fullSQL += ` GROUP BY ${quotedColumns.join(',')}`;
     console.log(fullSQL);
-    const result = entityManager.query(
-      fullSQL,
-      // [syntheseFilter],
+    const rows = await entityManager.query(fullSQL);
+    console.log(JSON.stringify(rows, undefined, 2));
+    return this.extractPeriodAmounts(periodIds.length, rows);
+  }
+
+  private async extractPeriodAmounts(periodsCount: number, rows: any[]) {
+    return rows.map(
+      ({
+        stasPlanName,
+        stasId,
+        ssName,
+        ssCode,
+        ssId,
+        snName,
+        snId,
+        sName,
+        sId,
+        sCode,
+        sDescr,
+        sLastUpt,
+        wlCode,
+        wlStatus,
+        wlId,
+        wlDescription,
+        tpTrigram,
+        ...periodsInfo
+      }) => {
+        const periodAmounts = [];
+        for (let i = 0; i < periodsCount; i++) {
+          periodAmounts.push({
+            keurossales: periodsInfo['keurossalesP' + i],
+            keuros: periodsInfo['keurosP' + i],
+            klocalcurrency: periodsInfo['klocalcurrencyP' + i],
+            mandays: periodsInfo['mandaysP' + i],
+          });
+        }
+        const res = {
+          stasPlanName,
+          stasId,
+          ssName,
+          ssCode,
+          ssId,
+          snName,
+          snId,
+          sName,
+          sId,
+          sCode,
+          sDescr,
+          sLastUpt,
+          wlCode,
+          wlStatus,
+          wlId,
+          wlDescription,
+          tpTrigram,
+          periodAmounts,
+        } as WorkloadTreeDataItemDTO;
+        return res;
+      },
     );
-    return result;
   }
 }

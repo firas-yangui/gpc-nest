@@ -41,7 +41,7 @@ export class PeriodsService {
     return await query.getOne();
   }
 
-  async find(appSettings: number, options: any): Promise<any> {
+  async find(appSettings: number, options: any): Promise<Period[]> {
     try {
       return await createQueryBuilder()
         .from(Period, 'period')

@@ -1,9 +1,10 @@
 import { Body, Controller, Get, HttpException, HttpStatus, Logger, Param, Post, Query } from '@nestjs/common';
 import { WorkloadsService } from './workloads.service';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Workload } from './workload.entity';
 import { SynthesisFilterDTO } from './dto/synthesis-filter.dto';
-import { WorkloadTreeDataItem } from './interface/workload-tree-data-item.interface';
+import { WorkloadTreeDataItemDTO } from './dto/workload-tree-data-item.dto';
+import { WorkloadTreeDataRequestDTO } from './dto/workload-tree-data-request.dto';
 
 @Controller('workloads')
 @ApiTags('Workloads')
@@ -47,7 +48,7 @@ export class WorkloadsController {
     @Param('gpcAppSettingsId') gpcAppSettingsId: number,
     @Body() synthesisFilter: SynthesisFilterDTO,
   ): Promise<any> {
-    const validProp = (prop: keyof WorkloadTreeDataItem) => prop;
+    const validProp = (prop: keyof WorkloadTreeDataItemDTO) => prop;
     const columns = [validProp('sId'), validProp('sName'), validProp('sCode'), validProp('sDescr'), validProp('sLastUpt')];
     const parentTreeNode = null; //no parent for first level
     return await this.workloadsService.getWorkloadPortfolioViewTreeDataWithFilter(gpcAppSettingsId, columns, parentTreeNode, synthesisFilter, [
@@ -77,5 +78,22 @@ export class WorkloadsController {
   ): Promise<any> {
     //return await this.workloadsService.getWorkloadsWithAmounts(query);
     return;
+  }
+
+  @Post('workload-generic-tree-data-with-filter')
+  @ApiOperation({ summary: 'gets generic workload tree data' })
+  @ApiResponse({ status: 200, type: WorkloadTreeDataItemDTO, isArray: true })
+  async getWorkloadPortfolioViewTreeDataWithFilter(@Body() req: WorkloadTreeDataRequestDTO): Promise<WorkloadTreeDataItemDTO[]> {
+    try {
+      return await this.workloadsService.getWorkloadPortfolioViewTreeDataWithFilter(
+        req.gpcAppSettingsId,
+        req.columns,
+        req.parentTreeNode,
+        req.syntheseFilter,
+        req.periodIds,
+      );
+    } catch (e) {
+      console.log(e);
+    }
   }
 }
