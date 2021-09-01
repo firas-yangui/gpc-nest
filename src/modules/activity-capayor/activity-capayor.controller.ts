@@ -16,7 +16,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import * as _ from 'lodash';
 import { ActivityService } from '../activity/activity.service';
 
-@ApiTags('capayorparty')
+@ApiTags('activitycapayor')
 @Controller('activitycapayor')
 export class ActivityCapayorController {
   private logger = new Logger(ActivityCapayorController.name);
@@ -162,7 +162,7 @@ export class ActivityCapayorController {
   @Header('Accept-Charset', 'utf-8')
   @ApiOperation({
     description: 'add activity partners with percentage',
-    operationId: 'POST /capayorparty/upload',
+    operationId: 'POST /activitythirdparty/upload',
   })
   @ApiResponse({
     status: SUCCESS.CREATE.STATUS,
@@ -229,11 +229,11 @@ export class ActivityCapayorController {
     const data: any[] = _.chain(rows)
       .map(row => _.zipObject(headers, row))
       .groupBy(this.constantService.ACTIVITY_CAPAYOR_HEADERS[0]) //groupBy activity
-      .map(activityCapayor => {
-        const { activity, startDate, endDate } = activityCapayor[0];
+      .map(activityThirparty => {
+        const { activity, startDate, endDate } = activityThirparty[0];
         return {
           activity,
-          capyorPercentages: activityCapayor.map(({ capayor, percentage }) => ({
+          capayorPercentages: activityThirparty.map(({ capayor, percentage }) => ({
             capayor,
             percentage,
             startDate,
@@ -257,10 +257,10 @@ export class ActivityCapayorController {
         const activityCapayor: ActivityCapayorInterface = {
           activity: parseInt(activity),
           capayorPercentages: capayorPercentages.map(({ capayor, percentage }) => ({
-            startDate: new Date(startDate),
-            endDate: new Date(endDate),
             capayor,
             percent: parseInt(percentage),
+            startDate: new Date(startDate),
+            endDate: new Date(endDate),
           })),
         };
 
