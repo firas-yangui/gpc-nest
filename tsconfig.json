@@ -17,8 +17,5 @@
   ],
   "files": [
     "src/main.ts"
-  ],
-  "include": [
-    "migrations/*.ts"
   ]
 }
