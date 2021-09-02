@@ -77,6 +77,18 @@ export class ActivityCapayorService {
       }
       const capayorPercentages = activityCapayorDto.getCapayorPercentages();
       for (const capayorPercentage of capayorPercentages) {
+        const deleteCondition = {
+          startDate: capayorPercentage['startDate'],
+          activity,
+        };
+        const activitycapayorExists = await this.activityCapayorRepository.find(deleteCondition);
+        if (activitycapayorExists) {
+          this.logger.log(activitycapayorExists);
+          this.logger.log('ACTIVITY capayor PERCENTAGE FOUND');
+          await this.activityCapayorRepository.delete(deleteCondition);
+        }
+      }
+      for (const capayorPercentage of capayorPercentages) {
         const id = capayorPercentage['capayor'] ? capayorPercentage['capayor'] : null;
         const options = {
           where: {
@@ -97,29 +109,10 @@ export class ActivityCapayorService {
             activity,
             capayor,
           };
-          const options = {
-            where: {
-              ...activitycapayorEntity,
-            },
-          };
-          const activitycapayorExists = await this.activityCapayorRepository.findOne(options);
-          if (activitycapayorExists) {
-            this.logger.log(activitycapayorExists);
-            this.logger.log('ACTIVITY capayor PERCENTAGE FOUND');
-            const id = activitycapayorExists['id'];
-            await this.activityCapayorRepository.save({
-              id,
-              percent,
-              ...activitycapayorEntity,
-            });
-          } else {
-            this.logger.log(activitycapayorExists);
-            this.logger.log('ACTIVITY capayor PERCENTAGE NOT FOUND');
-            await this.activityCapayorRepository.save({
-              percent,
-              ...activitycapayorEntity,
-            });
-          }
+          await this.activityCapayorRepository.save({
+            percent,
+            ...activitycapayorEntity,
+          });
         }
       }
       return SUCCESS.CREATE;
