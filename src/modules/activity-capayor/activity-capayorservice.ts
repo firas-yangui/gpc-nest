@@ -89,10 +89,10 @@ export class ActivityCapayorService {
         }
       }
       for (const capayorPercentage of capayorPercentages) {
-        const id = capayorPercentage['capayor'] ? capayorPercentage['capayor'] : null;
+        const codeCaPayor = capayorPercentage['capayor'] ? capayorPercentage['capayor'] : null;
         const options = {
           where: {
-            id,
+            codeCaPayor,
           },
         };
         const capayor = await this.caPayorService.findOne(options);

@@ -230,21 +230,20 @@ export class ActivityCapayorController {
       .map(row => _.zipObject(headers, row))
       .groupBy(this.constantService.ACTIVITY_CAPAYOR_HEADERS[0]) //groupBy activity
       .map(activityThirparty => {
-        const { activity, startDate, endDate } = activityThirparty[0];
+        const { activity } = activityThirparty[0];
         return {
           activity,
-          capayorPercentages: activityThirparty.map(({ capayor, percentage }) => ({
+          capayorPercentages: activityThirparty.map(({ capayor, percentage, startDate }) => ({
             capayor,
             percentage,
             startDate,
-            endDate,
           })),
         };
       })
       .value();
 
     //processData
-    for (const { activity, endDate, startDate, capayorPercentages } of data) {
+    for (const { activity, capayorPercentages } of data) {
       try {
         //convert thirpartyTrigram to thirdPartyId
         //for (const index in capayorPercentages) {
@@ -256,11 +255,11 @@ export class ActivityCapayorController {
 
         const activityCapayor: ActivityCapayorInterface = {
           activity: parseInt(activity),
-          capayorPercentages: capayorPercentages.map(({ capayor, percentage }) => ({
+          capayorPercentages: capayorPercentages.map(({ capayor, percentage, startDate }) => ({
             capayor,
             percent: parseInt(percentage),
             startDate: new Date(startDate),
-            endDate: new Date(endDate),
+            endDate: new Date('12/31/2099'),
           })),
         };
 
@@ -281,10 +280,9 @@ export class ActivityCapayorController {
             break;
         }
       } catch (error) {
-        for (const { capayor, percentage } of capayorPercentages) {
+        for (const { capayor, percentage, startDate } of capayorPercentages) {
           errors.push({
             activity,
-            endDate,
             startDate,
             capayor,
             percentage,

@@ -278,5 +278,5 @@ export class ConstantService {
 
   public ACTIVIT_CAPAYOR_KEYS = ['capayorPercentages', 'activity'];
 
-  public ACTIVITY_CAPAYOR_HEADERS = ['activity', 'startDate', 'endDate', 'percentage', 'capayor'];
+  public ACTIVITY_CAPAYOR_HEADERS = ['activity', 'startDate', 'percentage', 'capayor'];
 }
