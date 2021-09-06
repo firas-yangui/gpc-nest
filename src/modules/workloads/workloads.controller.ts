@@ -1,6 +1,6 @@
 import { Body, Controller, Get, HttpException, HttpStatus, Logger, Param, Post, Query } from '@nestjs/common';
 import { WorkloadsService } from './workloads.service';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiResponse, ApiTags, ApiOAuth2 } from '@nestjs/swagger';
 import { Workload } from './workload.entity';
 import { SynthesisFilterDTO } from './dto/synthesis-filter.dto';
 import { WorkloadTreeDataItemDTO } from './dto/workload-tree-data-item.dto';
@@ -8,6 +8,7 @@ import { WorkloadTreeDataRequestDTO } from './dto/workload-tree-data-request.dto
 
 @Controller('workloads')
 @ApiTags('Workloads')
+@ApiOAuth2(['api.gpc-workload-management.v1'], 'SG Connect')
 export class WorkloadsController {
   constructor(private readonly workloadsService: WorkloadsService) {}
 
@@ -93,7 +94,7 @@ export class WorkloadsController {
         req.periodIds,
       );
     } catch (e) {
-      console.log(e);
+      console.error(e);
     }
   }
 }

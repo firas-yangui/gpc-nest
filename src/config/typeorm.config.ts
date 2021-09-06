@@ -12,9 +12,9 @@ export const typeOrmConfig: TypeOrmModuleOptions = {
   subscribers: [__dirname + '/../**/*.subscriber.{js,ts}'],
   synchronize: false,
   migrationsTableName: 'gpc_migrations',
-  migrations: ['dist/migrations/*.js'],
+  migrations: [__dirname + 'migrations/*{.ts,.js}'],
   cli: {
-    migrationsDir: 'dist/migrations/*.js',
+    migrationsDir: __dirname + 'migrations/*{.ts,.js}',
   },
 };
 

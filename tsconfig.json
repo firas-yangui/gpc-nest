@@ -14,13 +14,6 @@
     "baseUrl": "./",
     "incremental": true
   },
-  "exclude": [
-    "node_modules"
-  ],
-  "files": [
-    "src/main.ts"
-  ],
-  "include": [
-    "migrations/*.ts"
-  ]
+  "exclude": ["node_modules"],
+  "files": ["src/main.ts"]
 }
