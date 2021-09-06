@@ -10,27 +10,33 @@ import { Price } from './../prices/prices.entity';
 import { Workload } from '../workloads/workload.entity';
 import { SubsidiaryAllocation } from './../subsidiaryallocation/subsidiaryallocation.entity';
 import { AmountStat } from '../amountstats/amountstat.entity';
+import { Activity } from '../activity/activity.entity';
+import { ApiProperty } from '@nestjs/swagger';
 
 @Entity('thirdparty')
 export class Thirdparty {
+  @ApiProperty()
   @PrimaryGeneratedColumn({
     type: 'integer',
     name: 'id',
   })
   id: number;
 
+  @ApiProperty()
   @Column('text', {
     nullable: false,
     name: 'radical',
   })
   radical: string;
 
+  @ApiProperty()
   @Column('text', {
     nullable: false,
     name: 'name',
   })
   name: string;
 
+  @ApiProperty()
   @Column('character varying', {
     nullable: true,
     length: 30,
@@ -136,4 +142,11 @@ export class Thirdparty {
   )
   @JoinColumn({ name: 'countryid' })
   country: Country;
+
+  @OneToMany(
+    () => Thirdparty,
+    (thirdparty: Thirdparty) => thirdparty.activity,
+    { onDelete: 'CASCADE' },
+  )
+  activity: Activity[];
 }

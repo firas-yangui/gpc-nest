@@ -2,7 +2,18 @@ import { Global } from '@nestjs/common';
 
 @Global()
 export class ConstantService {
-  private defaultEmailTo: string[] = ['anouer.hammami-ext@socgen.com', 'emilie.nuon@socgen.com', 'fatima-zahra.el-mouhafidi-ext@socgen.com'];
+  private devEmailTo: string[] = [
+    'anouer.hammami-ext@socgen.com',
+    'emilie.nuon@socgen.com',
+    'alban.a.kosak-ext@socgen.com',
+    'rodolphe.poon-ext@socgen.com',
+    'shuwen.ni-ext@socgen.com',
+  ];
+
+  private prodEmailTo: string[] = [...this.devEmailTo, 'laure.tellier@socgen.com'];
+
+  private defaultEmailTo: string[] = process.env.NODE_ENV == 'production' ? this.prodEmailTo : this.devEmailTo;
+
   public GLOBAL_CONST = Object.freeze({
     AMOUNT_UNITS: Object.freeze({
       KLC: 'klocalcurrency',
@@ -218,6 +229,36 @@ export class ConstantService {
         <br > L'equipe GPC.`,
         HEADER: ['ClientLongName', '€', 'Code NRG', 'Gamme', 'Sous-Gamme', 'Mois'],
       }),
+      LICENCE_MAINTENANCE: Object.freeze({
+        NAME: 'LICENCE_MAINTENANCE',
+        ORIGIN_SEPARATOR: '|@|',
+        SEPARATOR: ';',
+        EMAIL_TO: [...this.defaultEmailTo],
+        EMAIL_SUBJECT: `Lignes rejetées suite à votre import automatique LICENCE_MAINTENANCE en ${process.env.NODE_ENV || 'development'}`,
+        EMAIL_BODY: `Bonjour,<br > Suite à votre import automatique,
+        vous trouverez un export des lignes rejetées.
+        La cause de rejet est ajoutée au bout de chaque ligne(la colonne <b>error</b>).
+        <br > Cordialement,
+        <br > L'equipe GPC.`,
+        HEADER: [
+          'year',
+          'accounting_period',
+          'guichet_code',
+          'organization_code',
+          'conversion_code',
+          'code_ledger',
+          'insert_date',
+          'PCI',
+          'NRG_code',
+          'CDS',
+          'CSM',
+          'Payor',
+          'amount_final_by_csm_partner',
+          'amount_initial_nosica',
+          'total_cost_by_NRG_CDS',
+          'expense_ratio',
+        ],
+      }),
       NOSICAPRD: Object.freeze({
         NAME: 'NOSICAPRD',
         ORIGIN_SEPARATOR: '|@|',
@@ -234,4 +275,8 @@ export class ConstantService {
     }),
     S3_BUCKET: 'bsc-fin-fpm-gpc-a2870-',
   });
+
+  public ACTIVIT_THIRDPARTY_KEYS = ['startDate', 'endDate', 'thirdPartyPercentages', 'activity'];
+
+  public ACTIVITY_THIRPARTY_HEADERS = ['activity', 'startDate', 'endDate', 'percentage', 'thirdpartyTrigram'];
 }

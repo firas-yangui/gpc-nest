@@ -26,6 +26,10 @@ import { ImportRejectionsHandlerModule } from './modules/import-rejections-handl
 import { MailerModule, MailerOptions } from '@nestjs-modules/mailer';
 import { AmountStatsModule } from './modules/amountstats/amountstats.module';
 import { IrtApplicationModule } from './modules/irtapplication/irtapplication.module';
+import { ImportMappingModule } from './modules/importmapping/importmapping.module';
+import { ActivityThirdPartyModule } from './modules/activity-thirdparty/activity-thirdparty.module';
+import { ActivitModule } from './modules/activity/activity.module';
+import { MappingCaPayorModule } from './modules/mappingcapayor/mappingcapayor.module';
 
 import DbLoader from './loader';
 
@@ -85,7 +89,11 @@ const mailerOptions: MailerOptions = {
     TasksModule,
     SchedulerModule,
     AmountStatsModule,
+    MappingCaPayorModule,
     IrtApplicationModule,
+    ImportMappingModule,
+    ActivityThirdPartyModule,
+    ActivitModule,
   ],
 })
 export class AppModule {}

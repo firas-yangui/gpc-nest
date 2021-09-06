@@ -3,6 +3,7 @@ import { NosicaService } from './nosica/nosica.service';
 import { ProductService } from './nosica/product.service';
 import { PyramidService } from './pyramid/pyramid.service';
 import { MyGtsService } from './mgts/mygts.service';
+import { LicenceMaintenanceService } from './licence_maintenance/licence_maintenance.service';
 import { ConstantService } from '../constants/constants';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { readFileSync, readdirSync, existsSync, unlinkSync } from 'fs';
@@ -10,6 +11,7 @@ import AWS = require('aws-sdk');
 import * as csvParser from 'csv-parser';
 import { map, includes, isEmpty, isString } from 'lodash';
 import { ImportRejectionsHandlerService } from '../import-rejections-handler/import-rejections-handler.service';
+import { AmountsService } from '../amounts/amounts.service';
 import { RawAmountsService } from '../rawamounts/rawamounts.service';
 import { MailerService } from '@nestjs-modules/mailer';
 import * as stringToStream from 'string-to-stream';
@@ -27,7 +29,9 @@ export class TasksService {
     private pyramidService: PyramidService,
     private constantService: ConstantService,
     private myGtsService: MyGtsService,
+    private licenceMaintenanceService: LicenceMaintenanceService,
     private productService: ProductService,
+    private amountsService: AmountsService,
     private rawAmountsService: RawAmountsService,
     private rejectionsHandlerService: ImportRejectionsHandlerService,
     private readonly mailerService: MailerService,
@@ -36,7 +40,7 @@ export class TasksService {
   getFlowType(flow: string): string {
     const datas = flow.split('.');
     if (datas.length !== 5) return undefined;
-    return datas[3];
+    return datas[3].toUpperCase();
   }
 
   importLine(filename, flow, line): Promise<any> {
@@ -53,9 +57,17 @@ export class TasksService {
         return this.nosicaService.import(filename, line);
       case this.constantService.GLOBAL_CONST.QUEUE.MYGTS.NAME:
         return this.myGtsService.import(filename, line);
+      case this.constantService.GLOBAL_CONST.QUEUE.LICENCE_MAINTENANCE.NAME:
+        return this.licenceMaintenanceService.import(filename, line);
       case this.constantService.GLOBAL_CONST.QUEUE.NOSICAPRD.NAME:
         return this.productService.import(filename, line);
     }
+  }
+
+  sleep(ms) {
+    return new Promise(resolve => {
+      setTimeout(resolve, ms);
+    });
   }
 
   parseFile(buffer, filename): Promise<string> {
@@ -80,6 +92,8 @@ export class TasksService {
           }
         })
         .on('end', async () => {
+          await this.sleep(500); //sometime 'end' is fired before last line is fully parsed
+          this.amountsService.synchronizeFromRawAmounts(filename);
           await this.sendRejectedFile(filename, flowType);
           resolve('end');
         })
@@ -120,9 +134,12 @@ export class TasksService {
    */
   @Cron(CronExpression.EVERY_30_MINUTES)
   async importFromS3() {
-    if (!includes(secureEnvs, process.env.NODE_ENV)) return false;
-    const inProgressImports = await this.rawAmountsService.findAll();
-    if (inProgressImports.length) return false;
+    this.logger.log(`Start Import from AWS S3`);
+    if (!includes(secureEnvs, process.env.NODE_ENV)) {
+      this.logger.log(`Not a secure environnement END Import from AWS S3`);
+      return false;
+    }
+
     let params: any = {
       Bucket: `${process.env.AWS_BUCKET_PREFIX}gpc-set`,
     };
@@ -133,22 +150,47 @@ export class TasksService {
       return;
     }
 
-    map(objects.Contents, async file => {
+    this.logger.log(`found ${objects.Contents.length} files in S3: [${objects.Contents.map(({ Key }) => Key).join(', ')}]`);
+
+    for await (const file of objects.Contents) {
       const flow = file.Key;
+      let process = true;
       const flowType = this.getFlowType(flow);
       params = { ...params, Key: flow };
       const rejectedFile = `/tmp/${flow}.REJECTED.csv`;
 
-      if (!flowType) return;
-      if (!this.constantService.GLOBAL_CONST.QUEUE[flowType]) return;
-      if (existsSync(rejectedFile)) return;
-      const rawInProgress = this.rawAmountsService.findOne({ datasource: flow });
-      if (rawInProgress && !isEmpty(rawInProgress)) return;
-
-      const s3object = await this.S3.getObject(params).promise();
-      const parsed = await this.parseFile(s3object.Body, flow);
-      if (parsed) this.S3.deleteObject(params).promise();
-    });
+      if (!flowType) {
+        this.logger.log(`${flow} cannot get flowtype`);
+        process = false;
+      }
+      if (!this.constantService.GLOBAL_CONST.QUEUE[flowType]) {
+        this.logger.log(`${flowType} doesn't exist in GPC`);
+        process = false;
+      }
+      if (existsSync(rejectedFile)) {
+        this.logger.log(`${rejectedFile} already exist`);
+        process = false;
+      }
+      const rawInProgress = await this.rawAmountsService.findOne({ datasource: flow });
+      if (rawInProgress && !isEmpty(rawInProgress)) {
+        this.logger.log(`${flow} is currently being processed`);
+        process = false;
+      }
+      if (process) {
+        const s3object = await this.S3.getObject(params).promise();
+        this.logger.log(`${flow} start processing at ${Date.now().toString()}`);
+        const parsed = await this.parseFile(s3object.Body, flow);
+        this.logger.log(`${flow} processing finished at ${Date.now().toString()}`);
+        if (parsed) {
+          this.logger.log(`deleting ${flow}`);
+          this.S3.deleteObject(params).promise();
+        }
+      } else {
+        this.logger.log(`deleting ${flow}`);
+        this.S3.deleteObject(params).promise();
+      }
+    }
+    this.logger.log(`End Import from AWS S3`);
   }
 
   /**
@@ -169,7 +211,7 @@ export class TasksService {
     map(files, async file => {
       const rejectedFile = `/tmp/${file.name}.REJECTED.csv`;
       if (existsSync(rejectedFile)) return;
-      const rawInProgress = this.rawAmountsService.findOne({ datasource: file.name });
+      const rawInProgress = await this.rawAmountsService.findOne({ datasource: file.name });
       if (rawInProgress && !isEmpty(rawInProgress)) return;
       const lines = readFileSync(path.join(receptiondir, file.name));
       await this.parseFile(lines, file.name);

@@ -1,5 +1,5 @@
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
-import { Service } from '../services/services.entity';
+import { ServiceDto } from '../services/services.entity';
 import { SubService } from '../subservices/subservice.entity';
 import { SubsidiaryAllocation } from '../subsidiaryallocation/subsidiaryallocation.entity';
 import { Thirdparty } from '../thirdparties/thirdparty.entity';
@@ -77,11 +77,11 @@ export class AmountStat {
   thirdparty: Thirdparty;
 
   @ManyToOne(
-    () => Service,
+    () => ServiceDto,
     service => service.amountStats,
   )
   @JoinColumn({ name: 'serviceid' })
-  service: Service;
+  service: ServiceDto;
 
   @ManyToOne(
     () => SubService,
