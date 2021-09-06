@@ -19,7 +19,7 @@ export class UserController {
     status: 200,
     description: 'Return all employees',
     type: User,
-    isArray: true,
+    isArray: false,
   })
   @ApiResponse({
     status: 401,

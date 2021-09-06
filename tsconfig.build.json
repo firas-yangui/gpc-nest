@@ -11,13 +11,5 @@
     "outDir": "./dist",
     "baseUrl": "./"
   },
-  "exclude": [
-    "node_modules",
-    "test",
-    "dist",
-    "**/*spec.ts"
-  ],
-  "include": [
-    "migrations/*.ts"
-  ],
+  "exclude": ["node_modules", "test", "dist", "**/*spec.ts"]
 }

@@ -50,6 +50,7 @@ const eacValideStaffType = [
   'travels',
   'other',
 ];
+
 const eacFields = {
   ProjectCode: 'Project_Code',
   ProjectName: 'Project_Name',

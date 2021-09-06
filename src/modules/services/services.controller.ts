@@ -1,4 +1,4 @@
-import { Controller, Get, HttpException, HttpStatus, Param, Query } from '@nestjs/common';
+import { Controller, Get, HttpException, HttpStatus, Param, Query, UseGuards } from '@nestjs/common';
 import { SubService } from '../subservices/subservice.entity';
 import { ServiceDto } from './services.entity';
 import { ServicesService } from './services.service';

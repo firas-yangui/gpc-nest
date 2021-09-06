@@ -6,16 +6,19 @@ import { SubNatureAppSettings } from './../subnatureappsettings/subnatureappsett
 import { PortfolioAppSettings } from './../portfolioAppSettings/portfolioappsettings.entity';
 import { SubTypologyAppSettings } from './../subTypologyAppSettings/subtypologyappsettings.entity';
 import { ServiceAppSettings } from '../serviceappsettings/serviceappsettings.entity';
+import { ApiProperty } from '@nestjs/swagger';
 
 @Entity('gpcappsettings')
 @Index('gpcappsettings_name_key', ['name'], { unique: true })
 export class GpcAppSettings {
+  @ApiProperty()
   @PrimaryGeneratedColumn({
     type: 'integer',
     name: 'id',
   })
   id: number;
 
+  @ApiProperty()
   @Column('text', {
     nullable: false,
     unique: true,
@@ -23,42 +26,49 @@ export class GpcAppSettings {
   })
   name: string;
 
+  @ApiProperty()
   @OneToMany(
     () => GpcUser,
     (gpcuser: GpcUser) => gpcuser.gpcAppSettings,
   )
   gpcusers: GpcUser[];
 
+  @ApiProperty()
   @OneToMany(
     () => Thirdpartyappsettings,
     (thirdpartyappsettings: Thirdpartyappsettings) => thirdpartyappsettings.gpcappsettings,
   )
   thirdpartyappsettings: Thirdpartyappsettings[];
 
+  @ApiProperty()
   @OneToMany(
     () => SubNatureAppSettings,
     (subNatureAppSettings: SubNatureAppSettings) => subNatureAppSettings.subnature,
   )
   subnatureappsettings: SubNatureAppSettings[];
 
+  @ApiProperty()
   @OneToMany(
     () => PortfolioAppSettings,
     (portfolioAppSettings: PortfolioAppSettings) => portfolioAppSettings.gpcappsettings,
   )
   portfolioAppSettings: PortfolioAppSettings[];
 
+  @ApiProperty()
   @OneToMany(
     () => ServiceAppSettings,
     (serviceAppSettings: ServiceAppSettings) => serviceAppSettings.gpcAppSettings,
   )
   serviceAppSettings: ServiceAppSettings[];
 
+  @ApiProperty()
   @OneToMany(
     () => SubTypologyAppSettings,
     (subTypologyAppSettings: SubTypologyAppSettings) => subTypologyAppSettings.gpcappsettings,
   )
   subTypologyAppSettings: SubTypologyAppSettings[];
 
+  @ApiProperty()
   @OneToMany(
     () => HomeMessageEntity,
     (homeMessages: HomeMessageEntity) => homeMessages.gpcappsettings,
