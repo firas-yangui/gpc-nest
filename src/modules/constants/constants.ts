@@ -279,4 +279,6 @@ export class ConstantService {
   public ACTIVIT_CAPAYOR_KEYS = ['capayorPercentages', 'activity'];
 
   public ACTIVITY_CAPAYOR_HEADERS = ['activity', 'startDate', 'percentage', 'capayor'];
+
+  public MULTI_CA_END_DATE = '12/31/2099';
 }

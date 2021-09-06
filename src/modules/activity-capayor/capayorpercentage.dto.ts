@@ -1,6 +1,6 @@
 export interface CapayorPercentage {
   percent: number;
-  capayor: number;
+  capayor: string;
   startDate: Date;
   endDate: Date;
 }

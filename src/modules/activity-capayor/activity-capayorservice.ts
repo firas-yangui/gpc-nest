@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { LessThan, Not, Equal } from 'typeorm';
 import { ActivityCapayorRepository } from './activity-capayor.repository';
 import { ActivityService } from '../activity/activity.service';
 import { ThirdpartiesService } from '../thirdparties/thirdparties.service';
@@ -10,7 +11,8 @@ import * as _ from 'lodash';
 import { ERRORS } from '../exceptions-handler/errors.constants';
 import { SUCCESS } from '../success-handler/success.constatns';
 import { CaPayorService } from '../capayor/capayor.service';
-
+import * as moment from 'moment';
+import { ConstantService } from '../constants/constants';
 @Injectable()
 export class ActivityCapayorService {
   constructor(
@@ -18,6 +20,7 @@ export class ActivityCapayorService {
     private readonly activityCapayorRepository: ActivityCapayorRepository,
     private readonly activityService: ActivityService,
     private readonly caPayorService: CaPayorService,
+    private readonly constantService: ConstantService,
   ) {}
 
   private readonly logger = new Logger(ActivityCapayorService.name);
@@ -77,15 +80,47 @@ export class ActivityCapayorService {
       }
       const capayorPercentages = activityCapayorDto.getCapayorPercentages();
       for (const capayorPercentage of capayorPercentages) {
+        /*
+         * check if for the exactly same period we have data
+         * delete it and replace it by new ones
+         */
+
         const deleteCondition = {
-          startDate: capayorPercentage['startDate'],
-          activity,
+          where: {
+            startDate: capayorPercentage['startDate'],
+            activity,
+          },
         };
         const activitycapayorExists = await this.activityCapayorRepository.find(deleteCondition);
         if (activitycapayorExists) {
           this.logger.log(activitycapayorExists);
           this.logger.log('ACTIVITY capayor PERCENTAGE FOUND');
-          await this.activityCapayorRepository.delete(deleteCondition);
+          await this.activityCapayorRepository.delete(deleteCondition['where']);
+        }
+
+        /*
+         * check if for the we have data for the same acitivty in the past
+         * update enddate then
+         */
+
+        const existCondition = {
+          where: {
+            startDate: LessThan(capayorPercentage['startDate']),
+            endDate: Equal(new Date(this.constantService.MULTI_CA_END_DATE)),
+            activity,
+          },
+        };
+        const dataExitInthePast = await this.activityCapayorRepository.find(existCondition);
+        if (dataExitInthePast) {
+          _.forEach(dataExitInthePast, async capayorPercentageLine => {
+            capayorPercentageLine['endDate'] = moment(capayorPercentage['startDate'], 'DD/MM/YYYY')
+              .subtract(1, 'months')
+              .endOf('month')
+              .toDate();
+            await this.activityCapayorRepository.save({
+              ...capayorPercentageLine,
+            });
+          });
         }
       }
       for (const capayorPercentage of capayorPercentages) {
@@ -102,7 +137,7 @@ export class ActivityCapayorService {
         } else {
           const percent = capayorPercentage['percent'];
           const startDate = capayorPercentage['startDate'];
-          const endDate = new Date('12/31/2099');
+          const endDate = new Date(this.constantService.MULTI_CA_END_DATE);
           const activitycapayorEntity = {
             startDate,
             endDate,
