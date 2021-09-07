@@ -21,7 +21,7 @@ import { SubservicesService } from './../subservices/subservices.service';
 import { ServicesService } from './../services/services.service';
 import { AmountStat } from '../amountstats/amountstat.entity';
 import { WorkloadTreeDataItemDTO } from './dto/workload-tree-data-item.dto';
-import { assertOnlyNumbers } from '../../utils/utils';
+import { assertOnlyNumbers, sqlEscape } from '../../utils/utils';
 import { SynthesisFilterDTO } from './dto/synthesis-filter.dto';
 
 @Injectable()
@@ -258,7 +258,10 @@ export class WorkloadsService {
            w.status as ${validProp('wlStatus')},
            w.description as ${validProp('wlDescription')},
            w.id as ${validProp('wlId')},
+           
+           ad.name as ${validProp('adName')},
 
+           tp.id as ${validProp('tpId')},
            tp.trigram as ${validProp('tpTrigram')} 
            ${includePeriodFields(periodIds)}
     from subservice ss
@@ -270,21 +273,47 @@ export class WorkloadsService {
              left outer join subnature sn on w.subnatureid = sn.id
              left outer join serviceappsettings sas on srv.id = sas.modelid
              left outer join thirdparty tp on w.thirdpartyid = tp.id
+             left outer join activitydomain ad on ad.id = sas.activitydomainid
            ${includePeriodJoins(periodIds)}
 
     where sas.gpcappsettingsid = ${gpcAppSettingsId}
-    group by stas.id, stas.plan, ss.id, ss.name, ss.code, sn.name, sn.id, srv.name, srv.id, srv.code,srv.description,srv.lastupdatedate, w.code, w.status, w.id, tp.trigram, w.description
     `;
-
+    //filter section
     if (filter && filter.portfolios && filter.portfolios.length > 0) {
       assertOnlyNumbers(filter.portfolios);
-      subquery += ` AND p.id in (${filter.portfolios.join(',')}) `;
+      subquery += ` AND srv.id in (${filter.portfolios.join(',')}) `;
     }
-    if (filter && filter.code && filter.code.length > 0) {
-      //assertOnlyNumbers(filter.portfolios);
-      //To Do sql inject check for string
-      subquery += ` AND w.code like (${filter.code} OR ss.`;
+    if (filter && filter.code) {
+      subquery += ` 
+      AND (upper(w.code) like upper('%${sqlEscape(filter.code)}%') 
+           OR upper(ss.code) like upper('%${sqlEscape(filter.code)}%') 
+           OR upper(srv.name) like upper('%${sqlEscape(filter.code)}%') )
+           `;
     }
+    if (filter && filter.description) {
+      subquery += ` 
+      AND (upper(w.description) like upper('%${sqlEscape(filter.description)}%') 
+           OR upper(ss.name) like upper('%${sqlEscape(filter.description)}%') )
+           `;
+    }
+    if (filter && filter.domaine) {
+      subquery += ` 
+      AND upper(ad.name) like upper('%${sqlEscape(filter.domaine)}%')
+           `;
+    }
+    if (filter && filter.thirdparties && filter.thirdparties.length > 0) {
+      subquery += ` AND tp.id in (${filter.thirdparties.join(',')}) `;
+    }
+    if (filter && filter.subnatures && filter.subnatures.length > 0) {
+      subquery += ` AND sn.id in (${filter.subnatures.join(',')}) `;
+    }
+    if (filter && filter.partners && filter.partners.length > 0) {
+      subquery += ` AND tp.id in (${filter.partners.join(',')}) `;
+    }
+
+    //end filter section
+    subquery += `
+        group by stas.id, stas.plan, ss.id, ss.name, ss.code, sn.name, sn.id, srv.name, srv.id, srv.code,srv.description,srv.lastupdatedate, ad.name, w.code, w.status, w.id, tp.id, tp.trigram, w.description`;
 
     /*
     --       AND srv.name = 'Activités de RSC/DIR'
@@ -334,9 +363,9 @@ export class WorkloadsService {
       });
     }
     fullSQL += ` GROUP BY ${quotedColumns.join(',')}`;
-    console.log(fullSQL);
+    console.info(fullSQL);
     const rows = await entityManager.query(fullSQL);
-    console.log(JSON.stringify(rows, undefined, 2));
+    console.info(JSON.stringify(rows, undefined, 2));
     return this.extractPeriodAmounts(periodIds.length, rows);
   }
 

@@ -5,7 +5,7 @@ import { ApiModelProperty } from '@nestjs/swagger/dist/decorators/api-model-prop
 export class WorkloadTreeDataItemDTO {
   /* Portofolio View Section*/
 
-  @ApiProperty() stasPlanName: string;
+  @ApiProperty() stasPlanName: string; //stas as subtypologyappsettings
   @ApiProperty() stasId: number;
   @ApiProperty() ssName: string; // ss as Sub Service
   @ApiProperty() ssCode: string;
@@ -21,7 +21,9 @@ export class WorkloadTreeDataItemDTO {
   @ApiProperty() wlStatus: string;
   @ApiProperty() wlId: number;
   @ApiProperty() wlDescription: string;
+  @ApiProperty() tpId: string; //tp as thirdparty
   @ApiProperty() tpTrigram: string;
+  @ApiProperty() adName: string; //ad as activity domaine
 
   /* Entity View Section*/
   //ToDo

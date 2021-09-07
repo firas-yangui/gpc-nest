@@ -69,18 +69,6 @@ export class WorkloadsController {
     return;
   }
 
-  //to do
-  @Post('portfolio-view/portfolio/:portfolioId/subservice/:subServiceId')
-  @ApiOperation({ summary: 'get workload for portofolio view of the third level workload with filters' })
-  async getWorkloadPortfolioViewLevelWorkloadWithFilter(
-    @Param('portfolioId') portfolioId: number,
-    @Param('subServiceId') subServiceId: number,
-    @Body() sythesisFilter: SynthesisFilterDTO,
-  ): Promise<any> {
-    //return await this.workloadsService.getWorkloadsWithAmounts(query);
-    return;
-  }
-
   @Post('workload-generic-tree-data-with-filter')
   @ApiOperation({ summary: 'gets generic workload tree data' })
   @ApiResponse({ status: 200, type: WorkloadTreeDataItemDTO, isArray: true })
