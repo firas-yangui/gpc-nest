@@ -238,7 +238,7 @@ export class WorkloadsService {
     const validProp = (prop: keyof WorkloadTreeDataItemDTO) => '"' + prop + '"';
     let subquery = `
     select
-           stas.id as ${validProp('stasId')},
+           stas.modelid as ${validProp('stasModelId')},
            stas.plan as ${validProp('stasPlanName')},
            
            ss.id  as ${validProp('ssId')},
@@ -265,8 +265,8 @@ export class WorkloadsService {
            tp.trigram as ${validProp('tpTrigram')} 
            ${includePeriodFields(periodIds)}
     from subservice ss
-             left outer JOIN service srv on ss.serviceid = srv.id
-             left outer join workload w on w.subserviceid = ss.id
+             left outer join service srv on ss.serviceid = srv.id
+             inner join workload w on w.subserviceid = ss.id
              left outer join portfolio p on p.id = ss.portfolioid
              left outer join subtypology st on ss.subtypologyid = st.id
              left outer join subtypologyappsettings stas on st.id = stas.modelid
@@ -296,10 +296,8 @@ export class WorkloadsService {
            OR upper(ss.name) like upper('%${sqlEscape(filter.description)}%') )
            `;
     }
-    if (filter && filter.domaine) {
-      subquery += ` 
-      AND upper(ad.name) like upper('%${sqlEscape(filter.domaine)}%')
-           `;
+    if (filter && filter.plans && filter.plans.length > 0) {
+      subquery += ` AND stas.modelid in (${filter.plans.join(',')}) `;
     }
     if (filter && filter.thirdparties && filter.thirdparties.length > 0) {
       subquery += ` AND tp.id in (${filter.thirdparties.join(',')}) `;
@@ -307,22 +305,19 @@ export class WorkloadsService {
     if (filter && filter.subnatures && filter.subnatures.length > 0) {
       subquery += ` AND sn.id in (${filter.subnatures.join(',')}) `;
     }
+    if (filter && filter.domaine) {
+      subquery += ` 
+      AND upper(ad.name) like upper('%${sqlEscape(filter.domaine)}%')
+           `;
+    }
     if (filter && filter.partners && filter.partners.length > 0) {
       subquery += ` AND tp.id in (${filter.partners.join(',')}) `;
     }
 
     //end filter section
     subquery += `
-        group by stas.id, stas.plan, ss.id, ss.name, ss.code, sn.name, sn.id, srv.name, srv.id, srv.code,srv.description,srv.lastupdatedate, ad.name, w.code, w.status, w.id, tp.id, tp.trigram, w.description`;
+        group by stas.modelid, stas.plan, ss.id, ss.name, ss.code, sn.name, sn.id, srv.name, srv.id, srv.code,srv.description,srv.lastupdatedate, ad.name, w.code, w.status, w.id, tp.id, tp.trigram, w.description`;
 
-    /*
-    --       AND srv.name = 'Activités de RSC/DIR'
-    --       AND ss.code = 'FASTENTRY'
-    --          AND sts.plan = 'Code plan'
-    --       AND ss.name = 'PLUG - RUN'
-    --       AND w.code like 'Z14184%'SynthesisFilter
-    --       AND sn.name = 'SG PARIS'
-    */
     return subquery;
   }
 
@@ -373,7 +368,7 @@ export class WorkloadsService {
     return rows.map(
       ({
         stasPlanName,
-        stasId,
+        stasModelId,
         ssName,
         ssCode,
         ssId,
@@ -402,7 +397,7 @@ export class WorkloadsService {
         }
         const res = {
           stasPlanName,
-          stasId,
+          stasModelId,
           ssName,
           ssCode,
           ssId,
