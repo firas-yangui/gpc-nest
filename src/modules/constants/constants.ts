@@ -22,8 +22,8 @@ export class ConstantService {
     }),
     CRON_INTERVAL: '10 minutes', // 10 minutes
     QUEUE: Object.freeze({
-      EAC: Object.freeze({
-        NAME: 'EAC',
+      EACDEBUTMOIS: Object.freeze({
+        NAME: 'EACDEBUTMOIS',
         ORIGIN_SEPARATOR: '|@|',
         SEPARATOR: ';',
         EMAIL_TO: [...this.defaultEmailTo],
