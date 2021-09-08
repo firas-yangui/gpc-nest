@@ -45,7 +45,7 @@ export class TasksService {
 
   importLine(filename, flow, line): Promise<any> {
     switch (flow) {
-      case this.constantService.GLOBAL_CONST.QUEUE.EAC.NAME:
+      case this.constantService.GLOBAL_CONST.QUEUE.EACDEBUTMOIS.NAME:
         return this.pyramidService.import(filename, line);
       case this.constantService.GLOBAL_CONST.QUEUE.EACFINMOIS.NAME:
         return this.pyramidService.import(filename, line, false, false, true);
@@ -62,6 +62,12 @@ export class TasksService {
       case this.constantService.GLOBAL_CONST.QUEUE.NOSICAPRD.NAME:
         return this.productService.import(filename, line);
     }
+  }
+
+  sleep(ms) {
+    return new Promise(resolve => {
+      setTimeout(resolve, ms);
+    });
   }
 
   parseFile(buffer, filename): Promise<string> {
@@ -86,6 +92,7 @@ export class TasksService {
           }
         })
         .on('end', async () => {
+          await this.sleep(500); //sometime 'end' is fired before last line is fully parsed
           this.amountsService.synchronizeFromRawAmounts(filename);
           await this.sendRejectedFile(filename, flowType);
           resolve('end');
@@ -128,9 +135,11 @@ export class TasksService {
   @Cron(CronExpression.EVERY_30_MINUTES)
   async importFromS3() {
     this.logger.log(`Start Import from AWS S3`);
-    if (!includes(secureEnvs, process.env.NODE_ENV)) return false;
-    const inProgressImports = await this.rawAmountsService.findAll();
-    if (inProgressImports.length) return false;
+    if (!includes(secureEnvs, process.env.NODE_ENV)) {
+      this.logger.log(`Not a secure environnement END Import from AWS S3`);
+      return false;
+    }
+
     let params: any = {
       Bucket: `${process.env.AWS_BUCKET_PREFIX}gpc-set`,
     };
@@ -141,22 +150,46 @@ export class TasksService {
       return;
     }
 
-    map(objects.Contents, async file => {
+    this.logger.log(`found ${objects.Contents.length} files in S3: [${objects.Contents.map(({ Key }) => Key).join(', ')}]`);
+
+    for await (const file of objects.Contents) {
       const flow = file.Key;
+      let process = true;
       const flowType = this.getFlowType(flow);
       params = { ...params, Key: flow };
       const rejectedFile = `/tmp/${flow}.REJECTED.csv`;
 
-      if (!flowType) return;
-      if (!this.constantService.GLOBAL_CONST.QUEUE[flowType]) return;
-      if (existsSync(rejectedFile)) return;
+      if (!flowType) {
+        this.logger.log(`${flow} cannot get flowtype`);
+        process = false;
+      }
+      if (!this.constantService.GLOBAL_CONST.QUEUE[flowType]) {
+        this.logger.log(`${flowType} doesn't exist in GPC`);
+        process = false;
+      }
+      if (existsSync(rejectedFile)) {
+        this.logger.log(`${rejectedFile} already exist`);
+        process = false;
+      }
       const rawInProgress = await this.rawAmountsService.findOne({ datasource: flow });
-      if (rawInProgress && !isEmpty(rawInProgress)) return;
-
-      const s3object = await this.S3.getObject(params).promise();
-      const parsed = await this.parseFile(s3object.Body, flow);
-      if (parsed) this.S3.deleteObject(params).promise();
-    });
+      if (rawInProgress && !isEmpty(rawInProgress)) {
+        this.logger.log(`${flow} is currently being processed`);
+        process = false;
+      }
+      if (process) {
+        const s3object = await this.S3.getObject(params).promise();
+        this.logger.log(`${flow} start processing at ${Date.now().toString()}`);
+        const parsed = await this.parseFile(s3object.Body, flow);
+        this.logger.log(`${flow} processing finished at ${Date.now().toString()}`);
+        if (parsed) {
+          this.logger.log(`deleting ${flow}`);
+          this.S3.deleteObject(params).promise();
+        }
+      } else {
+        this.logger.log(`deleting ${flow}`);
+        this.S3.deleteObject(params).promise();
+      }
+    }
     this.logger.log(`End Import from AWS S3`);
   }
 

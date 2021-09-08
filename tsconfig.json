@@ -4,6 +4,8 @@
     "declaration": true,
     "removeComments": true,
     "moduleResolution": "node",
+    "strictPropertyInitialization": false,
+    "strictNullChecks": false,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "target": "es6",

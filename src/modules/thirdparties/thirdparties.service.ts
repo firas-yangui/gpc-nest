@@ -4,7 +4,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import * as _ from 'lodash';
 import { Thirdparty } from './thirdparty.entity';
 import { Thirdparty as ThirdpartyInterface } from './../interfaces/common-interfaces';
-import { getManager, getRepository } from 'typeorm';
+import { getConnection, getManager, getRepository } from 'typeorm';
 import { isNull, isUndefined } from 'lodash';
 
 @Injectable()
@@ -22,6 +22,10 @@ export class ThirdpartiesService {
     }
 
     return thirdparty;
+  }
+
+  async getThirdParty(): Promise<any[]> {
+    return await this.thirdpartyRepository.find();
   }
 
   async findAndCount(): Promise<[Thirdparty[], number]> {

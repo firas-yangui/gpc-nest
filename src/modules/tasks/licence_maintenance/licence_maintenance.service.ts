@@ -19,7 +19,7 @@ import { Period } from '../../periods/period.entity';
 import { Price } from '../../prices/prices.entity';
 import { SubNature } from '../../subnature/subnature.entity';
 import { SubService } from '../../subservices/subservice.entity';
-import { Service } from '../../services/services.entity';
+import { ServiceDto } from '../../services/services.entity';
 import { ImportMappingService } from '../../importmapping/importmapping.service';
 import { SubnatureappsettingsService } from '../../subnatureappsettings/subnatureappsettings.service';
 import moment = require('moment');
@@ -40,7 +40,6 @@ export class LicenceMaintenanceService {
     private readonly constantService: ConstantService,
     private readonly subnatureService: SubnatureService,
     private readonly subServiceService: SubservicesService,
-    private readonly servicesService: ServicesService,
     private readonly subnatureappsettingsService: SubnatureappsettingsService,
     private readonly importMappingService: ImportMappingService,
   ) {}
@@ -57,15 +56,12 @@ export class LicenceMaintenanceService {
     const headers = this.constantService.GLOBAL_CONST.QUEUE.LICENCE_MAINTENANCE.HEADER;
 
     const subnatureappsetting = await this.subnatureappsettingsService.findOne({
-      where: { nrgcode: Like(`%${line[headers[9]]}%`), gpcappsettingsid: this.constantService.GLOBAL_CONST.SCOPES.BSC },
+      where: { nrgcode: Like(`%${line[headers[8]]}%`), gpcappsettingsid: this.constantService.GLOBAL_CONST.SCOPES.BSC },
       relations: ['subnature'],
     });
-    if (!subnatureappsetting) throw `No Subnature found with NRG Code : ${line[headers[9]]}`;
-
-    const thirdPartyTrigram = chain(line[headers[8]])
-      .split('/')
-      .first()
-      .value();
+    if (!subnatureappsetting) throw `No Subnature found with NRG Code : ${line[headers[8]]}`;
+    const payorTrigram = line[headers[11]]?.trim();
+    const csmName = line[headers[10]]?.trim();
     return {
       year: moment()
         .subtract(1, 'month')
@@ -74,7 +70,8 @@ export class LicenceMaintenanceService {
         .subtract(1, 'month')
         .format('MM'),
       amount: (parseFloat(line[headers[12]]) * -1) / 1000,
-      thirdPartyTrigram,
+      csmName,
+      payorTrigram,
       subnatureName: subnatureappsetting.subnature.name,
     };
   };
@@ -102,18 +99,26 @@ export class LicenceMaintenanceService {
     return subnature;
   };
 
-  getThirdParty = async (thirdPartyTrigram: string): Promise<Thirdparty> => {
-    const thirdParty = await this.thirdpartiesService.findOne({ trigram: Like(thirdPartyTrigram) });
+  getPayorThirdparty = async (thirdPartyTrigram: string): Promise<Thirdparty> => {
+    const LICENCE_MAINTENANCE = 'LICENCE & MAINTENANCE';
+    const PAYOR = 'PAYOR';
+    const thirdparty = await this.importMappingService.getMapping(LICENCE_MAINTENANCE, PAYOR, thirdPartyTrigram);
+    if (!thirdparty) throw `No payor thirdparty found for thirdparty trigram: ${thirdPartyTrigram}`;
+    return thirdparty;
+  };
+
+  getThirdPartyByName = async (thirdpartyName: string): Promise<Thirdparty> => {
+    const thirdParty = await this.thirdpartiesService.findOne({ name: Like('%' + thirdpartyName + '%') });
     if (!thirdParty) {
-      throw `No Thirdparty found for trigram like : ${thirdPartyTrigram}`;
+      throw `No Thirdparty found for name like : ${thirdpartyName}`;
     }
     return thirdParty;
   };
 
-  getWorkload = async (thirdPartyTrigram: string, subnatureName: string): Promise<Workload> => {
-    const thirdparty = await this.getThirdParty(thirdPartyTrigram);
+  getWorkload = async (csmName: string, subnatureName: string, payorTrigram: string): Promise<Workload> => {
+    const thirdparty = await this.getThirdPartyByName(csmName);
     const subnature = await this.getSubnature(subnatureName);
-    const subservice = await this.getSubservice(thirdparty);
+    const subservice = await this.getSubservice(payorTrigram);
 
     let workload = await this.workloadsService.findOne({
       relations: ['subnature', 'thirdparty', 'subservice'],
@@ -145,20 +150,21 @@ export class LicenceMaintenanceService {
     });
   };
 
-  getService = async (thirdParty: Thirdparty): Promise<Service> => {
+  getService = async (payor: Thirdparty): Promise<ServiceDto> => {
     const LICENCE_MAINTENANCE = 'LICENCE & MAINTENANCE';
     const ORGA = 'ORGA';
-    const service = await this.importMappingService.getMapping(LICENCE_MAINTENANCE, ORGA, thirdParty.trigram);
-    if (!service) throw `No service found for thirdparty: ${thirdParty.trigram}`;
+    const service = await this.importMappingService.getMapping(LICENCE_MAINTENANCE, ORGA, payor.trigram);
+    if (!service) throw `No service found for thirdparty: ${payor.trigram}`;
     return service;
   };
 
-  getSubservice = async (thirdparty: Thirdparty): Promise<SubService> => {
-    const service = await this.getService(thirdparty);
+  getSubservice = async (payorTrigram: string): Promise<SubService> => {
+    const payor = await this.getPayorThirdparty(payorTrigram);
+    const service = await this.getService(payor);
     const subService = await this.subServiceService.findOne({
-      where: { service, thirdparty },
+      where: { service, thirdparty: payor },
     });
-    if (!subService) throw `no Subservice found for thirdPartyId:${thirdparty.id} and serviceId:${service.id}`;
+    if (!subService) throw `no Subservice found for payorId:${payor.id} and serviceId:${service.id}`;
     return subService;
   };
 
@@ -183,9 +189,9 @@ export class LicenceMaintenanceService {
 
   import = async (filename: string, line: Record<string, any>): Promise<Record<string, any>> => {
     try {
-      const { year, month, amount, thirdPartyTrigram, subnatureName } = await this.prepareLine(line);
+      const { year, month, amount, csmName, subnatureName, payorTrigram } = await this.prepareLine(line);
       const period = await this.getPeriod(year, month);
-      const workload = await this.getWorkload(thirdPartyTrigram, subnatureName);
+      const workload = await this.getWorkload(csmName, subnatureName, payorTrigram);
       let createdAmount = await this.createAmount(amount, workload, period);
       createdAmount = { ...createdAmount, datasource: filename };
       Logger.log(`amount saved with success for workload "${workload.code}" and period "${period.code}"`);

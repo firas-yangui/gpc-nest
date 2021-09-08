@@ -1,3 +1,6 @@
+import { Response } from 'express';
+import { Res } from '@nestjs/common';
+
 interface ErrorDescriptor {
   code: number | string;
   message: string;
@@ -29,12 +32,12 @@ export abstract class BusinessException extends Error {
     return this.errors;
   }
 
-  public toHttpException() {
+  public toHttpException(@Res() response: Response) {
     const envelop = {
       code: this.code,
       message: this.message,
       errors: this.errors,
     };
-    return envelop;
+    return response.status(this.getStatus()).json(envelop);
   }
 }

@@ -1,10 +1,11 @@
 import { Controller, Get, HttpException, HttpStatus, Logger, Param, Query } from '@nestjs/common';
 import { WorkloadsService } from './workloads.service';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiOAuth2, ApiTags } from '@nestjs/swagger';
 import { Workload } from './workload.entity';
 
 @Controller('workloads')
 @ApiTags('Workloads')
+@ApiOAuth2(['api.gpc-workload-management.v1'], 'SG Connect')
 export class WorkloadsController {
   constructor(private readonly workloadsService: WorkloadsService) {}
 

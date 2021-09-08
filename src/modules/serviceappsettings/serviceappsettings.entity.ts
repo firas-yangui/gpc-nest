@@ -1,5 +1,5 @@
 import { Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
-import { Service } from './../services/services.entity';
+import { ServiceDto } from './../services/services.entity';
 import { GpcAppSettings } from './../gpcappsettings/gpcappsettings.entity';
 import { Thirdparty } from './../thirdparties/thirdparty.entity';
 
@@ -12,12 +12,12 @@ export class ServiceAppSettings {
   id: number;
 
   @ManyToOne(
-    () => Service,
-    (service: Service) => service.serviceAppSettings,
+    () => ServiceDto,
+    (service: ServiceDto) => service.serviceAppSettings,
     { nullable: false, onDelete: 'CASCADE' },
   )
   @JoinColumn({ name: 'modelid' })
-  model: Service | null;
+  model: ServiceDto | null;
 
   @ManyToOne(
     () => GpcAppSettings,

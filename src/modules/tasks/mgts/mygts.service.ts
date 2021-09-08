@@ -18,7 +18,7 @@ import { Workload } from '../../workloads/workload.entity';
 import { Period } from '../../periods/period.entity';
 import { Price } from '../../prices/prices.entity';
 import { SubService } from '../../subservices/subservice.entity';
-import { Service } from '../../services/services.entity';
+import { ServiceDto } from '../../services/services.entity';
 import { SubNature } from '../../subnature/subnature.entity';
 import { SubtypologiesService } from '../../subtypologies/subtypologies.service';
 import { ImportMappingService } from '../../importmapping/importmapping.service';
@@ -123,7 +123,7 @@ export class MyGtsService {
     return thirdParty;
   };
 
-  getService = async (thirdParty: Thirdparty): Promise<Service> => {
+  getService = async (thirdParty: Thirdparty): Promise<ServiceDto> => {
     const MYGTS = 'MYGTS';
     const ORGA = 'ORGA';
     const service = await this.importMappingService.getMapping(MYGTS, ORGA, thirdParty.trigram);

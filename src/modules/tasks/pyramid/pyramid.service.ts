@@ -36,16 +36,21 @@ const mappingTypes = {
 const intExtStaffType: string[] = ['internal', 'external'];
 const onshoreStaffType = 'onshore';
 const actualsValideStaffType = [...intExtStaffType, onshoreStaffType, 'nearshore', 'offshore'];
+const outsourcingValideStaffType = ['outsourcing - consulting', 'outsourcing - fixed-price contract', 'restatement'];
 const eacValideStaffType = [
-  'outsourcing - consulting',
-  'outsourcing - fixed-price contract',
-  'restatement',
+  ...outsourcingValideStaffType,
+  'gbsu - contribution',
+  'itim - contribution',
+  'other - contribution',
+  'gts - hosting and client request',
+  'irbs - contribution',
+  'software acquisition',
+  'gts - client projects',
+  'it rental and maintenance',
   'travels',
   'other',
-  'itim - contribution',
-  'gbsu - contribution',
-  'software acquisition',
 ];
+
 const eacFields = {
   ProjectCode: 'Project_Code',
   ProjectName: 'Project_Name',
@@ -77,7 +82,7 @@ const pyramidFields = {
   },
   pmd: {
     ...eacFields,
-    valideStaffType: [...eacValideStaffType],
+    valideStaffType: [...outsourcingValideStaffType],
   },
   actuals: {
     amount: 'standard_actuals_integrated_md',
@@ -417,7 +422,7 @@ export class PyramidService {
         // check allocations on the current period
         const previousPeriodAppSettings = await this.getPeriodAppSettings(periodType, isActuals, outsourcing, true);
         if (previousPeriodAppSettings) {
-          const prevAllocation = await this.getAllocations(workloadsBySubserviceThirdpartySubnature, line, fields, periodAppSettings);
+          const prevAllocation = await this.getAllocations(workloadsBySubserviceThirdpartySubnature, line, fields, previousPeriodAppSettings);
           if (prevAllocation) {
             workload = prevAllocation.workload;
             newWorkload = false;
