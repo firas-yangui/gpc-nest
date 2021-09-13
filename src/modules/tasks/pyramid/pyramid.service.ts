@@ -28,7 +28,7 @@ import { ActivityThirdPartyService } from '../../activity-thirdparty/activity-th
 import { Activity } from 'src/modules/activity/activity.entity';
 import { ActivityThirdParty } from 'src/modules/activity-thirdparty/activity-thirdparty.entity';
 import { MappingCaPayor } from 'src/modules/mappingcapayor/mappingcapayor.entity';
-import { MappingCaPayorService } from 'src/modules/mappingcapayor/mappingcapayor.service';
+import { MappingCaPayorService } from '../../mappingcapayor/mappingcapayor.service';
 
 const importName = 'PYRAMID';
 const mappingTypes = {
