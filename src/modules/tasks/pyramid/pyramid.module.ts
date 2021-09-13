@@ -20,6 +20,7 @@ import { DatalakeMappingModule } from '../../datalakemapping/datalakemapping.mod
 import { ImportMappingModule } from '../../importmapping/importmapping.module';
 import { ActivityThirdPartyModule } from '../../activity-thirdparty/activity-thirdparty.module';
 import { ActivitModule } from '../../activity/activity.module';
+import { MappingCaPayorModule } from 'src/modules/mappingcapayor/mappingcapayor.module';
 @Module({
   imports: [
     AmountsModule,
@@ -42,6 +43,7 @@ import { ActivitModule } from '../../activity/activity.module';
     ImportMappingModule,
     ActivityThirdPartyModule,
     ActivitModule,
+    MappingCaPayorModule,
   ],
   providers: [PyramidService],
   exports: [PyramidService],
