@@ -12,8 +12,12 @@ export class MappingCaPayorService {
     private mappingCaPayorRepository: MappingCaPayorRepository,
   ) {}
 
-  getMappingCaPayor() {
-    return this.mappingCaPayorRepository.find();
+  getMappingCaPayor(option = {}) {
+    return this.mappingCaPayorRepository.find(option);
+  }
+
+  findOne(option = {}) {
+    return this.mappingCaPayorRepository.findOne(option);
   }
 
   async setMappingCaPayor(newMappingCaPayors: MappingCaPayor[]) {

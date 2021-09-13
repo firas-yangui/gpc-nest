@@ -27,6 +27,8 @@ import { ActivityService } from '../../activity/activity.service';
 import { ActivityThirdPartyService } from '../../activity-thirdparty/activity-thirdparty.service';
 import { Activity } from 'src/modules/activity/activity.entity';
 import { ActivityThirdParty } from 'src/modules/activity-thirdparty/activity-thirdparty.entity';
+import { MappingCaPayor } from 'src/modules/mappingcapayor/mappingcapayor.entity';
+import { MappingCaPayorService } from 'src/modules/mappingcapayor/mappingcapayor.service';
 
 const importName = 'PYRAMID';
 const mappingTypes = {
@@ -140,6 +142,7 @@ export class PyramidService {
     private readonly importMappingService: ImportMappingService,
     private readonly activityThirdPartyService: ActivityThirdPartyService,
     private readonly activityService: ActivityService,
+    private readonly mappingCaPayorService: MappingCaPayorService,
   ) {}
 
   isValidParams = (requiredFileds: string[], line: any) => {
@@ -328,14 +331,21 @@ export class PyramidService {
   getPartners = async (activityCode): Promise<any[]> => {
     const activity: Activity = await this.activityService.findOne({ where: { activityCode } });
     if (!activity) throw 'no activity found for activityCode ' + activityCode;
-    const partners: ActivityThirdParty[] = await this.activityThirdPartyService.find({
+    const payors: ActivityThirdParty[] = await this.activityThirdPartyService.find({
       relations: ['activity', 'thirdParty'],
       where: { activity: { id: activity.id } },
     });
-    if (!partners.length) throw 'no thirdparty found for activityCode ' + activityCode;
-    const sum: number = partners.map(({ percent }) => parseInt(percent.toString())).reduce((total, percent) => total + percent);
+    if (!payors.length) throw 'no thirdparty found for activityCode ' + activityCode;
+    const sum: number = payors.map(({ percent }) => parseInt(percent.toString())).reduce((total, percent) => total + percent);
     if (sum != 100) throw `sum not equal to 100, ${sum}`;
-    return partners.map(({ thirdParty, percent }) => ({ partner: thirdParty, percent }));
+
+    const res = [];
+    for (const { thirdParty: payor, percent } of payors) {
+      const payormapping = await this.mappingCaPayorService.findOne({ libelleCaPayor: payor.name });
+      const partner = await this.thirdpartiesService.findOne({ trigram: payormapping.partnerTrigram });
+      res.push({ partner, percent });
+    }
+    return res;
   };
 
   import = async (filename, line: any, isActuals = false, outsourcing = false, isV2 = false): Promise<any> => {
