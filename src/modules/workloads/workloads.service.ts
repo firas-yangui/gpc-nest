@@ -262,7 +262,11 @@ export class WorkloadsService {
            ad.name as ${validProp('adName')},
 
            tp.id as ${validProp('tpId')},
-           tp.trigram as ${validProp('tpTrigram')} 
+           tp.trigram as ${validProp('tpTrigram')},
+
+           dpt.id as ${validProp('dptId')},
+           dpt.trigram as ${validProp('dptTrigram')}
+           /*array_agg(partner.id) as "partnerIds",*/
            ${includePeriodFields(periodIds)}
     from subservice ss
              left outer join service srv on ss.serviceid = srv.id
@@ -271,10 +275,14 @@ export class WorkloadsService {
              left outer join subtypology st on ss.subtypologyid = st.id
              left outer join subtypologyappsettings stas on st.id = stas.modelid
              left outer join subnature sn on w.subnatureid = sn.id
-             left outer join serviceappsettings sas on srv.id = sas.modelid
+             inner join serviceappsettings sas on srv.id = sas.modelid
              left outer join thirdparty tp on w.thirdpartyid = tp.id
              left outer join activitydomain ad on ad.id = sas.activitydomainid
-           ${includePeriodJoins(periodIds)}
+             ${includePeriodJoins(periodIds)}
+             left outer join subsidiaryallocation ssda on w.id = ssda.workloadid and ssda.periodid IN (${periodIds})
+             left outer join thirdparty partner on partner.id = ssda.thirdpartyid
+             left outer join thirdpartyappsettings partneras on partner.id = partneras.modelid
+             left outer join thirdparty dpt on dpt.id=sas.thirdpartyid
 
     where sas.gpcappsettingsid = ${gpcAppSettingsId}
     `;
@@ -311,17 +319,17 @@ export class WorkloadsService {
            `;
     }
     if (filter && filter.partners && filter.partners.length > 0) {
-      subquery += ` AND tp.id in (${filter.partners.join(',')}) `;
+      subquery += ` AND partner.id in (${filter.partners.join(',')}) `;
     }
 
     //end filter section
     subquery += `
-        group by stas.modelid, stas.plan, ss.id, ss.name, ss.code, sn.name, sn.id, srv.name, srv.id, srv.code,srv.description,srv.lastupdatedate, ad.name, w.code, w.status, w.id, tp.id, tp.trigram, w.description`;
+        group by stas.modelid, stas.plan, ss.id, ss.name, ss.code, sn.name, sn.id, srv.name, srv.id, srv.code,srv.description,srv.lastupdatedate, ad.name, w.code, w.status, w.id, tp.id, tp.trigram, w.description, dpt.id, dpt.trigram`;
 
     return subquery;
   }
 
-  async getWorkloadPortfolioViewTreeDataWithFilter(
+  async getWorkloadTreeDataWithFilter(
     gpcAppSettingsId: number,
     columns: Array<keyof WorkloadTreeDataItemDTO>,
     parentTreeNode: Partial<WorkloadTreeDataItemDTO>,
@@ -384,6 +392,8 @@ export class WorkloadsService {
         wlId,
         wlDescription,
         tpTrigram,
+        dptId,
+        dptTrigram,
         ...periodsInfo
       }) => {
         const periodAmounts = [];
@@ -413,6 +423,8 @@ export class WorkloadsService {
           wlId,
           wlDescription,
           tpTrigram,
+          dptId,
+          dptTrigram,
           periodAmounts,
         } as WorkloadTreeDataItemDTO;
         return res;

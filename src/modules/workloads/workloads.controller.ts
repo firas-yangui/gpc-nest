@@ -43,38 +43,12 @@ export class WorkloadsController {
     });
   }
 
-  @Post('portfolio-view/portfolios/byGpcAppSettingsId/:gpcAppSettingsId')
-  @ApiOperation({ summary: 'get workload for portfolio view of the first level portofolios with filters' })
-  async getWorkloadPortfolioViewLevelPortfolioWithFilter(
-    @Param('gpcAppSettingsId') gpcAppSettingsId: number,
-    @Body() synthesisFilter: SynthesisFilterDTO,
-  ): Promise<any> {
-    const validProp = (prop: keyof WorkloadTreeDataItemDTO) => prop;
-    const columns = [validProp('sId'), validProp('sName'), validProp('sCode'), validProp('sDescr'), validProp('sLastUpt')];
-    const parentTreeNode = null; //no parent for first level
-    return await this.workloadsService.getWorkloadPortfolioViewTreeDataWithFilter(gpcAppSettingsId, columns, parentTreeNode, synthesisFilter, [
-      110,
-      126,
-    ]);
-  }
-
-  //to do
-  @Post('portfolio-view/portfolio/:portfolioId/subservices')
-  @ApiOperation({ summary: 'get workload for portofolio view of the second level sub-service with filters' })
-  async getWorkloadPortfolioViewLevelSubServiceWithFilter(
-    @Param('portfolioId') portfolioId: number,
-    @Body() sythesisFilter: SynthesisFilterDTO,
-  ): Promise<any> {
-    //return await this.workloadsService.getWorkloadsWithAmounts(query);
-    return;
-  }
-
   @Post('workload-generic-tree-data-with-filter')
   @ApiOperation({ summary: 'gets generic workload tree data' })
   @ApiResponse({ status: 200, type: WorkloadTreeDataItemDTO, isArray: true })
-  async getWorkloadPortfolioViewTreeDataWithFilter(@Body() req: WorkloadTreeDataRequestDTO): Promise<WorkloadTreeDataItemDTO[]> {
+  async getWorkloadTreeDataWithFilter(@Body() req: WorkloadTreeDataRequestDTO): Promise<WorkloadTreeDataItemDTO[]> {
     try {
-      return await this.workloadsService.getWorkloadPortfolioViewTreeDataWithFilter(
+      return await this.workloadsService.getWorkloadTreeDataWithFilter(
         req.gpcAppSettingsId,
         req.columns,
         req.parentTreeNode,

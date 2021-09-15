@@ -34,6 +34,8 @@ export class WorkloadTreeDataItemDTO {
   /* Entity View Section*/
   //ToDo
 
+  @ApiProperty() dptId: number; //dpt as thirdparty as the parent department of services, to be verified
+  @ApiProperty() dptTrigram: number; //dpt as thirdparty as the parent department of services, to be verified
   /* Partner View */
   //ToDo
 

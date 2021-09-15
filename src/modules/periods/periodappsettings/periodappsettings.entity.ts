@@ -1,6 +1,7 @@
 import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { Period } from '../period.entity';
 import { GpcAppSettings } from '../../gpcappsettings/gpcappsettings.entity';
+import { ApiProperty } from '@nestjs/swagger';
 
 @Entity('periodappsettings')
 @Index('unique_thirdparty_gpcappsettings_couple', ['gpcappsettings', 'period'], { unique: true })
@@ -32,6 +33,7 @@ export class PeriodAppSettings {
     default: () => 'false',
     name: 'iscampaignperiod',
   })
+  @ApiProperty()
   iscampaignperiod: boolean;
 
   @Column('character varying', {
