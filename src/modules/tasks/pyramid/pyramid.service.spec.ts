@@ -27,35 +27,37 @@ import { ActivityThirdParty } from '../../activity-thirdparty/activity-thirdpart
 import { MappingCaPayorService } from '../../mappingcapayor/mappingcapayor.service';
 import { iteratee } from 'lodash';
 
-const AmountsModuleMock = { dd: () => {} };
 describe('Pyramid.service', () => {
   let service: PyramidService;
 
-  beforeEach(async () => {
+  const createService = async (useValue = {}) => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         PyramidService,
-        { provide: AmountConverter, useValue: {} },
-        { provide: RawAmountsService, useValue: {} },
-        { provide: WorkloadsService, useValue: {} },
-        { provide: ThirdpartiesService, useValue: {} },
-        { provide: PeriodsService, useValue: {} },
-        { provide: SubservicesService, useValue: {} },
-        { provide: ConstantService, useValue: {} },
-        { provide: CurrencyRateService, useValue: {} },
-        { provide: PricesService, useValue: {} },
-        { provide: ImportMappingService, useValue: {} },
-        { provide: ActivityThirdPartyService, useValue: {} },
-        { provide: ActivityService, useValue: {} },
-        { provide: SubtypologiesService, useValue: {} },
-        { provide: SubsidiaryallocationService, useValue: {} },
-        { provide: ServicesService, useValue: {} },
-        { provide: SubnatureService, useValue: {} },
-        { provide: MappingCaPayorService, useValue: {} },
+        { provide: AmountConverter, useValue },
+        { provide: RawAmountsService, useValue },
+        { provide: WorkloadsService, useValue },
+        { provide: ThirdpartiesService, useValue },
+        { provide: PeriodsService, useValue },
+        { provide: SubservicesService, useValue },
+        { provide: ConstantService, useValue },
+        { provide: CurrencyRateService, useValue },
+        { provide: PricesService, useValue },
+        { provide: ImportMappingService, useValue },
+        { provide: ActivityThirdPartyService, useValue },
+        { provide: ActivityService, useValue },
+        { provide: SubtypologiesService, useValue },
+        { provide: SubsidiaryallocationService, useValue },
+        { provide: ServicesService, useValue },
+        { provide: SubnatureService, useValue },
+        { provide: MappingCaPayorService, useValue },
       ],
     }).compile();
 
     service = module.get<PyramidService>(PyramidService);
+  };
+  beforeEach(async () => {
+    await createService();
   });
 
   it('should be defined', () => {
@@ -208,6 +210,42 @@ describe('Pyramid.service', () => {
       const unvalidStaffType = 'unvalidStaffType';
       const res = service.isJH(unvalidStaffType);
       expect(res).toBe(false);
+    });
+  });
+
+  describe('isChargeableLine', () => {
+    const valideStaffType = ['type1', 'type2', 'type3'];
+    const staffType = 'staffType';
+    const fields = { valideStaffType, staffType };
+
+    it('line1 should return true', () => {
+      const line1 = { staffType: 'TYPE1' };
+      const res = service.isChargeableLine(line1, fields);
+      expect(res).toBe(true);
+    });
+
+    it('line2 should return true', () => {
+      const line2 = { staffType: 'type2' };
+      const res = service.isChargeableLine(line2, fields);
+      expect(res).toBe(true);
+    });
+
+    it('line3 should return false', () => {
+      const line3 = { staffType: 'invalidType' };
+      const res = service.isChargeableLine(line3, fields);
+      expect(res).toBe(false);
+    });
+  });
+
+  describe.only('getSubtypologyByCode', () => {
+    it('should return OK', async () => {
+      const codes = ['code1', 'code2'];
+
+      await createService({ findByCodes: async () => 'OK' });
+
+      const res = await service.getSubtypologyByCode(codes);
+
+      expect(res).toBe('OK');
     });
   });
 });
