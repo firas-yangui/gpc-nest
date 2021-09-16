@@ -284,7 +284,7 @@ export class WorkloadsService {
              left outer join thirdpartyappsettings partneras on partner.id = partneras.modelid
              left outer join thirdparty dpt on dpt.id=sas.thirdpartyid
 
-    where sas.gpcappsettingsid = ${gpcAppSettingsId}
+    where sas.gpcappsettingsid = ${gpcAppSettingsId} and stas.gpcappsettingsid = ${gpcAppSettingsId}
     `;
     //filter section
     if (filter && filter.portfolios && filter.portfolios.length > 0) {
