@@ -236,7 +236,7 @@ describe('Pyramid.service', () => {
     });
   });
 
-  describe.only('getSubtypologyByCode', () => {
+  describe('getSubtypologyByCode', () => {
     it('should return OK', async () => {
       const codes = ['code1', 'code2'];
 
