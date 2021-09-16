@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
-import { Thirdparty } from '../thirdparties/thirdparty.entity';
+import { CaPayor } from '../capayor/capayor.entity';
 
 @Entity({ name: 'mtr_activity' })
 export class Activity {
@@ -90,9 +90,9 @@ export class Activity {
 
   @ApiProperty()
   @OneToMany(
-    () => Thirdparty,
-    (thirdParty: Thirdparty) => thirdParty.activity,
+    () => CaPayor,
+    (caPayor: CaPayor) => caPayor.activity,
     { onDelete: 'CASCADE' },
   )
-  thirdParty: Thirdparty[];
+  capayor: CaPayor[];
 }

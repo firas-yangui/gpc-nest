@@ -1,6 +1,6 @@
 import { Get, Query, Header, Controller, Post, Body, Res, HttpStatus, Param, Logger, UseInterceptors, UploadedFile } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
-import { ErrorModel } from './../exceptions-handler/error-model';
+import { ErrorModel } from '../exceptions-handler/error-model';
 import { SUCCESS } from '../success-handler/success.constatns';
 import { EXCEPTIONS } from '../exceptions-handler/exceptions.constants';
 import { NoContent } from '../exceptions-handler/no-content.exception';
@@ -8,20 +8,20 @@ import { CustomBadRequestException } from '../exceptions-handler/bad-request.exc
 import { ERRORS } from '../exceptions-handler/errors.constants';
 import { Response } from 'express';
 import { ThirdpartiesService } from '../thirdparties/thirdparties.service';
-import { ActivityThirdPartyService } from './activity-thirdparty.service';
-import { ActivityThirdParty } from './activity-thirdparty.entity';
-import { ActivityThirdPartyDto, ActivityThirdParty as ActivityThirdPartyInterface } from '../activity-thirdparty/activity-thirdparty.dto';
+import { ActivityCapayorService } from './activity-capayorservice';
+import { ActivityCapayorDto, ActivityCapayorInterface } from './activity-capayor.dto';
+import { ActivityCapayor } from './activity-capayor.entity';
 import { ConstantService } from '../constants/constants';
 import { FileInterceptor } from '@nestjs/platform-express';
 import * as _ from 'lodash';
 import { ActivityService } from '../activity/activity.service';
 
-@ApiTags('activitythirdparty')
-@Controller('activitythirdparty')
-export class ActivityThirdPartyController {
-  private logger = new Logger(ActivityThirdPartyController.name);
+@ApiTags('activitycapayor')
+@Controller('activitycapayor')
+export class ActivityCapayorController {
+  private logger = new Logger(ActivityCapayorController.name);
   constructor(
-    private readonly activityThirdPartyService: ActivityThirdPartyService,
+    private readonly activityCapayorService: ActivityCapayorService,
     private readonly constantService: ConstantService,
     private readonly thirdpartiesService: ThirdpartiesService,
     private readonly activityService: ActivityService,
@@ -33,19 +33,19 @@ export class ActivityThirdPartyController {
   @Header('Accept-Charset', 'utf-8')
   @ApiOperation({
     description: 'add activity partners with percentage',
-    operationId: 'POST /activitythirdparty',
+    operationId: 'POST /capayorparty',
   })
   @ApiResponse({
     status: SUCCESS.CREATE.STATUS,
     description: 'activity partners created',
     isArray: true,
-    type: ActivityThirdParty,
+    type: ActivityCapayor,
   })
   @ApiResponse({
     status: SUCCESS.OK.STATUS,
     description: 'activity partners updated',
     isArray: true,
-    type: ActivityThirdParty,
+    type: ActivityCapayor,
   })
   @ApiResponse({
     status: EXCEPTIONS.INTERNAL_SERVER_ERROR.STATUS_CODE,
@@ -59,11 +59,11 @@ export class ActivityThirdPartyController {
     type: CustomBadRequestException,
     isArray: false,
   })
-  async addConversionRate(@Body() activityThirdPartyDto: ActivityThirdPartyInterface, @Res() response: Response) {
+  async addCapayor(@Body() activityCapayorDto: ActivityCapayorInterface, @Res() response: Response) {
     try {
       const structureErrors = [];
-      this.constantService.ACTIVIT_THIRDPARTY_KEYS.map(attribute => {
-        if (!activityThirdPartyDto[attribute] || activityThirdPartyDto[attribute] == null) {
+      this.constantService.ACTIVIT_CAPAYOR_KEYS.map(attribute => {
+        if (!activityCapayorDto[attribute] || activityCapayorDto[attribute] == null) {
           structureErrors.push(`${attribute} ${ERRORS.MISSING.TYPE}`);
         }
       });
@@ -71,23 +71,19 @@ export class ActivityThirdPartyController {
         const exception = new CustomBadRequestException(ERRORS.MISSING.CODE, ERRORS.MISSING.DESCRIPTION, structureErrors);
         return exception.toHttpException(response);
       }
-      const activityThirdParty = new ActivityThirdPartyDto(activityThirdPartyDto);
-      const percentageValide = this.activityThirdPartyService.percentageValidation(activityThirdParty.getThirdPartyPercentages());
+      const activityCapayor = new ActivityCapayorDto(activityCapayorDto);
+      const percentageValide = this.activityCapayorService.percentageValidation(activityCapayor.getCapayorPercentages());
       if (!percentageValide) {
         const exception = new CustomBadRequestException(ERRORS.PERCENTAGE_KO.CODE, ERRORS.PERCENTAGE_KO.DESCRIPTION);
         return exception.toHttpException(response);
       }
-      if (activityThirdParty.getStartDate() > activityThirdParty.getEndDate()) {
-        const exception = new CustomBadRequestException(ERRORS.DATES_KO.CODE, ERRORS.DATES_KO.DESCRIPTION);
-        return exception.toHttpException(response);
-      }
-      const result = await this.activityThirdPartyService.linkActivityToThirdParty(activityThirdParty);
+      const result = await this.activityCapayorService.linkActivityTocapayor(activityCapayor);
       if (result == ERRORS.ACTIVITY_NOT_FOUND) {
         const exception = new CustomBadRequestException(ERRORS.ACTIVITY_NOT_FOUND.CODE, ERRORS.ACTIVITY_NOT_FOUND.DESCRIPTION);
         return exception.toHttpException(response);
       }
-      if (result == ERRORS.THIRDPARTY_NOT_FOUND) {
-        const exception = new CustomBadRequestException(ERRORS.THIRDPARTY_NOT_FOUND.CODE, ERRORS.THIRDPARTY_NOT_FOUND.DESCRIPTION);
+      if (result == ERRORS.CAPAYOR_NOT_FOUND) {
+        const exception = new CustomBadRequestException(ERRORS.CAPAYOR_NOT_FOUND.CODE, ERRORS.CAPAYOR_NOT_FOUND.DESCRIPTION);
         return exception.toHttpException(response);
       }
       if (result == SUCCESS.CREATE) {
@@ -98,20 +94,20 @@ export class ActivityThirdPartyController {
     }
   }
 
-  @Get('get-activityThirdparty/:id')
+  @Get('get-capayorparty/:id')
   @ApiResponse({
     status: SUCCESS.OK.STATUS,
     description: SUCCESS.OK.DESCRIPTION,
     isArray: true,
-    type: ActivityThirdParty,
+    type: ActivityCapayor,
   })
   @ApiResponse({
     status: SUCCESS.NOCONTENT.STATUS,
     description: SUCCESS.NOCONTENT.DESCRIPTION,
     isArray: false,
-    type: ActivityThirdParty,
+    type: ActivityCapayor,
   })
-  async getActivityThirdParty(@Param('id') id: number): Promise<any> {
+  async getcapayorParty(@Param('id') id: number): Promise<any> {
     const optionsActivity = {
       where: {
         id,
@@ -119,48 +115,48 @@ export class ActivityThirdPartyController {
     };
     const activity = await this.activityService.findOne(optionsActivity);
     const options = {
-      relations: ['thirdParty', 'activity'],
+      relations: ['capayor', 'activity'],
       where: {
         activity,
       },
     };
-    return await this.activityThirdPartyService.find(options);
+    return await this.activityCapayorService.find(options);
   }
-
-  @Get('delete-activityThirdparty/:id')
+  /*
+  @Get('delete-capayorparty/:id')
   @ApiResponse({
     status: SUCCESS.OK.STATUS,
     description: SUCCESS.OK.DESCRIPTION,
     isArray: true,
-    type: ActivityThirdParty,
+    type: capayorParty,
   })
   @ApiResponse({
     status: SUCCESS.NOCONTENT.STATUS,
     description: SUCCESS.NOCONTENT.DESCRIPTION,
     isArray: false,
-    type: ActivityThirdParty,
+    type: capayorParty,
   })
-  async deleteActivityThirdParty(@Param('id') id: number): Promise<any> {
-    return await this.activityThirdPartyService.deleteActivityThirdPartyRepository(id);
+  async deletecapayorParty(@Param('id') id: number): Promise<any> {
+    return await this.activityCapayorService.deletecapayorPartyRepository(id);
   }
 
-  @Get('update-activityThirdparty/:id/:percent')
+  @Get('update-capayorparty/:id/:percent')
   @ApiResponse({
     status: SUCCESS.OK.STATUS,
     description: SUCCESS.OK.DESCRIPTION,
     isArray: true,
-    type: ActivityThirdParty,
+    type: capayorParty,
   })
   @ApiResponse({
     status: SUCCESS.NOCONTENT.STATUS,
     description: SUCCESS.NOCONTENT.DESCRIPTION,
     isArray: false,
-    type: ActivityThirdParty,
+    type: capayorParty,
   })
-  async updateActivityThirdParty(@Param('id') id: number, @Param('percent') percent: number): Promise<any> {
-    return await this.activityThirdPartyService.update(id, percent);
+  async updatecapayorParty(@Param('id') id: number, @Param('percent') percent: number): Promise<any> {
+    return await this.activityCapayorService.update(id, percent);
   }
-
+  */
   @Header('Cache-Control', 'none')
   @Header('Content-Type', 'multipart/form-data')
   @Header('Accept-Charset', 'utf-8')
@@ -172,13 +168,13 @@ export class ActivityThirdPartyController {
     status: SUCCESS.CREATE.STATUS,
     description: 'activity partners created',
     isArray: true,
-    type: ActivityThirdParty,
+    type: ActivityCapayor,
   })
   @ApiResponse({
     status: SUCCESS.OK.STATUS,
     description: 'activity partners updated',
     isArray: true,
-    type: ActivityThirdParty,
+    type: ActivityCapayor,
   })
   @ApiResponse({
     status: EXCEPTIONS.INTERNAL_SERVER_ERROR.STATUS_CODE,
@@ -223,7 +219,7 @@ export class ActivityThirdPartyController {
 
     //check headers
     for (const header of headers)
-      if (!this.constantService.ACTIVITY_THIRPARTY_HEADERS.includes(header)) structureErrors.push(`${header} ${ERRORS.MISSING.TYPE}`);
+      if (!this.constantService.ACTIVITY_CAPAYOR_HEADERS.includes(header)) structureErrors.push(`${header} ${ERRORS.MISSING.TYPE}`);
     if (structureErrors.length != 0) {
       const exception = new CustomBadRequestException(ERRORS.MISSING.CODE, ERRORS.MISSING.DESCRIPTION, structureErrors);
       return exception.toHttpException(response);
@@ -232,67 +228,63 @@ export class ActivityThirdPartyController {
     //parse Array
     const data: any[] = _.chain(rows)
       .map(row => _.zipObject(headers, row))
-      .groupBy(this.constantService.ACTIVITY_THIRPARTY_HEADERS[0]) //groupBy activity
+      .groupBy(this.constantService.ACTIVITY_CAPAYOR_HEADERS[0]) //groupBy activity
       .map(activityThirparty => {
-        const { activity, startDate, endDate } = activityThirparty[0];
+        const { activity } = activityThirparty[0];
         return {
           activity,
-          startDate,
-          endDate,
-          thirdPartyPercentages: activityThirparty.map(({ thirdpartyTrigram, percentage }) => ({
-            thirdpartyTrigram,
+          capayorPercentages: activityThirparty.map(({ capayor, percentage, startDate }) => ({
+            capayor,
             percentage,
+            startDate,
           })),
         };
       })
       .value();
 
     //processData
-    for (const { activity, endDate, startDate, thirdPartyPercentages } of data) {
+    for (const { activity, capayorPercentages } of data) {
       try {
         //convert thirpartyTrigram to thirdPartyId
-        for (const index in thirdPartyPercentages) {
-          const { thirdpartyTrigram } = thirdPartyPercentages[index];
-          const thirdparty = await this.thirdpartiesService.findOne({ trigram: thirdpartyTrigram });
-          if (!thirdparty) throw `Third Party not found with trigram ${thirdpartyTrigram}`;
-          thirdPartyPercentages[index].thirdParty = thirdparty.id;
-        }
+        //for (const index in capayorPercentages) {
+        //  const { thirdpartyTrigram } = capayorPercentages[index];
+        //  const thirdparty = await this.thirdpartiesService.findOne({ trigram: thirdpartyTrigram });
+        //  if (!thirdparty) throw `Third Party not found with trigram ${thirdpartyTrigram}`;
+        //  thirdPartyPercentages[index].thirdParty = thirdparty.id;
+        //}
 
-        const activityThirdParty: ActivityThirdPartyInterface = {
+        const activityCapayor: ActivityCapayorInterface = {
           activity: parseInt(activity),
-          startDate: new Date(startDate),
-          endDate: new Date(endDate),
-          thirdPartyPercentages: thirdPartyPercentages.map(({ thirdParty, percentage }) => ({
-            thirdParty,
+          capayorPercentages: capayorPercentages.map(({ capayor, percentage, startDate }) => ({
+            capayor,
             percent: parseInt(percentage),
+            startDate: new Date(startDate),
+            endDate: new Date('12/31/2099'),
           })),
         };
 
-        const activityThirdPartyDto: ActivityThirdPartyDto = new ActivityThirdPartyDto(activityThirdParty);
+        const activityCapayorDto: ActivityCapayorDto = new ActivityCapayorDto(activityCapayor);
 
         //functionnal check
-        if (!this.activityThirdPartyService.percentageValidation(activityThirdPartyDto.getThirdPartyPercentages()))
-          throw ERRORS.PERCENTAGE_KO.DESCRIPTION;
-        if (activityThirdPartyDto.getStartDate() > activityThirdPartyDto.getEndDate()) throw ERRORS.DATES_KO.DESCRIPTION;
+        if (!this.activityCapayorService.percentageValidation(activityCapayorDto.getCapayorPercentages())) throw ERRORS.PERCENTAGE_KO.DESCRIPTION;
 
         //add
-        const result = await this.activityThirdPartyService.linkActivityToThirdParty(activityThirdPartyDto);
+        const result = await this.activityCapayorService.linkActivityTocapayor(activityCapayorDto);
 
         switch (result) {
           case ERRORS.ACTIVITY_NOT_FOUND:
             throw ERRORS.ACTIVITY_NOT_FOUND.DESCRIPTION;
-          case ERRORS.THIRDPARTY_NOT_FOUND:
-            throw ERRORS.THIRDPARTY_NOT_FOUND.DESCRIPTION;
+          case ERRORS.CAPAYOR_NOT_FOUND:
+            throw ERRORS.CAPAYOR_NOT_FOUND.DESCRIPTION;
           default:
             break;
         }
       } catch (error) {
-        for (const { thirdpartyTrigram, percentage } of thirdPartyPercentages) {
+        for (const { capayor, percentage, startDate } of capayorPercentages) {
           errors.push({
             activity,
-            endDate,
             startDate,
-            thirdpartyTrigram,
+            capayor,
             percentage,
             error,
           });

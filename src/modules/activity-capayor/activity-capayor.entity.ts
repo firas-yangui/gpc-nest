@@ -1,10 +1,10 @@
 import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
-import { Thirdparty } from '../thirdparties/thirdparty.entity';
+import { CaPayor } from '../capayor/capayor.entity';
 import { Activity } from '../activity/activity.entity';
 import { ApiProperty } from '@nestjs/swagger';
 
-@Entity('activity_thirdparty')
-export class ActivityThirdParty {
+@Entity('activity_capayor')
+export class ActivityCapayor {
   @ApiProperty()
   @PrimaryGeneratedColumn({
     type: 'integer',
@@ -18,32 +18,36 @@ export class ActivityThirdParty {
     name: 'percent',
   })
   percent: number;
+
   @ApiProperty()
   @Column('date', {
     nullable: true,
     name: 'start_date',
   })
   startDate: Date;
+
   @ApiProperty()
   @Column('date', {
     nullable: true,
     name: 'end_date',
   })
   endDate: Date;
+
   @ApiProperty()
   @ManyToOne(
     () => Activity,
-    (activity: Activity) => activity.thirdParty,
+    (activity: Activity) => activity.capayor,
     { nullable: false, onUpdate: 'CASCADE' },
   )
   @JoinColumn({ name: 'activity_id' })
   activity: Activity | null;
+
   @ApiProperty()
   @ManyToOne(
-    () => Thirdparty,
-    (thirdParty: Thirdparty) => thirdParty.activity,
+    () => CaPayor,
+    (capayor: CaPayor) => capayor.activity,
     { nullable: false, onUpdate: 'CASCADE' },
   )
-  @JoinColumn({ name: 'thirdparty_id' })
-  thirdParty: Thirdparty | null;
+  @JoinColumn({ name: 'capayor_id' })
+  capayor: CaPayor | null;
 }

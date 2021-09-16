@@ -27,9 +27,9 @@ import { MailerModule, MailerOptions } from '@nestjs-modules/mailer';
 import { AmountStatsModule } from './modules/amountstats/amountstats.module';
 import { IrtApplicationModule } from './modules/irtapplication/irtapplication.module';
 import { ImportMappingModule } from './modules/importmapping/importmapping.module';
-import { ActivityThirdPartyModule } from './modules/activity-thirdparty/activity-thirdparty.module';
+import { ActivitycapayorModule } from './modules/activity-capayor/activity-capayor.module';
 import { ActivitModule } from './modules/activity/activity.module';
-import { MappingCaPayorModule } from './modules/mappingcapayor/mappingcapayor.module';
+import { CaPayorModule } from './modules/capayor/capayor.module';
 
 import DbLoader from './loader';
 
@@ -89,10 +89,10 @@ const mailerOptions: MailerOptions = {
     TasksModule,
     SchedulerModule,
     AmountStatsModule,
-    MappingCaPayorModule,
+    CaPayorModule,
     IrtApplicationModule,
     ImportMappingModule,
-    ActivityThirdPartyModule,
+    ActivitycapayorModule,
     ActivitModule,
   ],
 })

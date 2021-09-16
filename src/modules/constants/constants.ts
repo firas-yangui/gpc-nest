@@ -276,7 +276,9 @@ export class ConstantService {
     S3_BUCKET: 'bsc-fin-fpm-gpc-a2870-',
   });
 
-  public ACTIVIT_THIRDPARTY_KEYS = ['startDate', 'endDate', 'thirdPartyPercentages', 'activity'];
+  public ACTIVIT_CAPAYOR_KEYS = ['capayorPercentages', 'activity'];
 
-  public ACTIVITY_THIRPARTY_HEADERS = ['activity', 'startDate', 'endDate', 'percentage', 'thirdpartyTrigram'];
+  public ACTIVITY_CAPAYOR_HEADERS = ['activity', 'startDate', 'percentage', 'capayor'];
+
+  public MULTI_CA_END_DATE = '12/31/2099';
 }
