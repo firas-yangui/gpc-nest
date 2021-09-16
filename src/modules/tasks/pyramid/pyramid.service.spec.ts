@@ -21,7 +21,7 @@ import { ImportMappingService } from '../../importmapping/importmapping.service'
 import { PeriodType as PeriodTypeInterface } from '../../interfaces/common-interfaces';
 import { Subtypology } from '../../subtypologies/subtypology.entity';
 import { ActivityService } from '../../activity/activity.service';
-import { ActivityThirdPartyService } from '../../activity-thirdparty/activity-thirdparty.service';
+import { ActivityCapayorService } from '../../activity-capayor/activity-capayorservice';
 import { Activity } from '../../activity/activity.entity';
 import { CaPayorService } from '../../capayor/capayor.service';
 import { iteratee } from 'lodash';
@@ -43,7 +43,7 @@ describe('Pyramid.service', () => {
         { provide: CurrencyRateService, useValue },
         { provide: PricesService, useValue },
         { provide: ImportMappingService, useValue },
-        { provide: ActivityThirdPartyService, useValue },
+        { provide: ActivityCapayorService, useValue },
         { provide: ActivityService, useValue },
         { provide: SubtypologiesService, useValue },
         { provide: SubsidiaryallocationService, useValue },
