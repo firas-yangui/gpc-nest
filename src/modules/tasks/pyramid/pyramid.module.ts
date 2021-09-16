@@ -18,7 +18,7 @@ import { SubtypologyAppSettingsModule } from './../../subTypologyAppSettings/sub
 import { SubnatureModule } from './../../subnature/subnature.module';
 import { DatalakeMappingModule } from '../../datalakemapping/datalakemapping.module';
 import { ImportMappingModule } from '../../importmapping/importmapping.module';
-import { ActivityThirdPartyModule } from '../../activity-thirdparty/activity-thirdparty.module';
+import { ActivitycapayorModule } from '../../activity-capayor/activity-capayor.module';
 import { ActivitModule } from '../../activity/activity.module';
 import { CaPayorModule } from '../../capayor/capayor.module';
 @Module({
@@ -41,7 +41,7 @@ import { CaPayorModule } from '../../capayor/capayor.module';
     WorkloadsModule,
     DatalakeMappingModule,
     ImportMappingModule,
-    ActivityThirdPartyModule,
+    ActivitycapayorModule,
     ActivitModule,
     CaPayorModule,
   ],

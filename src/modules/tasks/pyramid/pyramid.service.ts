@@ -24,9 +24,9 @@ import { ImportMappingService } from '../../importmapping/importmapping.service'
 import { PeriodType as PeriodTypeInterface } from '../../interfaces/common-interfaces';
 import { Subtypology } from 'src/modules/subtypologies/subtypology.entity';
 import { ActivityService } from '../../activity/activity.service';
-import { ActivityThirdPartyService } from '../../activity-thirdparty/activity-thirdparty.service';
+import { ActivityCapayorService } from '../../activity-capayor/activity-capayorservice';
 import { Activity } from 'src/modules/activity/activity.entity';
-import { ActivityThirdParty } from 'src/modules/activity-thirdparty/activity-thirdparty.entity';
+import { ActivityCapayor } from '../../activity-capayor/activity-capayor.entity';
 import { CaPayorService } from '../../capayor/capayor.service';
 const importName = 'PYRAMID';
 const mappingTypes = {
@@ -138,7 +138,7 @@ export class PyramidService {
     private readonly currencyRateService: CurrencyRateService,
     private readonly pricesService: PricesService,
     private readonly importMappingService: ImportMappingService,
-    private readonly activityThirdPartyService: ActivityThirdPartyService,
+    private readonly activityCapayorService: ActivityCapayorService,
     private readonly activityService: ActivityService,
     private readonly caPayorService: CaPayorService,
   ) {}
@@ -329,8 +329,8 @@ export class PyramidService {
   getPartners = async (activityCode): Promise<any[]> => {
     const activity: Activity = await this.activityService.findOne({ where: { activityCode } });
     if (!activity) throw 'no activity found for activityCode ' + activityCode;
-    const payors: ActivityThirdParty[] = await this.activityThirdPartyService.find({
-      relations: ['activity', 'thirdParty'],
+    const payors: ActivityCapayor[] = await this.activityCapayorService.find({
+      relations: ['activity', 'payor'],
       where: { activity: { id: activity.id } },
     });
     if (!payors.length) throw 'no thirdparty found for activityCode ' + activityCode;
@@ -338,8 +338,8 @@ export class PyramidService {
     if (sum != 100) throw `sum not equal to 100, ${sum}`;
 
     const res = [];
-    for (const { thirdParty: payor, percent } of payors) {
-      const payormapping = await this.caPayorService.findOne({ libelleCaPayor: payor.name });
+    for (const { capayor, percent } of payors) {
+      const payormapping = await this.caPayorService.findOne({ libelleCaPayor: capayor.libelleCaPayor });
       const partner = await this.thirdpartiesService.findOne({ trigram: payormapping.partnerTrigram });
       res.push({ partner, percent });
     }
