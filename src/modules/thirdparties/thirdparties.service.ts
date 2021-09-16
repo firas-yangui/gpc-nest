@@ -42,7 +42,7 @@ export class ThirdpartiesService {
         .from(Thirdparty, 'thirdparty')
         .innerJoinAndSelect('thirdparty.thirdpartyappsettings', 'thirdpartyappsettings')
         .innerJoinAndSelect('thirdpartyappsettings.gpcappsettings', 'gpcappsettings')
-        .innerJoinAndSelect('thirdparty.country', 'country');
+        .innerJoinAndSelect('thirdparty.country', 'country'); //? why need
 
       if (options.gpcAppSettingsId) query.where('gpcappsettings.id = :gpcAppSettingsId', { gpcAppSettingsId: +options.gpcAppSettingsId });
       return await query.getMany();
