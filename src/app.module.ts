@@ -1,9 +1,9 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { TerminusModule } from '@nestjs/terminus';
 import { TerminusOptionsService } from './modules/healthcheck/terminus-options.service';
 import { EmployeesModule } from './modules/employees/employees.module';
 import { TransactionModule } from './modules/transactions/transaction.module';
-import { SgConnectModule, SgConnectOptions } from '@societe-generale/nestjs-sg-connect';
+import { SgConnectMiddleware, SgConnectModule, SgConnectOptionalMiddleware, SgConnectOptions } from '@societe-generale/nestjs-sg-connect';
 import { ConfigurationModule } from './modules/configuration/configuration.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserModule } from './modules/user/user.module';
@@ -64,7 +64,7 @@ const mailerOptions: MailerOptions = {
     ScheduleModule.forRoot(),
     ConfigurationModule,
     ConstantsModule,
-    SgConnectModule.register(options),
+    SgConnectModule.forRoot(options),
     TerminusModule.forRootAsync({
       useClass: TerminusOptionsService,
     }),
@@ -96,4 +96,8 @@ const mailerOptions: MailerOptions = {
     ActivitModule,
   ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer): any {
+    consumer.apply(SgConnectMiddleware).forRoutes('*');
+  }
+}

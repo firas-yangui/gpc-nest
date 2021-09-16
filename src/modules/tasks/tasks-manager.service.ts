@@ -45,7 +45,7 @@ export class TasksService {
 
   importLine(filename, flow, line): Promise<any> {
     switch (flow) {
-      case this.constantService.GLOBAL_CONST.QUEUE.EAC.NAME:
+      case this.constantService.GLOBAL_CONST.QUEUE.EACDEBUTMOIS.NAME:
         return this.pyramidService.import(filename, line);
       case this.constantService.GLOBAL_CONST.QUEUE.EACFINMOIS.NAME:
         return this.pyramidService.import(filename, line, false, false, true);

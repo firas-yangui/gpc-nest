@@ -4,6 +4,8 @@
     "declaration": true,
     "removeComments": true,
     "moduleResolution": "node",
+    "strictPropertyInitialization": false,
+    "strictNullChecks": false,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "target": "es6",
@@ -12,10 +14,6 @@
     "baseUrl": "./",
     "incremental": true
   },
-  "exclude": [
-    "node_modules"
-  ],
-  "files": [
-    "src/main.ts"
-  ]
+  "exclude": ["node_modules"],
+  "files": ["src/main.ts"]
 }
