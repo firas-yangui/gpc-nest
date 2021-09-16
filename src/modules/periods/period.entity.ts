@@ -3,6 +3,7 @@ import { Amount } from './../amounts/amount.entity';
 import { CurrencyRate } from './../currency-rate/currency-rate.entity';
 import { PeriodAppSettings } from './periodappsettings/periodappsettings.entity';
 import { SubsidiaryAllocation } from './../subsidiaryallocation/subsidiaryallocation.entity';
+import { ApiProperty } from '@nestjs/swagger';
 
 @Entity('period')
 @Index('period_code_uniqueness', ['code'], { unique: true })
@@ -12,6 +13,7 @@ export class Period {
     type: 'integer',
     name: 'id',
   })
+  @ApiProperty()
   id: number;
 
   @Column('character varying', {
@@ -19,6 +21,7 @@ export class Period {
     length: 32,
     name: 'name',
   })
+  @ApiProperty()
   name: string;
 
   @Column('text', {
@@ -26,6 +29,7 @@ export class Period {
     unique: true,
     name: 'code',
   })
+  @ApiProperty()
   code: string;
 
   @Column('enum', {
@@ -33,18 +37,21 @@ export class Period {
     enum: ['notified', 'actual', 'sum', 'committed', 'budget', 'forecast'],
     name: 'type',
   })
+  @ApiProperty()
   type: string | null;
 
   @Column('text', {
     nullable: true,
     name: 'year',
   })
+  @ApiProperty()
   year: string | null;
 
   @Column('text', {
     nullable: true,
     name: 'month',
   })
+  @ApiProperty()
   month: string | null;
 
   @Column('boolean', {
@@ -52,6 +59,7 @@ export class Period {
     default: () => 'false',
     name: 'isarchived',
   })
+  @ApiProperty()
   isarchived: boolean | null;
 
   @Column('boolean', {
@@ -59,6 +67,7 @@ export class Period {
     default: () => 'false',
     name: 'allowtransfer',
   })
+  @ApiProperty()
   allowtransfer: boolean;
 
   @OneToMany(
@@ -87,4 +96,12 @@ export class Period {
     { onUpdate: 'CASCADE' },
   )
   subsidiaryAllocations: SubsidiaryAllocation[];
+
+  @Column('boolean', {
+    nullable: false,
+    default: () => 'false',
+    name: 'iscampaignperiod',
+  })
+  @ApiProperty()
+  iscampaignperiod: boolean;
 }

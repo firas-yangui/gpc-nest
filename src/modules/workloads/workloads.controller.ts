@@ -1,7 +1,10 @@
-import { Controller, Get, HttpException, HttpStatus, Logger, Param, Query } from '@nestjs/common';
+import { Body, Controller, Get, HttpException, HttpStatus, Logger, Param, Post, Query } from '@nestjs/common';
 import { WorkloadsService } from './workloads.service';
-import { ApiOAuth2, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiResponse, ApiTags, ApiOAuth2 } from '@nestjs/swagger';
 import { Workload } from './workload.entity';
+import { SynthesisFilterDTO } from './dto/synthesis-filter.dto';
+import { WorkloadTreeDataItemDTO } from './dto/workload-tree-data-item.dto';
+import { WorkloadTreeDataRequestDTO } from './dto/workload-tree-data-request.dto';
 
 @Controller('workloads')
 @ApiTags('Workloads')
@@ -38,5 +41,22 @@ export class WorkloadsController {
     return this.workloadsService.findOne({ id }).catch(err => {
       throw new HttpException(err, HttpStatus.BAD_REQUEST);
     });
+  }
+
+  @Post('workload-generic-tree-data-with-filter')
+  @ApiOperation({ summary: 'gets generic workload tree data' })
+  @ApiResponse({ status: 200, type: WorkloadTreeDataItemDTO, isArray: true })
+  async getWorkloadTreeDataWithFilter(@Body() req: WorkloadTreeDataRequestDTO): Promise<WorkloadTreeDataItemDTO[]> {
+    try {
+      return await this.workloadsService.getWorkloadTreeDataWithFilter(
+        req.gpcAppSettingsId,
+        req.columns,
+        req.parentTreeNode,
+        req.syntheseFilter,
+        req.periodIds,
+      );
+    } catch (e) {
+      console.error(e);
+    }
   }
 }
