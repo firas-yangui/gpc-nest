@@ -27,9 +27,7 @@ import { ActivityService } from '../../activity/activity.service';
 import { ActivityThirdPartyService } from '../../activity-thirdparty/activity-thirdparty.service';
 import { Activity } from 'src/modules/activity/activity.entity';
 import { ActivityThirdParty } from 'src/modules/activity-thirdparty/activity-thirdparty.entity';
-import { MappingCaPayor } from 'src/modules/mappingcapayor/mappingcapayor.entity';
-import { MappingCaPayorService } from '../../mappingcapayor/mappingcapayor.service';
-
+import { CaPayorService } from '../../capayor/capayor.service';
 const importName = 'PYRAMID';
 const mappingTypes = {
   orga: 'ORGA',
@@ -142,7 +140,7 @@ export class PyramidService {
     private readonly importMappingService: ImportMappingService,
     private readonly activityThirdPartyService: ActivityThirdPartyService,
     private readonly activityService: ActivityService,
-    private readonly mappingCaPayorService: MappingCaPayorService,
+    private readonly caPayorService: CaPayorService,
   ) {}
 
   isValidParams = (requiredFileds: string[], line: any) => {
@@ -341,7 +339,7 @@ export class PyramidService {
 
     const res = [];
     for (const { thirdParty: payor, percent } of payors) {
-      const payormapping = await this.mappingCaPayorService.findOne({ libelleCaPayor: payor.name });
+      const payormapping = await this.caPayorService.findOne({ libelleCaPayor: payor.name });
       const partner = await this.thirdpartiesService.findOne({ trigram: payormapping.partnerTrigram });
       res.push({ partner, percent });
     }

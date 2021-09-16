@@ -23,8 +23,7 @@ import { Subtypology } from '../../subtypologies/subtypology.entity';
 import { ActivityService } from '../../activity/activity.service';
 import { ActivityThirdPartyService } from '../../activity-thirdparty/activity-thirdparty.service';
 import { Activity } from '../../activity/activity.entity';
-import { ActivityThirdParty } from '../../activity-thirdparty/activity-thirdparty.entity';
-import { MappingCaPayorService } from '../../mappingcapayor/mappingcapayor.service';
+import { CaPayorService } from '../../capayor/capayor.service';
 import { iteratee } from 'lodash';
 
 describe('Pyramid.service', () => {
@@ -50,7 +49,7 @@ describe('Pyramid.service', () => {
         { provide: SubsidiaryallocationService, useValue },
         { provide: ServicesService, useValue },
         { provide: SubnatureService, useValue },
-        { provide: MappingCaPayorService, useValue },
+        { provide: CaPayorService, useValue },
       ],
     }).compile();
 
