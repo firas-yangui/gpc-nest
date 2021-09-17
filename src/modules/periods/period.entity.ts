@@ -96,12 +96,4 @@ export class Period {
     { onUpdate: 'CASCADE' },
   )
   subsidiaryAllocations: SubsidiaryAllocation[];
-
-  @Column('boolean', {
-    nullable: false,
-    default: () => 'false',
-    name: 'iscampaignperiod',
-  })
-  @ApiProperty()
-  iscampaignperiod: boolean;
 }

@@ -330,19 +330,28 @@ export class PyramidService {
     const activity: Activity = await this.activityService.findOne({ where: { activityCode } });
     if (!activity) throw 'no activity found for activityCode ' + activityCode;
     const payors: ActivityCapayor[] = await this.activityCapayorService.find({
-      relations: ['activity', 'payor'],
+      relations: ['activity', 'capayor'],
       where: { activity: { id: activity.id } },
     });
     if (!payors.length) throw 'no thirdparty found for activityCode ' + activityCode;
     const sum: number = payors.map(({ percent }) => parseInt(percent.toString())).reduce((total, percent) => total + percent);
     if (sum != 100) throw `sum not equal to 100, ${sum}`;
 
-    const res = [];
-    for (const { capayor, percent } of payors) {
-      const payormapping = await this.caPayorService.findOne({ libelleCaPayor: capayor.libelleCaPayor });
-      const partner = await this.thirdpartiesService.findOne({ trigram: payormapping.partnerTrigram });
-      res.push({ partner, percent });
+    const res = [],
+      err = [];
+    for (const {
+      capayor: { partnerTrigram: trigram },
+      percent,
+    } of payors) {
+      const partner = await this.thirdpartiesService.findOne({ trigram });
+      if (partner) res.push({ partner, percent });
+      else err.push(`partner not found for trigram ${trigram}`);
     }
+
+    if (err.length) {
+      throw err.toString();
+    }
+
     return res;
   };
 
