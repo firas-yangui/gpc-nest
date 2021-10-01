@@ -18,9 +18,6 @@ import { SubtypologyAppSettingsModule } from './../../subTypologyAppSettings/sub
 import { SubnatureModule } from './../../subnature/subnature.module';
 import { DatalakeMappingModule } from '../../datalakemapping/datalakemapping.module';
 import { ImportMappingModule } from '../../importmapping/importmapping.module';
-import { ActivitycapayorModule } from '../../activity-capayor/activity-capayor.module';
-import { ActivitModule } from '../../activity/activity.module';
-import { CaPayorModule } from '../../capayor/capayor.module';
 @Module({
   imports: [
     AmountsModule,
@@ -41,9 +38,6 @@ import { CaPayorModule } from '../../capayor/capayor.module';
     WorkloadsModule,
     DatalakeMappingModule,
     ImportMappingModule,
-    ActivitycapayorModule,
-    ActivitModule,
-    CaPayorModule,
   ],
   providers: [PyramidService],
   exports: [PyramidService],
