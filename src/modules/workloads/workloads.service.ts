@@ -210,6 +210,7 @@ export class WorkloadsService {
 
   getWorkloadSubQuery(gpcAppSettingsId: number, filter: SynthesisFilterDTO, periodIds: number[]) {
     const asserNumber = num => (typeof num === 'number' ? num : 0); // sql injection protection
+    gpcAppSettingsId = asserNumber(gpcAppSettingsId);
     const includePeriodFields = (periodIds: number[]) =>
       periodIds
         ? periodIds
@@ -262,34 +263,41 @@ export class WorkloadsService {
            ad.name as ${validProp('adName')},
 
            tp.id as ${validProp('tpId')},
-           tp.trigram as ${validProp('tpTrigram')},
-
-           dpt.id as ${validProp('dptId')},
-           dpt.trigram as ${validProp('dptTrigram')}
-           /*array_agg(partner.id) as "partnerIds",*/
+           tp.trigram as ${validProp('tpTrigram')}
+          
            ${includePeriodFields(periodIds)}
     from subservice ss
              left outer join service srv on ss.serviceid = srv.id
              inner join workload w on w.subserviceid = ss.id
              left outer join portfolio p on p.id = ss.portfolioid
-             left outer join subtypology st on ss.subtypologyid = st.id
-             left outer join subtypologyappsettings stas on st.id = stas.modelid
+             left outer join subtypology st on ss.subtypologyid = st.id 
+             inner join serviceappsettings sas on srv.id = sas.modelid and sas.gpcappsettingsid = ${gpcAppSettingsId}
+             inner join subtypologyappsettings stas on st.id = stas.modelid and stas.gpcappsettingsid=${gpcAppSettingsId}
              left outer join subnature sn on w.subnatureid = sn.id
-             inner join serviceappsettings sas on srv.id = sas.modelid
              left outer join thirdparty tp on w.thirdpartyid = tp.id
+             left outer join thirdpartyappsettings tpas on tpas.modelid = tp.id and tpas.gpcappsettingsid=${gpcAppSettingsId}
              left outer join activitydomain ad on ad.id = sas.activitydomainid
              ${includePeriodJoins(periodIds)}
-             left outer join subsidiaryallocation ssda on w.id = ssda.workloadid and ssda.periodid IN (${periodIds})
-             left outer join thirdparty partner on partner.id = ssda.thirdpartyid
-             left outer join thirdpartyappsettings partneras on partner.id = partneras.modelid
-             left outer join thirdparty dpt on dpt.id=sas.thirdpartyid
 
-    where sas.gpcappsettingsid = ${gpcAppSettingsId} and stas.gpcappsettingsid = ${gpcAppSettingsId}
+             ${
+               filter && filter.partners && filter.partners.length > 0
+                 ? `inner join ( 
+                select ssda.workloadid 
+                from subsidiaryallocation ssda
+                     left outer join thirdparty partner on partner.id = ssda.thirdpartyid
+                     left outer join thirdpartyappsettings partneras on partner.id = partneras.modelid  and partneras.gpcappsettingsid=${gpcAppSettingsId}
+                         where ssda.periodid IN (${periodIds.map(assertOnlyNumbers).join(',')})
+                         AND partner.id in (${filter.partners.map(assertOnlyNumbers).join(',')}) 
+                group by ssda.workloadid
+                ) partners on partners.workloadid = w.id`
+                 : ''
+             }
+             where 1=1
     `;
     //filter section
     if (filter && filter.portfolios && filter.portfolios.length > 0) {
       assertOnlyNumbers(filter.portfolios);
-      subquery += ` AND srv.id in (${filter.portfolios.join(',')}) `;
+      subquery += ` AND srv.id in (${filter.portfolios.map(assertOnlyNumbers).join(',')}) `;
     }
     if (filter && filter.code) {
       subquery += ` 
@@ -305,30 +313,40 @@ export class WorkloadsService {
            `;
     }
     if (filter && filter.plans && filter.plans.length > 0) {
-      subquery += ` AND stas.modelid in (${filter.plans.join(',')}) `;
+      subquery += ` AND stas.plan in ('${filter.plans.map(sqlEscape).join(`','`)}') `;
     }
     if (filter && filter.thirdparties && filter.thirdparties.length > 0) {
-      subquery += ` AND tp.id in (${filter.thirdparties.join(',')}) `;
+      subquery += ` AND tp.id in (${filter.thirdparties.map(assertOnlyNumbers).join(',')}) `;
     }
     if (filter && filter.subnatures && filter.subnatures.length > 0) {
-      subquery += ` AND sn.id in (${filter.subnatures.join(',')}) `;
+      subquery += ` AND sn.id in (${filter.subnatures.map(assertOnlyNumbers).join(',')}) `;
     }
     if (filter && filter.domaine) {
       subquery += ` 
       AND upper(ad.name) like upper('%${sqlEscape(filter.domaine)}%')
            `;
     }
-    if (filter && filter.partners && filter.partners.length > 0) {
-      subquery += ` AND partner.id in (${filter.partners.join(',')}) `;
+
+    //for entity view or partner view
+    if (filter && filter.workloadThirdPartyType && filter.workloadThirdPartyType.length > 0) {
+      const type = filter.workloadThirdPartyType;
+      if (type.includes('organization')) {
+        subquery += ` AND tpas.type in ('${type.map(sqlEscape).join(`','`)}') `;
+      } else if (type.includes('partner')) {
+        // subquery += ` AND partneras.type in ('${type.map(sqlEscape).join(`','`)}') `; TODO : VERIFY if needed
+      }
     }
-
     //end filter section
-    subquery += `
-        group by stas.modelid, stas.plan, ss.id, ss.name, ss.code, sn.name, sn.id, srv.name, srv.id, srv.code,srv.description,srv.lastupdatedate, ad.name, w.code, w.status, w.id, tp.id, tp.trigram, w.description, dpt.id, dpt.trigram`;
 
+    subquery += `
+        group by stas.modelid, stas.plan, ss.id, ss.name, ss.code, sn.name, sn.id, srv.name, srv.id, srv.code,srv.description,srv.lastupdatedate, ad.name, w.code, w.status, w.id, tp.id, tp.trigram, w.description`;
     return subquery;
   }
 
+  /*
+TODO :
+-  remplaccer syntheseFilter.workloadThirdPartyType?.includes('partner') par un boolean
+ */
   async getWorkloadTreeDataWithFilter(
     gpcAppSettingsId: number,
     columns: Array<keyof WorkloadTreeDataItemDTO>,
@@ -338,41 +356,87 @@ export class WorkloadsService {
   ): Promise<WorkloadTreeDataItemDTO[]> {
     //todo validate column names to prevent SQL Injection
     const entityManager = getManager();
+    const includeParterTrgPerPeriod = syntheseFilter.workloadThirdPartyType?.includes('partner');
+    if (includeParterTrgPerPeriod) {
+      columns.push('wlId');
+    }
+
     const subquery = this.getWorkloadSubQuery(gpcAppSettingsId, syntheseFilter, periodIds);
 
     const quotedColumns: string[] = columns.map(c => '"' + c + '"');
     const periodSums: string[] = [];
-    periodIds.forEach((pId, i) =>
+    periodIds.forEach((pId, i) => {
       periodSums.push(
         `, SUM("keurossalesP${i}") as "keurossalesP${i}"`,
         `, SUM("keurosP${i}") as "keurosP${i}"`,
         `, SUM("klocalcurrencyP${i}") as "klocalcurrencyP${i}"`,
         `, SUM("mandaysP${i}") as "mandaysP${i}"`,
-      ),
+      );
+    });
+
+    const periodWhere: string[] = [];
+    periodIds.forEach((pId, i) =>
+      periodWhere.push(` "keurossalesP${i}"!=0 `, ` "keurosP${i}"!=0 `, ` "klocalcurrencyP${i}"!=0`, ` "mandaysP${i}"!=0`),
     );
 
-    let fullSQL = `
-    with treeData as (${subquery}) 
+    let fullSQL =
+      `
+    with 
+         treeData as (${subquery}) 
     SELECT  
                     ${quotedColumns.join(',')}
                     ${periodSums.join('')} 
-    from treeData t where 1=1 `;
+    from treeData t where ` + `( ${periodWhere.join(' OR ')} )`;
 
     if (parentTreeNode != null) {
       Object.keys(parentTreeNode).forEach(parentColumn => {
         const id = parentTreeNode[parentColumn];
-        assertOnlyNumbers(id);
-        fullSQL += ` AND "${parentColumn}" = ${id} `;
+        if (id === null) {
+          fullSQL += ` AND "${parentColumn}" IS NULL `;
+        } else {
+          assertOnlyNumbers(id);
+          fullSQL += ` AND "${parentColumn}" = ${id} `;
+        }
       });
     }
-    fullSQL += ` GROUP BY ${quotedColumns.join(',')}`;
-    console.info(fullSQL);
+    fullSQL += `
+     GROUP BY ${quotedColumns.join(',')}
+    `;
+    if (quotedColumns && quotedColumns.filter(q => q.includes('Id')).length > 0) {
+      fullSQL += `
+     ORDER BY ${quotedColumns.filter(q => q.includes('Id')).join(',')}
+    `;
+    }
+    // console.info(fullSQL);
     const rows = await entityManager.query(fullSQL);
-    console.info(JSON.stringify(rows, undefined, 2));
-    return this.extractPeriodAmounts(periodIds.length, rows);
+
+    let periodTrigramsMap = {};
+    if (includeParterTrgPerPeriod) {
+      periodTrigramsMap = await this.getPartnersForWorkloadPeriod(rows, periodIds);
+    }
+
+    //console.info(JSON.stringify(rows, undefined, 2));
+    return this.extractPeriodAmounts(periodIds, rows, periodTrigramsMap);
   }
 
-  private async extractPeriodAmounts(periodsCount: number, rows: any[]) {
+  async getPartnersForWorkloadPeriod(rows: WorkloadTreeDataItemDTO[], periodIds: number[]) {
+    const entityManager = getManager();
+    const periodTrigramsResults = await entityManager.query(`
+        select ssda.periodid||'/'|| ssda.workloadid as key, array_agg(partner.trigram) as "trigrams"
+        from subsidiaryallocation ssda
+                 inner join thirdparty partner on partner.id = ssda.thirdpartyid
+                 inner join thirdpartyappsettings partneras on partner.id = partneras.modelid  and partneras.gpcappsettingsid=2
+        where periodid in (${periodIds.map(assertOnlyNumbers).join(',')}) 
+          and workloadid in (${rows.map(row => row.wlId).join(',')})
+        group by ssda.workloadid, ssda.periodid
+    `);
+    const periodTrigramsMap = {};
+
+    periodTrigramsResults.forEach(r => (periodTrigramsMap[r.key] = r.trigrams));
+    return periodTrigramsMap;
+  }
+
+  private async extractPeriodAmounts(periodIds, rows: any[], periodTrigramsMap: {}) {
     return rows.map(
       ({
         stasPlanName,
@@ -391,18 +455,18 @@ export class WorkloadsService {
         wlStatus,
         wlId,
         wlDescription,
+        tpId,
         tpTrigram,
-        dptId,
-        dptTrigram,
         ...periodsInfo
       }) => {
         const periodAmounts = [];
-        for (let i = 0; i < periodsCount; i++) {
+        for (let i = 0; i < periodIds.length; i++) {
           periodAmounts.push({
             keurossales: periodsInfo['keurossalesP' + i],
             keuros: periodsInfo['keurosP' + i],
             klocalcurrency: periodsInfo['klocalcurrencyP' + i],
             mandays: periodsInfo['mandaysP' + i],
+            partnerTrigrams: periodTrigramsMap[periodIds[i] + '/' + wlId],
           });
         }
         const res = {
@@ -422,9 +486,8 @@ export class WorkloadsService {
           wlStatus,
           wlId,
           wlDescription,
+          tpId,
           tpTrigram,
-          dptId,
-          dptTrigram,
           periodAmounts,
         } as WorkloadTreeDataItemDTO;
         return res;

@@ -6,6 +6,7 @@
   "license": "Copyright Société Générale 2019 - All rights reserved",
   "main": "dist/main.js",
   "typings": "dist/main.d.ts",
+  "type": "modules",
   "scripts": {
     "package-push": "docker-compose exec nest-package-push ./opt/app-packager/package-and-push-tar.sh --tar-name=gpc --use-yarn --version=$npm_package_version --repository=$(git remote get-url origin) -nr='fastit-maven' -ng='fastitdco'",
     "prebuild": "rimraf dist",

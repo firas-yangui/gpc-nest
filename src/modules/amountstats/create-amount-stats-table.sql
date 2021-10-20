@@ -6,7 +6,7 @@ CREATE TABLE amountstats
   subserviceid INT NOT NULL,
   subnatureid INT NOT NULL,
   periodid INT NOT NULL,
-  period_type period_type,
+  period_type VARCHAR (50),
   month VARCHAR(2) NOT NULL,
   year VARCHAR(4) NOT NULL,
   business_type VARCHAR(3) NOT NULL,

@@ -5,4 +5,5 @@ export class WorkloadTreePeriodAmountsDTO {
   @ApiProperty() keuros: number;
   @ApiProperty() klocalcurrency: number;
   @ApiProperty() mandays: number;
+  @ApiProperty({ isArray: true, nullable: true, type: String }) partnerTrigrams: string[];
 }

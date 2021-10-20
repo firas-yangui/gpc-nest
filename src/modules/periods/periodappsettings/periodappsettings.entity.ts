@@ -10,6 +10,7 @@ export class PeriodAppSettings {
     type: 'integer',
     name: 'id',
   })
+  @ApiProperty()
   id: number;
 
   @ManyToOne(
@@ -42,5 +43,6 @@ export class PeriodAppSettings {
     default: () => "'administratorOnly'",
     name: 'status',
   })
+  @ApiProperty()
   status: string | null;
 }

@@ -7,6 +7,7 @@ import { PortfolioAppSettings } from './../portfolioAppSettings/portfolioappsett
 import { SubTypologyAppSettings } from './../subTypologyAppSettings/subtypologyappsettings.entity';
 import { ServiceAppSettings } from '../serviceappsettings/serviceappsettings.entity';
 import { ApiProperty } from '@nestjs/swagger';
+import { PeriodAppSettings } from '../periods/periodappsettings/periodappsettings.entity';
 
 @Entity('gpcappsettings')
 @Index('gpcappsettings_name_key', ['name'], { unique: true })
@@ -74,4 +75,11 @@ export class GpcAppSettings {
     (homeMessages: HomeMessageEntity) => homeMessages.gpcappsettings,
   )
   homeMessages: HomeMessageEntity[];
+
+  @ApiProperty({ type: () => PeriodAppSettings, isArray: true })
+  @OneToMany(
+    () => PeriodAppSettings,
+    (periodAppSettings: PeriodAppSettings) => periodAppSettings.gpcappsettings,
+  )
+  periodAppSettings: PeriodAppSettings[];
 }
