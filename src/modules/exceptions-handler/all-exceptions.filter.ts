@@ -8,7 +8,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
     const ctx = host.switchToHttp();
     const request = ctx.getRequest();
     const response = ctx.getResponse();
-    const status = exception.getStatus();
+    const status = (exception.getStatus && exception.getStatus()) || 500;
 
     let errorResponse = {
       code: status,

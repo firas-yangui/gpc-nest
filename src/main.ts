@@ -52,6 +52,7 @@ async function bootstrap() {
     .setDescription(swaggerConfig.description)
     .setVersion(swaggerConfig.version)
     .setTermsOfService(swaggerConfig.termsOfService)
+    .addServer('/')
     .addSecurity('SG Connect', {
       type: 'oauth2',
       description: 'SGConnect implicit flow',

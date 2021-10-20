@@ -1,6 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { WorkloadTreePeriodAmountsDTO } from './workload-tree-period-amounts.dto';
-import { ApiModelProperty } from '@nestjs/swagger/dist/decorators/api-model-property.decorator';
 
 export class WorkloadTreeDataItemDTO {
   /* Portofolio View Section*/
@@ -32,12 +31,11 @@ export class WorkloadTreeDataItemDTO {
   @ApiProperty() adName: string; //ad as activity domaine
 
   /* Entity View Section*/
-  //ToDo
 
-  @ApiProperty() dptId: number; //dpt as thirdparty as the parent department of services, to be verified
-  @ApiProperty() dptTrigram: number; //dpt as thirdparty as the parent department of services, to be verified
   /* Partner View */
-  //ToDo
+
+  // @ApiProperty() partnerId: number; //dpt as thirdparty as the parent department of services, to be verified
+  // @ApiProperty() partnerTrigram: string; //dpt as thirdparty as the parent department of services, to be verified
 
   @ApiProperty({ isArray: true, type: WorkloadTreePeriodAmountsDTO })
   periodAmounts: WorkloadTreePeriodAmountsDTO[];

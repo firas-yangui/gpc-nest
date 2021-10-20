@@ -10,18 +10,21 @@ export class SynthesisFilterDTO {
   @ApiProperty({ nullable: true })
   domaine?: string;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ nullable: true, isArray: true, type: Number })
   thirdparties?: number[];
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ nullable: true, isArray: true, type: Number })
   portfolios?: number[];
 
-  @ApiProperty({ nullable: true })
-  plans?: number[];
+  @ApiProperty({ nullable: true, isArray: true, type: String })
+  plans?: string[];
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ nullable: true, isArray: true, type: Number })
   subnatures?: number[];
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ nullable: true, isArray: true, type: Number })
   partners?: number[];
+
+  @ApiProperty({ nullable: true, isArray: true, type: String })
+  workloadThirdPartyType?: string[];
 }

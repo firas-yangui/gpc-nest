@@ -30,6 +30,7 @@ import { ImportMappingModule } from './modules/importmapping/importmapping.modul
 import { ActivitycapayorModule } from './modules/activity-capayor/activity-capayor.module';
 import { ActivitModule } from './modules/activity/activity.module';
 import { CaPayorModule } from './modules/capayor/capayor.module';
+import { MyViewModule } from './modules/my-view/my-view.module';
 
 import DbLoader from './loader';
 
@@ -94,6 +95,7 @@ const mailerOptions: MailerOptions = {
     ImportMappingModule,
     ActivitycapayorModule,
     ActivitModule,
+    MyViewModule,
   ],
 })
 export class AppModule implements NestModule {

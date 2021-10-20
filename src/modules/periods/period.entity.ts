@@ -1,4 +1,4 @@
-import { Column, Entity, Index, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
+import { Column, Entity, Index, PrimaryGeneratedColumn, OneToMany, ManyToOne, JoinColumn } from 'typeorm';
 import { Amount } from './../amounts/amount.entity';
 import { CurrencyRate } from './../currency-rate/currency-rate.entity';
 import { PeriodAppSettings } from './periodappsettings/periodappsettings.entity';
@@ -84,6 +84,7 @@ export class Period {
   )
   currencyrates: CurrencyRate[];
 
+  @ApiProperty({ type: () => PeriodAppSettings, isArray: true })
   @OneToMany(
     () => PeriodAppSettings,
     (periodappsettings: PeriodAppSettings) => periodappsettings.period,
