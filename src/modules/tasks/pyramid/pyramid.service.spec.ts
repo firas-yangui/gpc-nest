@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/camelcase */
 import { Test, TestingModule } from '@nestjs/testing';
+
 import { In, Equal } from 'typeorm';
 import { PyramidService } from './pyramid.service';
 import { RawAmountsService } from '../../rawamounts/rawamounts.service';
@@ -10,6 +11,8 @@ import { PeriodsService } from '../../periods/periods.service';
 import { SubservicesService } from '../../subservices/subservices.service';
 import { Workload } from '../../workloads/workload.entity';
 import { ThirdpartiesService } from '../../thirdparties/thirdparties.service';
+import { Thirdparty } from '../../thirdparties/thirdparty.entity';
+import { SubsidiaryAllocation } from '../../subsidiaryallocation/subsidiaryallocation.entity';
 import { SubsidiaryallocationService } from '../../subsidiaryallocation/subsidiaryallocation.service';
 import { SubtypologiesService } from '../../subtypologies/subtypologies.service';
 import { SubnatureService } from '../../subnature/subnature.service';
@@ -17,10 +20,14 @@ import { ServicesService } from '../../services/services.service';
 import { PricesService } from '../../prices/prices.service';
 import { ConstantService } from '../../constants/constants';
 import { ImportMappingService } from '../../importmapping/importmapping.service';
+
+import { PeriodType as PeriodTypeInterface } from '../../interfaces/common-interfaces';
 import { Subtypology } from '../../subtypologies/subtypology.entity';
 import { ActivityService } from '../../activity/activity.service';
 import { ActivityCapayorService } from '../../activity-capayor/activity-capayorservice';
+import { Activity } from '../../activity/activity.entity';
 import { CaPayorService } from '../../capayor/capayor.service';
+import { iteratee } from 'lodash';
 import * as moment from 'moment';
 
 describe('Pyramid.service', () => {
@@ -52,7 +59,6 @@ describe('Pyramid.service', () => {
 
     service = module.get<PyramidService>(PyramidService);
   };
-
   beforeEach(async () => {
     await createService();
   });
