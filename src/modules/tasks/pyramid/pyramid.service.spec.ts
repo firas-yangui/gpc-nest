@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/camelcase */
 import { Test, TestingModule } from '@nestjs/testing';
 
-import { In, Equal } from 'typeorm';
+import { In, Equal, MoreThan } from 'typeorm';
 import { PyramidService } from './pyramid.service';
 import { RawAmountsService } from '../../rawamounts/rawamounts.service';
 import { AmountConverter } from '../../amounts/amounts.converter';
@@ -951,7 +951,7 @@ describe('Pyramid.service', () => {
       expect(mockFn2).toHaveBeenCalledTimes(1);
       expect(mockFn2).toHaveBeenCalledWith({
         relations: ['activity', 'capayor'],
-        where: { activity: { id: 1 } },
+        where: { activity: { id: 1 }, endDate: MoreThan(moment().format('YYYY-MM-DD')) },
       });
     });
 
@@ -969,7 +969,7 @@ describe('Pyramid.service', () => {
       expect(mockFn2).toHaveBeenCalledTimes(1);
       expect(mockFn2).toHaveBeenCalledWith({
         relations: ['activity', 'capayor'],
-        where: { activity: { id: 1 } },
+        where: { activity: { id: 1 }, endDate: MoreThan(moment().format('YYYY-MM-DD')) },
       });
     });
 
@@ -987,7 +987,7 @@ describe('Pyramid.service', () => {
       expect(mockFn2).toHaveBeenCalledTimes(1);
       expect(mockFn2).toHaveBeenCalledWith({
         relations: ['activity', 'capayor'],
-        where: { activity: { id: 1 } },
+        where: { activity: { id: 1 }, endDate: MoreThan(moment().format('YYYY-MM-DD')) },
       });
     });
 
@@ -1024,7 +1024,7 @@ describe('Pyramid.service', () => {
       expect(mockFn2).toHaveBeenCalledTimes(1);
       expect(mockFn2).toHaveBeenCalledWith({
         relations: ['activity', 'capayor'],
-        where: { activity: { id: 1 } },
+        where: { activity: { id: 1 }, endDate: MoreThan(moment().format('YYYY-MM-DD')) },
       });
     });
 
@@ -1066,7 +1066,7 @@ describe('Pyramid.service', () => {
       expect(mockFn2).toHaveBeenCalledTimes(1);
       expect(mockFn2).toHaveBeenCalledWith({
         relations: ['activity', 'capayor'],
-        where: { activity: { id: 1 } },
+        where: { activity: { id: 1 }, endDate: MoreThan(moment().format('YYYY-MM-DD')) },
       });
     });
   });

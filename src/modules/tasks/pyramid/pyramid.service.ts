@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { In, Equal } from 'typeorm';
+import { In, Equal, MoreThan } from 'typeorm';
 import * as moment from 'moment';
 import * as _ from 'lodash';
 
@@ -331,7 +331,7 @@ export class PyramidService {
     if (!activity) throw 'no activity found for activityCode ' + activityCode;
     const payors: ActivityCapayor[] = await this.activityCapayorService.find({
       relations: ['activity', 'capayor'],
-      where: { activity: { id: activity.id } },
+      where: { activity: { id: activity.id }, endDate: MoreThan(moment().format('YYYY-MM-DD')) },
     });
     if (!payors.length) throw 'no thirdparty found for activityCode ' + activityCode;
     const sum: number = payors.map(({ percent }) => parseInt(percent.toString())).reduce((total, percent) => total + percent);
