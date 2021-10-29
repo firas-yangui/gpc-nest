@@ -345,7 +345,6 @@ export class PyramidService {
     } of payors) {
       const partner = await this.thirdpartiesService.findOne({ trigram });
       if (partner) {
-        Logger.log('push ' + JSON.stringify({ partner, percent }));
         res.push({ partner, percent });
       } else err.push(`partner not found for trigram ${trigram}`);
     }
@@ -441,14 +440,13 @@ export class PyramidService {
       partners = [{ partner, percent: 100 }];
     }
 
-    Logger.log(JSON.stringify({ partners }));
-
     for (const { partner, percent } of partners) {
       if (workloadsBySubserviceThirdpartySubnature.length) {
         // check allocations on the current period
         const allocation = await this.getAllocations(workloadsBySubserviceThirdpartySubnature, partner, periodAppSettings);
         if (allocation) {
           workload = allocation.workload;
+          Logger.log('allocation ' + JSON.stringify({ workload, partner }));
           newWorkload = false;
         } else {
           // check allocations on the current period
@@ -457,6 +455,7 @@ export class PyramidService {
             const prevAllocation = await this.getAllocations(workloadsBySubserviceThirdpartySubnature, partner, previousPeriodAppSettings);
             if (prevAllocation) {
               workload = prevAllocation.workload;
+              Logger.log('prevAllocation ' + JSON.stringify({ workload, partner }));
               newWorkload = false;
             }
           }
@@ -476,11 +475,13 @@ export class PyramidService {
           subnature: subnature,
           subservice: subservice,
         });
+        Logger.log('new workload ' + JSON.stringify({ workload, partner }));
       }
 
       // update allocations
       const allocation = await this.subsidiaryallocationService.findOne({ period: currentPeriod, workload });
       if (!allocation) {
+        Logger.log('find allocation ' + JSON.stringify(workload, partner));
         await this.subsidiaryallocationService.save({
           thirdparty: partner,
           weight: 1,
@@ -503,7 +504,7 @@ export class PyramidService {
 
       createdAmount = { ...createdAmount, datasource: filename };
 
-      Logger.log(JSON.stringify({ percent, partner, createdAmount }));
+      Logger.log(JSON.stringify({ percent, partner, createdAmount, workload }));
 
       await this.rawAmountsService.save(createdAmount, workload, currentPeriod);
     }
