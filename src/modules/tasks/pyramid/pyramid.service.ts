@@ -344,8 +344,10 @@ export class PyramidService {
       percent,
     } of payors) {
       const partner = await this.thirdpartiesService.findOne({ trigram });
-      if (partner) res.push({ partner, percent });
-      else err.push(`partner not found for trigram ${trigram}`);
+      if (partner) {
+        Logger.log('push ' + JSON.stringify({ partner, percent }));
+        res.push({ partner, percent });
+      } else err.push(`partner not found for trigram ${trigram}`);
     }
 
     if (err.length) {
@@ -439,6 +441,8 @@ export class PyramidService {
       partners = [{ partner, percent: 100 }];
     }
 
+    Logger.log(JSON.stringify({ partners }));
+
     for (const { partner, percent } of partners) {
       if (workloadsBySubserviceThirdpartySubnature.length) {
         // check allocations on the current period
@@ -498,6 +502,8 @@ export class PyramidService {
       );
 
       createdAmount = { ...createdAmount, datasource: filename };
+
+      Logger.log(JSON.stringify({ percent, partner, createdAmount }));
 
       await this.rawAmountsService.save(createdAmount, workload, currentPeriod);
     }
