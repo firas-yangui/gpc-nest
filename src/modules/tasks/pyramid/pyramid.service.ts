@@ -237,6 +237,11 @@ export class PyramidService {
   };
 
   getAllocations = async (workloads: Workload[], partner, periodAppSettings: Record<string, any>): Promise<SubsidiaryAllocation> => {
+    Logger.log(
+      `SELECT * from subsidiaryallocation where thirdpartyid = ${partner.id} and workloadid in ${workloads.map(
+        workload => workload.id,
+      )} and periodid = ${periodAppSettings.period.id} left join workload on workloadid=workload.id `,
+    );
     return this.subsidiaryallocationService.findOne({
       where: { thirdparty: Equal(partner.id), workload: In(workloads.map(workload => workload.id)), period: Equal(periodAppSettings.period.id) },
       relations: ['workload', 'workload.subnature'],
