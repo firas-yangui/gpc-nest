@@ -447,13 +447,11 @@ export class PyramidService {
     for (const { partner, percent } of partners) {
       let newWorkload = true;
       workload = {};
-      Logger.log(`[${partner.name} ${percent}] 444 ${workloadsBySubserviceThirdpartySubnature.length}`);
       if (workloadsBySubserviceThirdpartySubnature.length) {
         // check allocations on the current period
         const allocation = await this.getAllocations(workloadsBySubserviceThirdpartySubnature, partner, periodAppSettings);
         if (allocation) {
           workload = allocation.workload;
-          Logger.log(`[${partner.name} ${percent}] 450 allocation true ${workload?.code}`);
           newWorkload = false;
         } else {
           // check allocations on the current period
@@ -462,7 +460,6 @@ export class PyramidService {
             const prevAllocation = await this.getAllocations(workloadsBySubserviceThirdpartySubnature, partner, previousPeriodAppSettings);
             if (prevAllocation) {
               workload = prevAllocation.workload;
-              Logger.log(`[${partner.name} ${percent}] 459 prevallocation true ${workload?.code}`);
               newWorkload = false;
             }
           }
@@ -475,7 +472,7 @@ export class PyramidService {
       if (!prices) throw `Price not found for thirdparty ${thirdparty.name} and subnature ${subnature.name}`;
 
       if (newWorkload) {
-        Logger.log(`[${partner.name} ${percent}] 473 newWorkload true ${workload?.code}`);
+        Logger.warn(`workload not found  with subnature "${subnature.name}" and subservice "${subservice.code}" and thirdparty "${thirdparty.name}"`);
         workload = await this.createWorkload({
           status: 'DRAFT',
           thirdparty: thirdparty,
@@ -487,7 +484,6 @@ export class PyramidService {
       // update allocations
       const allocation = await this.subsidiaryallocationService.findOne({ period: currentPeriod, workload });
       if (!allocation) {
-        Logger.log(`[${partner.name} ${percent}] 484 allocation false ${workload?.code}`);
         await this.subsidiaryallocationService.save({
           thirdparty: partner,
           weight: 1,
@@ -509,7 +505,6 @@ export class PyramidService {
       );
 
       createdAmount = { ...createdAmount, datasource: filename };
-      Logger.log(`[${partner.name} ${percent}] 506 allocation false ${workload?.code} ${JSON.stringify(createdAmount)}`);
       await this.rawAmountsService.save(createdAmount, workload, currentPeriod);
     }
 
