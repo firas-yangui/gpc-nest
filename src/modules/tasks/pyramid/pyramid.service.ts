@@ -434,7 +434,6 @@ export class PyramidService {
     if (!subnature) throw `subNature not found with name: "${subnatureName.trim()}"`;
 
     const workloadsBySubserviceThirdpartySubnature = await this.findWorkloadBySubserviceThirdpartySubnature(subnature, subservice, thirdparty);
-    let newWorkload = true;
     const isMultiCa = line[fields.caPayor] === '3000377777';
     let partners;
     if (isMultiCa) {
@@ -446,6 +445,8 @@ export class PyramidService {
     }
 
     for (const { partner, percent } of partners) {
+      let newWorkload = true;
+      workload = {};
       Logger.log(`[${partner.name} ${percent}] 444 ${workloadsBySubserviceThirdpartySubnature.length}`);
       if (workloadsBySubserviceThirdpartySubnature.length) {
         // check allocations on the current period
