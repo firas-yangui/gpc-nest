@@ -73,7 +73,6 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, options, {
     operationIdFactory: (controllerKey, methodKey) => methodKey,
   });
-  SwaggerModule.setup('docs', app, document);
 
   //SgConnect Swagger Config
 
