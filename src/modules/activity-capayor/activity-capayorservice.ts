@@ -50,18 +50,20 @@ export class ActivityCapayorService {
     return this.activityCapayorRepository.save(activity);
   }
 
-  percentageValidation(capayorPercentages: Record<string, any>[]): boolean {
+  percentageValidation(capayorPercentages: Record<string, any>[]): any {
+    let res = [true, 100];
     const groupedByPeriod = _.chain(capayorPercentages)
       .groupBy('startDate')
       .map((value, key) => ({ resource: value }))
       .value();
-    let valide = true;
     _.forEach(groupedByPeriod, partnerPercentagesGrouped => {
       const total = _.sumBy(partnerPercentagesGrouped.resource, partnerPercentage => partnerPercentage.percent);
-      valide = total == 100 ? true : false;
-      if (!valide) return valide;
+      const roundTotal = Math.round(total * 100) / 100;
+      if (roundTotal != 100) {
+        res = [false, roundTotal];
+      }
     });
-    return valide;
+    return res;
   }
 
   async linkActivityTocapayor(activityCapayorDto: ActivityCapayorDto): Promise<any> {
