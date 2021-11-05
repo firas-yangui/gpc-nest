@@ -957,7 +957,7 @@ describe('Pyramid.service', () => {
 
     it('should throw "sum not equal to 100, 200"', async () => {
       const mockFn = jest.fn().mockResolvedValue({ id: 1 });
-      const mockFn2 = jest.fn().mockResolvedValue([{ percent: 70 }, { percent: 43 }, { percent: 87 }]);
+      const mockFn2 = jest.fn().mockResolvedValue([{ percent: 69.55 }, { percent: 43.45 }, { percent: 87.0 }]);
       await createService({ findOne: mockFn, find: mockFn2 });
       await service.getPartners(activityCode).catch(err => {
         expect(err).toBe('sum not equal to 100, 200');
