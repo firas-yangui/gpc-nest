@@ -77,8 +77,8 @@ export class ActivityCapayorService {
       };
       const activity = await this.activityService.findOne(activityOptions);
       if (!activity) {
-        this.logger.log(ERRORS.ACTIVITY_NOT_FOUND.DESCRIPTION);
-        return ERRORS.ACTIVITY_NOT_FOUND;
+        this.logger.log(ERRORS.ACTIVITY_NOT_FOUND.DESCRIPTION + 'for ' + activityCapayorDto.getActivity());
+        return ERRORS.ACTIVITY_NOT_FOUND + 'for ' + activityCapayorDto.getActivity();
       }
       const capayorPercentages = activityCapayorDto.getCapayorPercentages();
       for (const capayorPercentage of capayorPercentages) {
@@ -134,8 +134,8 @@ export class ActivityCapayorService {
         };
         const capayor = await this.caPayorService.findOne(options);
         if (!capayor) {
-          this.logger.log(ERRORS.CAPAYOR_NOT_FOUND.DESCRIPTION);
-          return ERRORS.CAPAYOR_NOT_FOUND;
+          this.logger.log(ERRORS.CAPAYOR_NOT_FOUND.DESCRIPTION + ' for ' + codeCaPayor);
+          return ERRORS.CAPAYOR_NOT_FOUND + ' for ' + codeCaPayor;
         } else {
           const percent = capayorPercentage['percent'];
           const startDate = capayorPercentage['startDate'];

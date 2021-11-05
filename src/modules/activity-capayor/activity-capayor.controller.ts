@@ -73,9 +73,9 @@ export class ActivityCapayorController {
         return exception.toHttpException(response);
       }
       const activityCapayor = new ActivityCapayorDto(activityCapayorDto);
-      const percentageValide = this.activityCapayorService.percentageValidation(activityCapayor.getCapayorPercentages());
+      const [percentageValide, totalPercent] = this.activityCapayorService.percentageValidation(activityCapayor.getCapayorPercentages());
       if (!percentageValide) {
-        const exception = new CustomBadRequestException(ERRORS.PERCENTAGE_KO.CODE, ERRORS.PERCENTAGE_KO.DESCRIPTION);
+        const exception = new CustomBadRequestException(ERRORS.PERCENTAGE_KO.CODE, ERRORS.PERCENTAGE_KO.DESCRIPTION + ' got ' + totalPercent);
         return exception.toHttpException(response);
       }
       const result = await this.activityCapayorService.linkActivityTocapayor(activityCapayor);
