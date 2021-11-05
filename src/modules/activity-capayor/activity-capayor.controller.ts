@@ -14,6 +14,7 @@ import { ActivityCapayor } from './activity-capayor.entity';
 import { ConstantService } from '../constants/constants';
 import { FileInterceptor } from '@nestjs/platform-express';
 import * as _ from 'lodash';
+import * as moment from 'moment';
 import { ActivityService } from '../activity/activity.service';
 
 @ApiTags('activitycapayor')
@@ -257,8 +258,8 @@ export class ActivityCapayorController {
           activity: parseInt(activity),
           capayorPercentages: capayorPercentages.map(({ capayor, percentage, startDate }) => ({
             capayor,
-            percent: parseInt(percentage),
-            startDate: new Date(startDate),
+            percent: parseFloat(percentage.replace(/,|\./g, '.')),
+            startDate: moment(startDate, 'DD/MM/YYYY'),
             endDate: new Date('12/31/2099'),
           })),
         };
@@ -266,7 +267,8 @@ export class ActivityCapayorController {
         const activityCapayorDto: ActivityCapayorDto = new ActivityCapayorDto(activityCapayor);
 
         //functionnal check
-        if (!this.activityCapayorService.percentageValidation(activityCapayorDto.getCapayorPercentages())) throw ERRORS.PERCENTAGE_KO.DESCRIPTION;
+        const [isValid, totalPercent] = this.activityCapayorService.percentageValidation(activityCapayorDto.getCapayorPercentages());
+        if (!isValid) throw ERRORS.PERCENTAGE_KO.DESCRIPTION + ' got ' + totalPercent;
 
         //add
         const result = await this.activityCapayorService.linkActivityTocapayor(activityCapayorDto);
