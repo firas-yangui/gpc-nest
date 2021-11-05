@@ -335,7 +335,7 @@ export class PyramidService {
     });
     if (!payors.length) throw 'no thirdparty found for activityCode ' + activityCode;
     const sum: number = payors.map(({ percent }) => parseFloat(percent.toString())).reduce((total, percent) => total + percent);
-    if (sum != 100) throw `sum not equal to 100, ${sum}`;
+    if (Math.round(sum * 100) / 100 != 100) throw `sum not equal to 100, ${sum}`;
 
     const res = [],
       err = [];
