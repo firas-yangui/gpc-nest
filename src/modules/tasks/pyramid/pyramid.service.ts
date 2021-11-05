@@ -334,7 +334,7 @@ export class PyramidService {
       where: { activity: { id: activity.id }, endDate: MoreThan(moment().format('YYYY-MM-DD')) },
     });
     if (!payors.length) throw 'no thirdparty found for activityCode ' + activityCode;
-    const sum: number = payors.map(({ percent }) => parseInt(percent.toString())).reduce((total, percent) => total + percent);
+    const sum: number = payors.map(({ percent }) => percent).reduce((total, percent) => total + percent);
     if (sum != 100) throw `sum not equal to 100, ${sum}`;
 
     const res = [],

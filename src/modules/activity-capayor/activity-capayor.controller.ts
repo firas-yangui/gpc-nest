@@ -210,6 +210,7 @@ export class ActivityCapayorController {
     let headers: string[] = [];
     let rows: string[][] = [];
 
+    Logger.log({ file, fileString: file.buffer.toString('utf-8') });
     //read and convert CSV to array
     if (fileType === 'csv')
       [headers, ...rows] = _.chain(file.buffer.toString('utf-8'))
