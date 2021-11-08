@@ -509,7 +509,6 @@ export class PyramidService {
       );
 
       createdAmount = { ...createdAmount, datasource: filename };
-      Logger.log(JSON.stringify({ createdAmount, workload, currentPeriod }, null, 2));
       await this.rawAmountsService.save(createdAmount, workload, currentPeriod);
     }
 
