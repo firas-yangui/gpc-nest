@@ -924,6 +924,32 @@ describe('Pyramid.service', () => {
       });
     });
 
+    it('should throw "no activity found for activityCode exponentialActivityCode"', async () => {
+      const mockFn = jest.fn().mockResolvedValue(null);
+      const exponentialActivityCode = '1234,34e+12';
+      await createService({ findOne: mockFn });
+      await service.getPartners(exponentialActivityCode).catch(err => {
+        expect(err).toBe('no activity found for activityCode ' + '1234340000000000');
+      });
+      expect(mockFn).toHaveBeenCalledTimes(1);
+      expect(mockFn).toHaveBeenCalledWith({
+        where: { activityCode: '1234340000000000' },
+      });
+    });
+
+    it('should throw "no activity found for activityCode exponentialActivityCode"', async () => {
+      const mockFn = jest.fn().mockResolvedValue(null);
+      const exponentialActivityCode = '1234.34E+12';
+      await createService({ findOne: mockFn });
+      await service.getPartners(exponentialActivityCode).catch(err => {
+        expect(err).toBe('no activity found for activityCode ' + '1234340000000000');
+      });
+      expect(mockFn).toHaveBeenCalledTimes(1);
+      expect(mockFn).toHaveBeenCalledWith({
+        where: { activityCode: '1234340000000000' },
+      });
+    });
+
     it('should throw Error', async () => {
       const mockFn = jest.fn().mockRejectedValueOnce('Error');
 

@@ -326,7 +326,16 @@ export class PyramidService {
     return await this.workloadsService.save(workload);
   };
 
-  getPartners = async (activityCode): Promise<any[]> => {
+  convertExponential = (exponential: string): string => {
+    if (exponential.match(/E\+/i)) {
+      const [nb, exp] = exponential.split(/E\+/i);
+      return (parseFloat(nb.replace(/,|\./, '.')) * Math.pow(10, parseInt(exp))).toString();
+    } else return exponential;
+  };
+
+  getPartners = async (pActivityCode): Promise<any[]> => {
+    const activityCode = this.convertExponential(pActivityCode);
+
     const activity: Activity = await this.activityService.findOne({ where: { activityCode } });
     if (!activity) throw 'no activity found for activityCode ' + activityCode;
     const payors: ActivityCapayor[] = await this.activityCapayorService.find({
