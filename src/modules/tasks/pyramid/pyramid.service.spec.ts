@@ -800,21 +800,21 @@ describe('Pyramid.service', () => {
       expect(res).toBe(undefined);
     });
 
-    it('should return {amount:"amount",unit:"MD"}', async () => {
+    it('should return {amount:"5.5",unit:"MD"}', async () => {
       await createService({ GLOBAL_CONST: { AMOUNT_UNITS: { MD: 'MD' } } });
-      const line = { eac: 'amount' };
+      const line = { eac: '5.5' };
       const isActual = false;
 
       service.isJH = jest.fn().mockReturnValueOnce(true);
 
       const res = await service.getAmountData(line, isActual);
 
-      expect(res).toStrictEqual({ amount: 'amount', unit: 'MD' });
+      expect(res).toStrictEqual({ amount: '5.5', unit: 'MD' });
     });
 
-    it('should return {amount:"amount",unit:"KLC"}', async () => {
+    it('should return {amount:"5.5",unit:"KLC"}', async () => {
       await createService({ GLOBAL_CONST: { AMOUNT_UNITS: { KLC: 'KLC' } } });
-      const line = { eac_ke: 'amount' };
+      const line = { eac_ke: '5,5' };
       const isActual = false;
 
       service.isJH = jest.fn().mockReturnValueOnce(false);
@@ -822,7 +822,10 @@ describe('Pyramid.service', () => {
 
       const res = await service.getAmountData(line, isActual);
 
-      expect(res).toStrictEqual({ amount: 'amount', unit: 'KLC' });
+      const res2 = (parseFloat(res.amount) * 20) / 100;
+      expect(res2).toStrictEqual(1.1);
+
+      expect(res).toStrictEqual({ amount: '5.5', unit: 'KLC' });
     });
 
     it('should return {amount:"amount",unit:"KLC"}', async () => {
@@ -1415,7 +1418,7 @@ describe('Pyramid.service', () => {
       init();
       service.findWorkloadBySubserviceThirdpartySubnature = jest.fn().mockResolvedValueOnce(['ok']);
       service.createWorkload = jest.fn().mockResolvedValueOnce('ok');
-      service.getAmountData = jest.fn().mockReturnValue({ amount: 10, unit: 'unit' });
+      service.getAmountData = jest.fn().mockReturnValue({ amount: '10,3', unit: 'unit' });
       service.getAllocations = jest
         .fn()
         .mockReturnValueOnce(null)
@@ -1456,7 +1459,7 @@ describe('Pyramid.service', () => {
       init();
       service.findWorkloadBySubserviceThirdpartySubnature = jest.fn().mockResolvedValueOnce([]);
       service.createWorkload = jest.fn().mockResolvedValueOnce('ok');
-      service.getAmountData = jest.fn().mockReturnValue({ amount: 10, unit: 'unit' });
+      service.getAmountData = jest.fn().mockReturnValue({ amount: '10', unit: 'unit' });
       service.getAllocations = jest
         .fn()
         .mockReturnValueOnce(null)

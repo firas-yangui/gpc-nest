@@ -281,9 +281,9 @@ export class PyramidService {
         };
 
       if (this.isKLC(line[pyramidFields.eac.staffType])) {
-        const eacke = line[pyramidFields.eac.eacKe].replace(',', '.');
+        const eacke = line[pyramidFields.eac.eacKe];
         return {
-          amount: eacke,
+          amount: eacke.replace(',', '.'),
           unit: this.constantService.GLOBAL_CONST.AMOUNT_UNITS.KLC,
         };
       }
@@ -502,7 +502,7 @@ export class PyramidService {
       const amountData = this.getAmountData(line, isActuals);
       Logger.log({ amountData });
       let createdAmount = this.amountConverter.createAmountEntity(
-        (parseFloat(amountData.amount) * percent) / 100,
+        (parseFloat(amountData?.amount?.replace(',', '.')) * percent) / 100,
         amountData.unit,
         rate.value,
         costPrice,
