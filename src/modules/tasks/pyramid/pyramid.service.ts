@@ -276,12 +276,12 @@ export class PyramidService {
     if (!isActuals) {
       if (this.isJH(line[pyramidFields.eac.staffType]))
         return {
-          amount: line[pyramidFields.eac.eac],
+          amount: line[pyramidFields.eac.eac].replace(',', '.'),
           unit: this.constantService.GLOBAL_CONST.AMOUNT_UNITS.MD,
         };
 
       if (this.isKLC(line[pyramidFields.eac.staffType])) {
-        const eacke = line[pyramidFields.eac.eacKe];
+        const eacke = line[pyramidFields.eac.eacKe].replace(',', '.');
         return {
           amount: eacke,
           unit: this.constantService.GLOBAL_CONST.AMOUNT_UNITS.KLC,
