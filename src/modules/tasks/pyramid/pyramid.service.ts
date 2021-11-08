@@ -329,7 +329,7 @@ export class PyramidService {
   parseExponential = (exponential: string): string => {
     if (exponential.match(/E\+/i)) {
       const [nb, exp] = exponential.split(/E\+/i);
-      return (parseFloat(nb.replace(/,|\./, '.')) * Math.pow(10, parseInt(exp))).toString();
+      return Math.round(parseFloat(nb.replace(/,|\./, '.')) * Math.pow(10, parseInt(exp))).toString();
     } else return exponential;
   };
 
