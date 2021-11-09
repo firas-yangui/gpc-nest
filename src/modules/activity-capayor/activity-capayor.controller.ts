@@ -214,7 +214,7 @@ export class ActivityCapayorController {
     //read and convert CSV to array
     if (fileType === 'csv')
       [headers, ...rows] = _.chain(file.buffer.toString('utf-8'))
-        .split('\n')
+        .split(/\n|\r\n/)
         .compact()
         .map(line => line.split(';'))
         .value();
