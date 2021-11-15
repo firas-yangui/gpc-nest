@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { In, Equal } from 'typeorm';
+import { In, Equal, MoreThan } from 'typeorm';
 import * as moment from 'moment';
-import { findKey, includes, join, map } from 'lodash';
+import * as _ from 'lodash';
 
 import { RawAmountsService } from '../../rawamounts/rawamounts.service';
 import { AmountConverter } from '../../amounts/amounts.converter';
@@ -19,14 +19,15 @@ import { SubnatureService } from '../../subnature/subnature.service';
 import { ServicesService } from '../../services/services.service';
 import { PricesService } from '../../prices/prices.service';
 import { ConstantService } from '../../constants/constants';
-import { DatalakeGpcOrganizationService } from '../../datalakemapping/datalakegpcorganization.service';
-import { DatalakeGpcPartnerService } from '../../datalakemapping/datalakegpcpartner.service';
-import { DatalakeGpcPayorService } from '../../datalakemapping/datalakegpcpayor.service';
 import { ImportMappingService } from '../../importmapping/importmapping.service';
 
 import { PeriodType as PeriodTypeInterface } from '../../interfaces/common-interfaces';
 import { Subtypology } from 'src/modules/subtypologies/subtypology.entity';
-
+import { ActivityService } from '../../activity/activity.service';
+import { ActivityCapayorService } from '../../activity-capayor/activity-capayorservice';
+import { Activity } from 'src/modules/activity/activity.entity';
+import { ActivityCapayor } from '../../activity-capayor/activity-capayor.entity';
+import { CaPayorService } from '../../capayor/capayor.service';
 const importName = 'PYRAMID';
 const mappingTypes = {
   orga: 'ORGA',
@@ -136,44 +137,42 @@ export class PyramidService {
     private readonly constantService: ConstantService,
     private readonly currencyRateService: CurrencyRateService,
     private readonly pricesService: PricesService,
-    private readonly datalakeGpcOrganizationService: DatalakeGpcOrganizationService,
-    private readonly datalakeGpcPartnerService: DatalakeGpcPartnerService,
-    private readonly datalakeGpcPayorService: DatalakeGpcPayorService,
     private readonly importMappingService: ImportMappingService,
+    private readonly activityCapayorService: ActivityCapayorService,
+    private readonly activityService: ActivityService,
+    private readonly caPayorService: CaPayorService,
   ) {}
 
-  isValidParams = (requiredFileds: Record<string, any>, line: any) => {
-    requiredFileds.forEach(field => {
+  isValidParams = (requiredFileds: string[], line: any) => {
+    for (const field of requiredFileds) {
       if (!line[field]) return false;
-    });
+    }
 
     return true;
   };
 
-  isParseableLine = (line: any, fields: Record<string, any>, outsourcing: boolean): boolean => {
-    let isParseable: boolean =
-      line[fields.cds].trim() !== 'RESG/TPS/API' &&
-      line[fields.cds].trim() !== 'RESG/TPS/GDO' &&
-      line[fields.cds].trim() !== 'RISQ/DTO' &&
-      line[fields.caPayor].trim() !== '3000324000' &&
-      line[fields.activityType].trim() !== 'Absence';
-
-    if (outsourcing) {
-      isParseable = isParseable && line[fields.curveType].trim().toLocaleLowerCase() === 'actuals';
+  isParseableLine = (line: any, { cds, caPayor, activityType, curveType }: Record<string, any>, outsourcing: boolean): boolean => {
+    switch (true) {
+      case ['RESG/TPS/API', 'RESG/TPS/GDO', 'RISQ/DTO'].includes(line[cds]):
+      case ['3000324000'].includes(line[caPayor]):
+      case ['Absence'].includes(line[activityType]):
+      case outsourcing && !line[curveType]?.match(/actuals/i)?.length:
+        return false;
+      default:
+        return true;
     }
-    return isParseable;
   };
 
   isChargeableLine = (line: any, fields: Record<string, any>): boolean => {
-    return includes(fields.valideStaffType, line[fields.staffType].toLocaleLowerCase());
+    return _.includes(fields.valideStaffType, line[fields.staffType].toLocaleLowerCase());
   };
 
   isJH = (subnature: string) => {
-    return includes(actualsValideStaffType, subnature.toLocaleLowerCase());
+    return _.includes(actualsValideStaffType, subnature.toLocaleLowerCase());
   };
 
   isKLC = (subnature: string) => {
-    return includes(eacValideStaffType, subnature.toLocaleLowerCase());
+    return _.includes(eacValideStaffType, subnature.toLocaleLowerCase());
   };
 
   getSubtypologyByCode = async (codes: string[]) => {
@@ -189,7 +188,7 @@ export class PyramidService {
       13: 'Tech Plan',
     };
     if (plan === 'Project') return ['P1', 'T1'];
-    return [findKey(plans, value => value === plan)];
+    return [_.findKey(plans, value => value === plan)];
   };
 
   getServiceByPortfolioName = async (portfolioName: string) => {
@@ -233,20 +232,11 @@ export class PyramidService {
 
   findSubService = async (service: Record<string, any>, subtypologies: Subtypology[], projectCode: string) => {
     return this.subservicesService.findOne({
-      where: { service: Equal(service.id), subtypology: In(map(subtypologies, 'id')), code: Equal(projectCode) },
+      where: { service: Equal(service.id), subtypology: In(_.map(subtypologies, 'id')), code: Equal(projectCode) },
     });
   };
 
-  getAllocations = async (
-    workloads: Workload[],
-    line: Record<string, any>,
-    fields: Record<string, any>,
-    periodAppSettings: Record<string, any>,
-  ): Promise<SubsidiaryAllocation> => {
-    const partner = await this.getGpcDatalakePartner(line, fields);
-    if (!partner) {
-      return null;
-    }
+  getAllocations = async (workloads: Workload[], partner, periodAppSettings: Record<string, any>): Promise<SubsidiaryAllocation> => {
     return this.subsidiaryallocationService.findOne({
       where: { thirdparty: Equal(partner.id), workload: In(workloads.map(workload => workload.id)), period: Equal(periodAppSettings.period.id) },
       relations: ['workload', 'workload.subnature'],
@@ -286,14 +276,14 @@ export class PyramidService {
     if (!isActuals) {
       if (this.isJH(line[pyramidFields.eac.staffType]))
         return {
-          amount: line[pyramidFields.eac.eac],
+          amount: line[pyramidFields.eac.eac].replace(',', '.'),
           unit: this.constantService.GLOBAL_CONST.AMOUNT_UNITS.MD,
         };
 
       if (this.isKLC(line[pyramidFields.eac.staffType])) {
         const eacke = line[pyramidFields.eac.eacKe];
         return {
-          amount: eacke,
+          amount: eacke.replace(',', '.'),
           unit: this.constantService.GLOBAL_CONST.AMOUNT_UNITS.KLC,
         };
       }
@@ -336,6 +326,45 @@ export class PyramidService {
     return await this.workloadsService.save(workload);
   };
 
+  parseExponential = (exponential: string): string => {
+    if (exponential.match(/E\+/i)) {
+      const [nb, exp] = exponential.split(/E\+/i);
+      return Math.round(parseFloat(nb.replace(/,|\./, '.')) * Math.pow(10, parseInt(exp))).toString();
+    } else return exponential;
+  };
+
+  getPartners = async (pActivityCode): Promise<any[]> => {
+    const activityCode = this.parseExponential(pActivityCode);
+
+    const activity: Activity = await this.activityService.findOne({ where: { activityCode } });
+    if (!activity) throw 'no activity found for activityCode ' + activityCode;
+    const payors: ActivityCapayor[] = await this.activityCapayorService.find({
+      relations: ['activity', 'capayor'],
+      where: { activity: { id: activity.id }, endDate: MoreThan(moment().format('YYYY-MM-DD')) },
+    });
+    if (!payors.length) throw 'no thirdparty found for activityCode ' + activityCode;
+    const sum: number = payors.map(({ percent }) => parseFloat(percent.toString())).reduce((total, percent) => total + percent);
+    if (Math.round(sum * 100) / 100 != 100) throw `sum not equal to 100, ${sum}`;
+
+    const res = [],
+      err = [];
+    for (const {
+      capayor: { partnerTrigram: trigram },
+      percent,
+    } of payors) {
+      const partner = await this.thirdpartiesService.findOne({ trigram });
+      if (partner) {
+        res.push({ partner, percent });
+      } else err.push(`partner not found for trigram ${trigram}`);
+    }
+
+    if (err.length) {
+      throw err.toString();
+    }
+
+    return res;
+  };
+
   import = async (filename, line: any, isActuals = false, outsourcing = false, isV2 = false): Promise<any> => {
     let workload: any;
     let fields: Record<string, any> = pyramidFields.eac;
@@ -353,7 +382,7 @@ export class PyramidService {
 
     if (!this.isChargeableLine(line, fields)) throw new Error('Unkown subnature for line');
 
-    if (includes(intExtStaffType, line[fields.staffType].toLocaleLowerCase())) {
+    if (_.includes(intExtStaffType, line[fields.staffType].toLocaleLowerCase())) {
       line[fields.staffType] = onshoreStaffType;
     }
 
@@ -390,9 +419,9 @@ export class PyramidService {
 
     let subservice: any = await this.findSubService(service, subtypologies, projectCode);
     if (!subservice) {
-      const subtypologiesCodes = map(subtypologies, 'code');
+      const subtypologiesCodes = _.map(subtypologies, 'code');
       Logger.warn(
-        `subservice not found for service "${service.name}" and subtypology "${join(subtypologiesCodes, ',')}" and projectCode "${projectCode}"`,
+        `subservice not found for service "${service.name}" and subtypology "${_.join(subtypologiesCodes, ',')}" and projectCode "${projectCode}"`,
       );
       const owner = await this.thirdpartiesService.findOne({ name: 'RESG/BSC' });
       if (!owner) throw 'subservice owner "RESG/BSC" not found';
@@ -408,63 +437,81 @@ export class PyramidService {
     const subnature = await this.subnatureService.findByName(subnatureName.trim());
     if (!subnature) throw `subNature not found with name: "${subnatureName.trim()}"`;
 
-    const partner = await this.getGpcDatalakePartner(line, fields);
-    if (!partner) throw 'Partner not found in GPC database';
     const workloadsBySubserviceThirdpartySubnature = await this.findWorkloadBySubserviceThirdpartySubnature(subnature, subservice, thirdparty);
-    let newWorkload = true;
-    if (workloadsBySubserviceThirdpartySubnature.length) {
-      // check allocations on the current period
-      const allocation = await this.getAllocations(workloadsBySubserviceThirdpartySubnature, line, fields, periodAppSettings);
-      if (allocation) {
-        workload = allocation.workload;
-        newWorkload = false;
-      } else {
+    const isMultiCa = line[fields.caPayor] === '3000377777';
+    let partners;
+    if (isMultiCa) {
+      partners = await this.getPartners(line.activity_code);
+    } else {
+      const partner = await this.getGpcDatalakePartner(line, fields);
+      if (!partner) throw 'Partner not found in GPC database';
+      partners = [{ partner, percent: 100 }];
+    }
+
+    for (const { partner, percent } of partners) {
+      let newWorkload = true;
+      workload = {};
+      if (workloadsBySubserviceThirdpartySubnature.length) {
         // check allocations on the current period
-        const previousPeriodAppSettings = await this.getPeriodAppSettings(periodType, isActuals, outsourcing, true);
-        if (previousPeriodAppSettings) {
-          const prevAllocation = await this.getAllocations(workloadsBySubserviceThirdpartySubnature, line, fields, previousPeriodAppSettings);
-          if (prevAllocation) {
-            workload = prevAllocation.workload;
-            newWorkload = false;
+        const allocation = await this.getAllocations(workloadsBySubserviceThirdpartySubnature, partner, periodAppSettings);
+        if (allocation) {
+          workload = allocation.workload;
+          newWorkload = false;
+        } else {
+          // check allocations on the current period
+          const previousPeriodAppSettings = await this.getPeriodAppSettings(periodType, isActuals, outsourcing, true);
+          if (previousPeriodAppSettings) {
+            const prevAllocation = await this.getAllocations(workloadsBySubserviceThirdpartySubnature, partner, previousPeriodAppSettings);
+            if (prevAllocation) {
+              workload = prevAllocation.workload;
+              newWorkload = false;
+            }
           }
         }
       }
+
+      const prices = await this.pricesService.findOne({ where: { thirdparty: thirdparty, subnature: subnature, periodtype: currentPeriod.type } });
+      const rate = await this.currencyRateService.getCurrencyRateByCountryAndPeriod(thirdparty.countryid, currentPeriod.id);
+
+      if (!prices) throw `Price not found for thirdparty ${thirdparty.name} and subnature ${subnature.name}`;
+
+      if (newWorkload) {
+        Logger.warn(`workload not found  with subnature "${subnature.name}" and subservice "${subservice.code}" and thirdparty "${thirdparty.name}"`);
+        workload = await this.createWorkload({
+          status: 'DRAFT',
+          thirdparty: thirdparty,
+          subnature: subnature,
+          subservice: subservice,
+        });
+      }
+
+      // update allocations
+      const allocation = await this.subsidiaryallocationService.findOne({ period: currentPeriod, workload });
+      if (!allocation) {
+        await this.subsidiaryallocationService.save({
+          thirdparty: partner,
+          weight: 1,
+          workload,
+          period: currentPeriod,
+        });
+      }
+
+      const costPrice = prices.price;
+      const salePrice = prices.saleprice;
+
+      const amountData = this.getAmountData(line, isActuals);
+      let createdAmount = this.amountConverter.createAmountEntity(
+        (parseFloat(amountData?.amount?.replace(',', '.')) * percent) / 100,
+        amountData.unit,
+        rate.value,
+        costPrice,
+        salePrice,
+      );
+
+      createdAmount = { ...createdAmount, datasource: filename };
+      await this.rawAmountsService.save(createdAmount, workload, currentPeriod);
     }
 
-    const prices = await this.pricesService.findOne({ where: { thirdparty: thirdparty, subnature: subnature, periodtype: currentPeriod.type } });
-    const rate = await this.currencyRateService.getCurrencyRateByCountryAndPeriod(thirdparty.countryid, currentPeriod.id);
-
-    if (!prices) throw `Price not found for thirdparty ${thirdparty.name} and subnature ${subnature.name}`;
-
-    if (newWorkload) {
-      Logger.warn(`workload not found  with subnature "${subnature.name}" and subservice "${subservice.code}" and thirdparty "${thirdparty.name}"`);
-      workload = await this.createWorkload({
-        status: 'DRAFT',
-        thirdparty: thirdparty,
-        subnature: subnature,
-        subservice: subservice,
-      });
-    }
-
-    // update allocations
-    const allocation = await this.subsidiaryallocationService.findOne({ period: currentPeriod, workload });
-    if (!allocation) {
-      await this.subsidiaryallocationService.save({
-        thirdparty: partner,
-        weight: 1,
-        workload,
-        period: currentPeriod,
-      });
-    }
-
-    const costPrice = prices.price;
-    const salePrice = prices.saleprice;
-
-    const amountData = this.getAmountData(line, isActuals);
-    let createdAmount = this.amountConverter.createAmountEntity(parseFloat(amountData.amount), amountData.unit, rate.value, costPrice, salePrice);
-
-    createdAmount = { ...createdAmount, datasource: filename };
-
-    return this.rawAmountsService.save(createdAmount, workload, currentPeriod);
+    return;
   };
 }

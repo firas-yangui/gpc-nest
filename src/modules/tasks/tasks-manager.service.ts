@@ -132,7 +132,7 @@ export class TasksService {
   /**
    * This cron will be executed in a secure environment [HML, PRD]
    */
-  @Cron(CronExpression.EVERY_30_MINUTES)
+  @Cron(process.env.NODE_ENV === 'homologation' ? CronExpression.EVERY_MINUTE : CronExpression.EVERY_30_MINUTES)
   async importFromS3() {
     this.logger.log(`Start Import from AWS S3`);
     if (!includes(secureEnvs, process.env.NODE_ENV)) {

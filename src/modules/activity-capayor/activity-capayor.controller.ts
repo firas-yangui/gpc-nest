@@ -14,6 +14,7 @@ import { ActivityCapayor } from './activity-capayor.entity';
 import { ConstantService } from '../constants/constants';
 import { FileInterceptor } from '@nestjs/platform-express';
 import * as _ from 'lodash';
+import * as moment from 'moment';
 import { ActivityService } from '../activity/activity.service';
 
 @ApiTags('activitycapayor')
@@ -72,9 +73,9 @@ export class ActivityCapayorController {
         return exception.toHttpException(response);
       }
       const activityCapayor = new ActivityCapayorDto(activityCapayorDto);
-      const percentageValide = this.activityCapayorService.percentageValidation(activityCapayor.getCapayorPercentages());
+      const [percentageValide, totalPercent] = this.activityCapayorService.percentageValidation(activityCapayor.getCapayorPercentages());
       if (!percentageValide) {
-        const exception = new CustomBadRequestException(ERRORS.PERCENTAGE_KO.CODE, ERRORS.PERCENTAGE_KO.DESCRIPTION);
+        const exception = new CustomBadRequestException(ERRORS.PERCENTAGE_KO.CODE, ERRORS.PERCENTAGE_KO.DESCRIPTION + ' got ' + totalPercent);
         return exception.toHttpException(response);
       }
       const result = await this.activityCapayorService.linkActivityTocapayor(activityCapayor);
@@ -212,7 +213,7 @@ export class ActivityCapayorController {
     //read and convert CSV to array
     if (fileType === 'csv')
       [headers, ...rows] = _.chain(file.buffer.toString('utf-8'))
-        .split('\n')
+        .split(/\n|\r\n/)
         .compact()
         .map(line => line.split(';'))
         .value();
@@ -257,8 +258,8 @@ export class ActivityCapayorController {
           activity: parseInt(activity),
           capayorPercentages: capayorPercentages.map(({ capayor, percentage, startDate }) => ({
             capayor,
-            percent: parseInt(percentage),
-            startDate: new Date(startDate),
+            percent: parseFloat(percentage.replace(/,|\./g, '.')),
+            startDate: moment(startDate, 'DD/MM/YYYY'),
             endDate: new Date('12/31/2099'),
           })),
         };
@@ -266,7 +267,8 @@ export class ActivityCapayorController {
         const activityCapayorDto: ActivityCapayorDto = new ActivityCapayorDto(activityCapayor);
 
         //functionnal check
-        if (!this.activityCapayorService.percentageValidation(activityCapayorDto.getCapayorPercentages())) throw ERRORS.PERCENTAGE_KO.DESCRIPTION;
+        const [isValid, totalPercent] = this.activityCapayorService.percentageValidation(activityCapayorDto.getCapayorPercentages());
+        if (!isValid) throw ERRORS.PERCENTAGE_KO.DESCRIPTION + ' got ' + totalPercent;
 
         //add
         const result = await this.activityCapayorService.linkActivityTocapayor(activityCapayorDto);

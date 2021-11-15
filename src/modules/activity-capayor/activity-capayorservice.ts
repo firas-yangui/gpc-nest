@@ -50,18 +50,20 @@ export class ActivityCapayorService {
     return this.activityCapayorRepository.save(activity);
   }
 
-  percentageValidation(capayorPercentages: Record<string, any>[]): boolean {
+  percentageValidation(capayorPercentages: Record<string, any>[]): [boolean, number?] {
+    let res: [boolean, number?] = [true];
     const groupedByPeriod = _.chain(capayorPercentages)
       .groupBy('startDate')
       .map((value, key) => ({ resource: value }))
       .value();
-    let valide = true;
     _.forEach(groupedByPeriod, partnerPercentagesGrouped => {
-      const total = _.sumBy(partnerPercentagesGrouped.resource, partnerPercentage => partnerPercentage.percent);
-      valide = total == 100 ? true : false;
-      if (!valide) return valide;
+      const total: number = _.sumBy(partnerPercentagesGrouped.resource, partnerPercentage => partnerPercentage.percent);
+      const roundTotal: number = Math.round(total * 100) / 100;
+      if (roundTotal != 100) {
+        res = [false, roundTotal];
+      }
     });
-    return valide;
+    return res;
   }
 
   async linkActivityTocapayor(activityCapayorDto: ActivityCapayorDto): Promise<any> {
@@ -75,8 +77,8 @@ export class ActivityCapayorService {
       };
       const activity = await this.activityService.findOne(activityOptions);
       if (!activity) {
-        this.logger.log(ERRORS.ACTIVITY_NOT_FOUND.DESCRIPTION);
-        return ERRORS.ACTIVITY_NOT_FOUND;
+        this.logger.log(ERRORS.ACTIVITY_NOT_FOUND.DESCRIPTION + 'for ' + activityCapayorDto.getActivity());
+        return ERRORS.ACTIVITY_NOT_FOUND + 'for ' + activityCapayorDto.getActivity();
       }
       const capayorPercentages = activityCapayorDto.getCapayorPercentages();
       for (const capayorPercentage of capayorPercentages) {
@@ -132,8 +134,8 @@ export class ActivityCapayorService {
         };
         const capayor = await this.caPayorService.findOne(options);
         if (!capayor) {
-          this.logger.log(ERRORS.CAPAYOR_NOT_FOUND.DESCRIPTION);
-          return ERRORS.CAPAYOR_NOT_FOUND;
+          this.logger.log(ERRORS.CAPAYOR_NOT_FOUND.DESCRIPTION + ' for ' + codeCaPayor);
+          return ERRORS.CAPAYOR_NOT_FOUND + ' for ' + codeCaPayor;
         } else {
           const percent = capayorPercentage['percent'];
           const startDate = capayorPercentage['startDate'];
