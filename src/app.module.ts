@@ -28,6 +28,7 @@ import { AmountStatsModule } from './modules/amountstats/amountstats.module';
 import { IrtApplicationModule } from './modules/irtapplication/irtapplication.module';
 import { ImportMappingModule } from './modules/importmapping/importmapping.module';
 import { ActivitycapayorModule } from './modules/activity-capayor/activity-capayor.module';
+import { ActivityDomainModule } from './modules/activity-domain/activity-domain.module';
 import { ActivitModule } from './modules/activity/activity.module';
 import { CaPayorModule } from './modules/capayor/capayor.module';
 import { MyViewModule } from './modules/my-view/my-view.module';
@@ -95,6 +96,7 @@ const mailerOptions: MailerOptions = {
     ImportMappingModule,
     ActivitycapayorModule,
     ActivitModule,
+    ActivityDomainModule,
     MyViewModule,
   ],
 })

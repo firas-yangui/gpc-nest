@@ -8,11 +8,12 @@ import { PeriodsModule } from './../periods/periods.module';
 import { ServicesModule } from './../services/services.module';
 import { SubservicesModule } from './../subservices/subservices.module';
 import { AuditModule } from '../audit/audit.module';
+import { WorkloadExportService } from './workload.export.service';
 
 @Module({
   imports: [TypeOrmModule.forFeature([WorkloadRepository]), ThirdpartiesModule, ServicesModule, SubservicesModule, PeriodsModule, AuditModule],
   controllers: [WorkloadsController],
-  providers: [WorkloadsService],
-  exports: [WorkloadsService],
+  providers: [WorkloadsService, WorkloadExportService],
+  exports: [WorkloadsService, WorkloadExportService],
 })
 export class WorkloadsModule {}

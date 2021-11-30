@@ -7,8 +7,8 @@ export class SynthesisFilterDTO {
   @ApiProperty({ nullable: true })
   description?: string;
 
-  @ApiProperty({ nullable: true })
-  domaine?: string;
+  @ApiProperty({ nullable: true, isArray: true, type: Number })
+  domains?: number[];
 
   @ApiProperty({ nullable: true, isArray: true, type: Number })
   thirdparties?: number[];

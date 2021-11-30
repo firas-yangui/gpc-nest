@@ -1,9 +1,7 @@
-import { Body, Controller, Get, Logger, Param, Post, Query } from '@nestjs/common';
+import { Controller, Get, Logger, Param, Query } from '@nestjs/common';
 import { PeriodsService } from './periods.service';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { WorkloadTreeDataItemDTO } from '../workloads/dto/workload-tree-data-item.dto';
-import { WorkloadTreeDataRequestDTO } from '../workloads/dto/workload-tree-data-request.dto';
-import { Period } from './period.entity';
+import { PeriodWithIsCampaignDto } from './period-with-is-campaign.dto';
 
 @Controller('periods')
 @ApiTags('periods')
@@ -27,7 +25,7 @@ export class PeriodsController {
   @ApiResponse({
     status: 200,
     description: 'Return all services for by gpcAppSettingsId',
-    type: Period,
+    type: PeriodWithIsCampaignDto,
     isArray: true,
   })
   async findByGpcAppSettingsId(@Param('gpcAppSettingsId') gpcAppSettingsId: number) {

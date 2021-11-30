@@ -5,12 +5,17 @@ import { Workload } from './workload.entity';
 import { SynthesisFilterDTO } from './dto/synthesis-filter.dto';
 import { WorkloadTreeDataItemDTO } from './dto/workload-tree-data-item.dto';
 import { WorkloadTreeDataRequestDTO } from './dto/workload-tree-data-request.dto';
+import { WorkloadExportDataItemDTO } from './dto/workload-export-data-item.dto';
+import { WorkloadExportRequestDTO } from './dto/workload-export-request.dto';
+import { WorkloadExportService } from './workload.export.service';
+import { WorkloadExportByDepartmentDataItemDTO } from './dto/workload-export-by-department-data-item.dto';
+import { WorkloadExportByPeriodWithPartnerDataItemDTO } from './dto/workload-export-with-partner-data-item.dto';
 
 @Controller('workloads')
 @ApiTags('Workloads')
 @ApiOAuth2(['api.gpc-workload-management.v1'], 'SG Connect')
 export class WorkloadsController {
-  constructor(private readonly workloadsService: WorkloadsService) {}
+  constructor(private readonly workloadsService: WorkloadsService, private readonly workloadExportService: WorkloadExportService) {}
 
   @Get()
   findAll(): Promise<Workload[]> {
@@ -59,4 +64,37 @@ export class WorkloadsController {
       console.error(e);
     }
   }
+  @Post('export-csv-workload')
+  @ApiOperation({ summary: 'export workload data to csv ' })
+  @ApiResponse({ status: 200, type: WorkloadExportDataItemDTO, isArray: true })
+  async exportWorkloadWithFilter(@Body() req: WorkloadExportRequestDTO): Promise<WorkloadExportDataItemDTO[]> {
+    try {
+      return await this.workloadExportService.exportCsvWorkload(req.gpcAppSettingsId, req.syntheseFilter, req.periodIds);
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  @Post('export-csv-workload-with-partners')
+  @ApiOperation({ summary: 'export workload data to csv by period with partners' })
+  @ApiResponse({ status: 200, type: WorkloadExportByPeriodWithPartnerDataItemDTO, isArray: true })
+  async exportWorkloadByPeriodWithPartners(@Body() req: WorkloadExportRequestDTO): Promise<WorkloadExportByPeriodWithPartnerDataItemDTO[]> {
+    try {
+      return await this.workloadExportService.exportCsvByPeriodWithPartners(req.gpcAppSettingsId, req.syntheseFilter, req.periodIds);
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  //temporarily unnecessary
+  /* @Post('export-csv-workload-by-department')
+  @ApiOperation({ summary: 'export workload/synthesis data by department to csv ' })
+  @ApiResponse({ status: 200, type: WorkloadExportByDepartmentDataItemDTO, isArray: true })
+  async exportWorkloadByDepartmentWithFilter(@Body() req: WorkloadExportRequestDTO): Promise<WorkloadExportByDepartmentDataItemDTO[]> {
+    try {
+      return await this.workloadExportService.exportCsvByDepartment(req.gpcAppSettingsId, req.syntheseFilter, req.periodIds);
+    } catch (e) {
+      console.error(e);
+    }
+  }*/
 }

@@ -5,6 +5,7 @@ import { PeriodType } from './../interfaces/common-interfaces';
 import { Period } from './period.entity';
 import { createQueryBuilder, Like } from 'typeorm';
 import * as moment from 'moment';
+import { PeriodWithIsCampaignDto } from './period-with-is-campaign.dto';
 
 interface IfindOneInAppSettings {
   type: string;
@@ -41,7 +42,7 @@ export class PeriodsService {
     return await query.getOne();
   }
 
-  async find(appSettings: number, options: any): Promise<Period[]> {
+  async find(appSettings: number, options: any): Promise<PeriodWithIsCampaignDto[]> {
     try {
       return await createQueryBuilder()
         .from(Period, 'period')
