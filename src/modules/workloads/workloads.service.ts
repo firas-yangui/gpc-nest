@@ -209,8 +209,7 @@ export class WorkloadsService {
   }
 
   getWorkloadSubQuery(gpcAppSettingsId: number, filter: SynthesisFilterDTO, periodIds: number[]) {
-    const asserNumber = num => (typeof num === 'number' ? num : 0); // sql injection protection
-    gpcAppSettingsId = asserNumber(gpcAppSettingsId);
+    gpcAppSettingsId = assertOnlyNumbers(gpcAppSettingsId);
     const includePeriodFields = (periodIds: number[]) =>
       periodIds
         ? periodIds
@@ -230,7 +229,7 @@ export class WorkloadsService {
         ? periodIds
             .map(
               (pId, i) => `
-           left outer join amount a${i} on w.id = a${i}.workloadid and a${i}.periodid = ${asserNumber(pId)}
+           left outer join amount a${i} on w.id = a${i}.workloadid and a${i}.periodid = ${assertOnlyNumbers(pId)}
         `,
             )
             .join('')
@@ -321,10 +320,8 @@ export class WorkloadsService {
     if (filter && filter.subnatures && filter.subnatures.length > 0) {
       subquery += ` AND sn.id in (${filter.subnatures.map(assertOnlyNumbers).join(',')}) `;
     }
-    if (filter && filter.domaine) {
-      subquery += ` 
-      AND upper(ad.name) like upper('%${sqlEscape(filter.domaine)}%')
-           `;
+    if (filter && filter.domains && filter.domains.length > 0) {
+      subquery += ` AND ad.id in ('${filter.domains.map(assertOnlyNumbers).join(`','`)}') `;
     }
 
     //for entity view or partner view
@@ -407,25 +404,25 @@ TODO :
      ORDER BY ${quotedColumns.filter(q => q.includes('Id')).join(',')}
     `;
     }
-    // console.info(fullSQL);
+    //console.info(fullSQL);
     const rows = await entityManager.query(fullSQL);
 
     let periodTrigramsMap = {};
     if (includeParterTrgPerPeriod) {
-      periodTrigramsMap = await this.getPartnersForWorkloadPeriod(rows, periodIds);
+      periodTrigramsMap = await this.getPartnersForWorkloadPeriod(rows, periodIds, gpcAppSettingsId);
     }
 
     //console.info(JSON.stringify(rows, undefined, 2));
     return this.extractPeriodAmounts(periodIds, rows, periodTrigramsMap);
   }
 
-  async getPartnersForWorkloadPeriod(rows: WorkloadTreeDataItemDTO[], periodIds: number[]) {
+  async getPartnersForWorkloadPeriod(rows: WorkloadTreeDataItemDTO[], periodIds: number[], gpcAppSettingsId: number) {
     const entityManager = getManager();
     const periodTrigramsResults = await entityManager.query(`
         select ssda.periodid||'/'|| ssda.workloadid as key, array_agg(partner.trigram) as "trigrams"
         from subsidiaryallocation ssda
                  inner join thirdparty partner on partner.id = ssda.thirdpartyid
-                 inner join thirdpartyappsettings partneras on partner.id = partneras.modelid  and partneras.gpcappsettingsid=2
+                 inner join thirdpartyappsettings partneras on partner.id = partneras.modelid  and partneras.gpcappsettingsid=${gpcAppSettingsId}
         where periodid in (${periodIds.map(assertOnlyNumbers).join(',')}) 
           and workloadid in (${rows.map(row => row.wlId).join(',')})
         group by ssda.workloadid, ssda.periodid
