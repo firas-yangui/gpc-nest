@@ -296,4 +296,48 @@ export class ActivityCapayorController {
 
     return response.status(SUCCESS.CREATE.STATUS).json({ ...SUCCESS.CREATE, rejectedLines: errors });
   }
+/*
+  @Get('exportactivitypayor')
+  @Header('Cache-Control', 'none')
+  @Header('Content-Type', 'application/json')
+  @Header('Accept-Charset', 'utf-8')
+  @ApiOperation({
+    description: 'export activitypayor',
+    operationId: 'GET /fiimmo/exportactivitypayor',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'export activitypayor',
+    isArray: true,
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'Internal server error',
+    type: ErrorModel,
+    isArray: false,
+  })
+  async exportActivityPayor(@Res() response: Response): Promise<void> {
+    const file = await this.activityCapayorService.exportActivityPayor();
+    response.setHeader('Content-Type', 'application/vnd.openxmlformats');
+    response.setHeader('Content-Disposition', 'attachment; filename=activityPayor.xlsx');
+    response.end(file, 'binary');
+  }
+*/
+
+  @Get('exportactivitypayor')
+  @ApiResponse({
+    status: SUCCESS.OK.STATUS,
+    description: SUCCESS.OK.DESCRIPTION,
+    isArray: true,
+    type: ActivityCapayor,
+  })
+  @ApiResponse({
+    status: SUCCESS.NOCONTENT.STATUS,
+    description: SUCCESS.NOCONTENT.DESCRIPTION,
+    isArray: false,
+    type: ActivityCapayor,
+  })
+  async getAllActivityPayor(): Promise<any> {
+    return await this.activityCapayorService.getActivityCapyorData();
+  }
 }
