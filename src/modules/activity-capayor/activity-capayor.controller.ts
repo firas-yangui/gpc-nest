@@ -295,8 +295,7 @@ export class ActivityCapayorController {
     }
 
     return response.status(SUCCESS.CREATE.STATUS).json({ ...SUCCESS.CREATE, rejectedLines: errors });
-  }
-/*
+  } /*
   @Get('exportactivitypayor')
   @Header('Cache-Control', 'none')
   @Header('Content-Type', 'application/json')

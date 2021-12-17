@@ -164,25 +164,25 @@ export class ActivityCapayorService {
 
   async getActivityCapyorData(): Promise<any> {
     const stockFiData = getConnection()
-    .createQueryBuilder()
-    .from(ActivityCapayor, 'actpayor')
-    .leftJoin(CaPayor, 'payor', 'actpayor.capayor_id = payor.id')
-    .leftJoin(Activity, 'act', 'actpayor.activity_id = act.id')
-    .select([
-      'actpayor.end_date',
-      'actpayor.start_date',
-      'actpayor.percent',
-      'act.project_code',
-      'act.activity_code',
-      'payor.partner_trigram',
-      'payor.libelle_ca_payor',
-      'payor.code_ca_payor',
-    ])
+      .createQueryBuilder()
+      .from(ActivityCapayor, 'actpayor')
+      .leftJoin(CaPayor, 'payor', 'actpayor.capayor_id = payor.id')
+      .leftJoin(Activity, 'act', 'actpayor.activity_id = act.id')
+      .select([
+        'actpayor.end_date',
+        'actpayor.start_date',
+        'actpayor.percent',
+        'act.project_code',
+        'act.activity_code',
+        'payor.partner_trigram',
+        'payor.libelle_ca_payor',
+        'payor.code_ca_payor',
+      ])
       .getRawMany();
     return stockFiData;
-  };
+  }
 
-  exportActivityPayor= async (): Promise<any> => {
+  exportActivityPayor = async (): Promise<any> => {
     try {
       const sheetName = 'ExtractionActivityCapayorData';
       const columns = [
