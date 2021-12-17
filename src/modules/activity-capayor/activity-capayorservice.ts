@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { LessThan, Not, Equal } from 'typeorm';
+import { LessThan, Not, Equal, getManager, getConnection } from 'typeorm';
 import { ActivityCapayorRepository } from './activity-capayor.repository';
 import { ActivityService } from '../activity/activity.service';
 import { ThirdpartiesService } from '../thirdparties/thirdparties.service';
@@ -13,6 +13,10 @@ import { SUCCESS } from '../success-handler/success.constatns';
 import { CaPayorService } from '../capayor/capayor.service';
 import * as moment from 'moment';
 import { ConstantService } from '../constants/constants';
+import { Activity } from '../activity/activity.entity';
+import { CaPayor } from '../capayor/capayor.entity';
+import * as nodeExcel from 'excel-export-next';
+
 @Injectable()
 export class ActivityCapayorService {
   constructor(
@@ -157,4 +161,50 @@ export class ActivityCapayorService {
       this.logger.log(error);
     }
   }
+
+  async getActivityCapyorData(): Promise<any> {
+    const stockFiData = getConnection()
+    .createQueryBuilder()
+    .from(ActivityCapayor, 'actpayor')
+    .leftJoin(CaPayor, 'payor', 'actpayor.capayor_id = payor.id')
+    .leftJoin(Activity, 'act', 'actpayor.activity_id = act.id')
+    .select([
+      'actpayor.end_date',
+      'actpayor.start_date',
+      'actpayor.percent',
+      'act.project_code',
+      'act.activity_code',
+      'payor.partner_trigram',
+      'payor.libelle_ca_payor',
+      'payor.code_ca_payor',
+    ])
+      .getRawMany();
+    return stockFiData;
+  };
+
+  exportActivityPayor= async (): Promise<any> => {
+    try {
+      const sheetName = 'ExtractionActivityCapayorData';
+      const columns = [
+        { caption: 'percent', type: 'number' },
+        { caption: 'end_date', type: 'date' },
+        { caption: 'start_date', type: 'date' },
+        { caption: 'project_code', type: 'number' },
+        { caption: 'activity_code', type: 'string' },
+        { caption: 'partner_trigram', type: 'string' },
+        { caption: 'libelle_ca_payor', type: 'string' },
+        { caption: 'code_ca_payor', type: 'string' },
+      ];
+      const data = await this.getActivityCapyorData();
+      const lines = data.map(Object.values);
+      const file = nodeExcel.execute({
+        name: sheetName,
+        cols: columns,
+        rows: lines,
+      });
+      return file;
+    } catch (err) {
+      this.logger.error(err);
+    }
+  };
 }
